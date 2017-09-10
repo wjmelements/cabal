@@ -1,0 +1,302 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BEDC099C1F65E549000E5F7B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BEDC099B1F65E549000E5F7B /* AppDelegate.m */; };
+		BEDC09A41F65E549000E5F7B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEDC09A31F65E549000E5F7B /* Assets.xcassets */; };
+		BEDC09AA1F65E549000E5F7B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BEDC09A91F65E549000E5F7B /* main.m */; };
+		BEDC09B21F65E9CF000E5F7B /* ProposalVC.m in Sources */ = {isa = PBXBuildFile; fileRef = BEDC09B01F65E964000E5F7B /* ProposalVC.m */; };
+		BEDC09B51F65ED99000E5F7B /* Color.m in Sources */ = {isa = PBXBuildFile; fileRef = BEDC09B41F65ED82000E5F7B /* Color.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BEDC09971F65E549000E5F7B /* Cabal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cabal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEDC099A1F65E549000E5F7B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		BEDC099B1F65E549000E5F7B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		BEDC09A31F65E549000E5F7B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BEDC09A81F65E549000E5F7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BEDC09A91F65E549000E5F7B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		BEDC09B01F65E964000E5F7B /* ProposalVC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProposalVC.m; sourceTree = "<group>"; };
+		BEDC09B11F65E98C000E5F7B /* ProposalVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProposalVC.h; sourceTree = "<group>"; };
+		BEDC09B31F65ED82000E5F7B /* Color.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Color.h; sourceTree = "<group>"; };
+		BEDC09B41F65ED82000E5F7B /* Color.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Color.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BEDC09941F65E549000E5F7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BEDC098E1F65E549000E5F7B = {
+			isa = PBXGroup;
+			children = (
+				BEDC09991F65E549000E5F7B /* Cabal */,
+				BEDC09981F65E549000E5F7B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BEDC09981F65E549000E5F7B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BEDC09971F65E549000E5F7B /* Cabal.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BEDC09991F65E549000E5F7B /* Cabal */ = {
+			isa = PBXGroup;
+			children = (
+				BEDC09B31F65ED82000E5F7B /* Color.h */,
+				BEDC09B41F65ED82000E5F7B /* Color.m */,
+				BEDC09B11F65E98C000E5F7B /* ProposalVC.h */,
+				BEDC09B01F65E964000E5F7B /* ProposalVC.m */,
+				BEDC099A1F65E549000E5F7B /* AppDelegate.h */,
+				BEDC099B1F65E549000E5F7B /* AppDelegate.m */,
+				BEDC09A31F65E549000E5F7B /* Assets.xcassets */,
+				BEDC09A81F65E549000E5F7B /* Info.plist */,
+				BEDC09A91F65E549000E5F7B /* main.m */,
+			);
+			path = Cabal;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BEDC09961F65E549000E5F7B /* Cabal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEDC09AD1F65E549000E5F7B /* Build configuration list for PBXNativeTarget "Cabal" */;
+			buildPhases = (
+				BEDC09931F65E549000E5F7B /* Sources */,
+				BEDC09941F65E549000E5F7B /* Frameworks */,
+				BEDC09951F65E549000E5F7B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cabal;
+			productName = Cabal;
+			productReference = BEDC09971F65E549000E5F7B /* Cabal.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BEDC098F1F65E549000E5F7B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = "William Morriss";
+				TargetAttributes = {
+					BEDC09961F65E549000E5F7B = {
+						CreatedOnToolsVersion = 9.0;
+					};
+				};
+			};
+			buildConfigurationList = BEDC09921F65E549000E5F7B /* Build configuration list for PBXProject "Cabal" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BEDC098E1F65E549000E5F7B;
+			productRefGroup = BEDC09981F65E549000E5F7B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BEDC09961F65E549000E5F7B /* Cabal */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BEDC09951F65E549000E5F7B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BEDC09A41F65E549000E5F7B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BEDC09931F65E549000E5F7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BEDC09B51F65ED99000E5F7B /* Color.m in Sources */,
+				BEDC09B21F65E9CF000E5F7B /* ProposalVC.m in Sources */,
+				BEDC09AA1F65E549000E5F7B /* main.m in Sources */,
+				BEDC099C1F65E549000E5F7B /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BEDC09AB1F65E549000E5F7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		BEDC09AC1F65E549000E5F7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BEDC09AE1F65E549000E5F7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = GUU9QUKZJ6;
+				INFOPLIST_FILE = Cabal/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.cabal.Cabal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BEDC09AF1F65E549000E5F7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = GUU9QUKZJ6;
+				INFOPLIST_FILE = Cabal/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.cabal.Cabal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BEDC09921F65E549000E5F7B /* Build configuration list for PBXProject "Cabal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEDC09AB1F65E549000E5F7B /* Debug */,
+				BEDC09AC1F65E549000E5F7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEDC09AD1F65E549000E5F7B /* Build configuration list for PBXNativeTarget "Cabal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEDC09AE1F65E549000E5F7B /* Debug */,
+				BEDC09AF1F65E549000E5F7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BEDC098F1F65E549000E5F7B /* Project object */;
+}
