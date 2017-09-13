@@ -8,7 +8,7 @@ CXXFLAGS=$(filter-out $(CCSTD), $(CFLAGS)) $(CXXSTD) -fno-exceptions -Wno-write-
 MKDIRS=lib bin tst/bin .pass .pass/tst/bin .make .make/bin .make/tst/bin .make/lib
 INCLUDE=$(addprefix -I,include)
 EXECS=$(addprefix bin/,)
-TESTS=$(addprefix tst/bin/,user)
+TESTS=$(addprefix tst/bin/,proposal_t)
 SRC=$(wildcard src/*.cpp)
 LIBS=$(patsubst src/%.cpp, lib/%.o, $(SRC))
 
