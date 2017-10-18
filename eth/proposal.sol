@@ -18,47 +18,57 @@ contract Proposal {
         FAILED,
         ENACTED
     }
-    UserService cabal;
-    address source;
-    string public text;
-    State public state;
-    Argument[] public arguments;
-    // Position => count
-    mapping (uint => uint64) public voteCounts;
-    mapping (address => Argument) votes;
-
-    uint256 constant voteBounty = 1 szabo;
-    uint256 constant argumentBounty = 1 finney;
-
     struct Argument {
         address source;
-        uint256 id; // one less than the index into 
+        uint256 id;
         Position position;
         string text;
     }
+
+    UserService public cabal;
+    State public state;
+    /**
+     * The first argument is the proposal.
+     */
+    Argument[] public arguments;
+    /**
+     * The count on SKIP is the unsigned negative of the total,
+     * so sum(voteCounts) == 0
+     */
+    uint64[5] public voteCounts;
+    /**
+     * Nonvoters are in the SKIP state.
+     */
+    mapping (address => uint256) votes;
+
+    uint256 constant voteBounty = 1 szabo;
+    uint256 constant argumentBounty = 1 finney;
 
     function Proposal(
         UserService _cabal,
         address _source,
         string _text
     ) public {
+        assert(_cabal.contains(_source));
+        arguments.push(Argument(
+            _source,
+            0,
+            Position.SKIP,
+            _text
+        ));
         cabal = _cabal;
-        source = _source;
-        text = _text;
     }
 
     function rmVote() internal {
         assert(cabal.contains(msg.sender));
-        Argument storage prior = votes[msg.sender];
-        if (prior.position == Position.SKIP) {
-            return;
-        }
+        uint256 choice = votes[msg.sender];
+        Argument storage prior = arguments[choice];
         voteCounts[(uint8)(prior.position)]--;
     }
 
     function addVote(Argument storage _argument) internal {
         voteCounts[(uint8)(_argument.position)]++;
-        votes[msg.sender] = _argument;
+        votes[msg.sender] = _argument.id;
     }
 
     function() payable public {}
@@ -66,7 +76,7 @@ contract Proposal {
     function argue(Position _position, string _text) payable external returns (uint256) {
         assert(_position != Position.SKIP);
         assert(msg.value >= argumentBounty);
-        source.transfer(argumentBounty); // consider send
+        arguments[0].source.transfer(argumentBounty); // consider send
         msg.sender.transfer(this.balance * 2 / 25); // consider send
         uint256 argumentId = arguments.length;
         rmVote();
