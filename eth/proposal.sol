@@ -43,7 +43,7 @@ contract Proposal {
      */
     mapping (address => uint40) votes;
 
-    uint256 constant voteBounty = 1 szabo;
+    uint256 constant voteBounty = 100 szabo;
     uint256 constant argumentBounty = 1 finney;
 
     function Proposal(
