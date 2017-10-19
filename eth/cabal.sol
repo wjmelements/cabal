@@ -28,11 +28,13 @@ contract Cabal is UserService {
     }
 
     function Cabal(
-        string _name
+        string _name,
+        string _description
     ) public {
         source = msg.sender;
         name = _name;
         users[msg.sender].membership = Membership.SOURCE;
+        users[msg.sender].turingTest = _description;
     }
 
     function join(string _turingTest) external payable {

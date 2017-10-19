@@ -20,8 +20,10 @@ contract Proposal {
     }
     struct Argument {
         address source;
-        uint256 id;
         Position position;
+        /**
+         * arbitrary encoding
+         */
         string text;
     }
 
@@ -35,11 +37,11 @@ contract Proposal {
      * The count on SKIP is the unsigned negative of the total,
      * so sum(voteCounts) == 0
      */
-    uint64[5] public voteCounts;
+    uint40[5] public voteCounts;
     /**
      * Nonvoters are in the SKIP state.
      */
-    mapping (address => uint256) votes;
+    mapping (address => uint40) votes;
 
     uint256 constant voteBounty = 1 szabo;
     uint256 constant argumentBounty = 1 finney;
@@ -52,49 +54,42 @@ contract Proposal {
         assert(_cabal.contains(_source));
         arguments.push(Argument(
             _source,
-            0,
             Position.SKIP,
             _text
         ));
         cabal = _cabal;
     }
 
-    function rmVote() internal {
-        assert(cabal.contains(msg.sender));
-        uint256 choice = votes[msg.sender];
+    function changeVote(uint40 _argumentId) internal {
+        uint40 choice = votes[msg.sender];
         Argument storage prior = arguments[choice];
+        Argument storage argument = arguments[_argumentId];
         voteCounts[(uint8)(prior.position)]--;
-    }
-
-    function addVote(Argument storage _argument) internal {
-        voteCounts[(uint8)(_argument.position)]++;
-        votes[msg.sender] = _argument.id;
+        voteCounts[(uint8)(argument.position)]++;
+        votes[msg.sender] = _argumentId;
     }
 
     function() payable public {}
 
-    function argue(Position _position, string _text) payable external returns (uint256) {
+    function argue(Position _position, string _text) payable external returns (uint40) {
         assert(_position != Position.SKIP);
         assert(msg.value >= argumentBounty);
+        assert(cabal.contains(msg.sender));
         arguments[0].source.transfer(argumentBounty); // consider send
         msg.sender.transfer(this.balance * 2 / 25); // consider send
-        uint256 argumentId = arguments.length;
-        rmVote();
+        uint40 argumentId = (uint40)(arguments.length);
         arguments.push(Argument(
             msg.sender,
-            argumentId,
             _position,
             _text
         ));
-        Argument storage argument = arguments[argumentId];
-        addVote(argument);
+        changeVote(argumentId);
         return argumentId;
     }
 
-    function side(uint32 _argumentId) payable external {
-        rmVote();
-        Argument storage argument = arguments[_argumentId];
-        addVote(argument);
-        argument.source.transfer(voteBounty); // consider send
+    function side(uint40 _argumentId) payable external {
+        assert(cabal.contains(msg.sender));
+        changeVote(_argumentId);
+        arguments[_argumentId].source.transfer(voteBounty); // consider send
     }
 }
