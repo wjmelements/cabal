@@ -52,6 +52,7 @@ contract Proposal {
         string _text
     ) public {
         assert(_cabal.contains(_source));
+
         arguments.push(Argument(
             _source,
             Position.SKIP,
@@ -75,8 +76,9 @@ contract Proposal {
         assert(_position != Position.SKIP);
         assert(msg.value >= argumentBounty);
         assert(cabal.contains(msg.sender));
-        arguments[0].source.transfer(argumentBounty); // consider send
-        msg.sender.transfer(this.balance * 2 / 25); // consider send
+
+        arguments[0].source.send(argumentBounty);
+        msg.sender.send(this.balance * 2 / 25);
         uint40 argumentId = (uint40)(arguments.length);
         arguments.push(Argument(
             msg.sender,
@@ -89,7 +91,8 @@ contract Proposal {
 
     function side(uint40 _argumentId) payable external {
         assert(cabal.contains(msg.sender));
+
         changeVote(_argumentId);
-        arguments[_argumentId].source.transfer(voteBounty); // consider send
+        arguments[_argumentId].source.send(voteBounty);
     }
 }
