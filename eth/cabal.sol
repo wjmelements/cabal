@@ -38,9 +38,10 @@ contract Cabal is UserService {
     }
 
     function join(string _turingTest) external payable {
-        assert(msg.value > membershipBounty);
+        assert(msg.value >= membershipBounty);
         User storage user = users[msg.sender];
         assert(user.membership == Membership.UNCONTACTED);
+
         user.membership = Membership.APPLIED;
         user.turingTest = _turingTest;
     }
@@ -50,6 +51,7 @@ contract Cabal is UserService {
         assert(me.membership >= Membership.BOARD);
         User storage user = users[_user];
         assert(user.membership == Membership.APPLIED);
+
         user.membership = Membership.MEMBER;
         msg.sender.transfer(membershipBounty);
     }
@@ -59,6 +61,7 @@ contract Cabal is UserService {
         assert(me.membership >= Membership.MODERATOR);
         User storage toBan = users[_toBan];
         assert(me.membership > toBan.membership);
+
         toBan.membership = Membership.BANNED;
     }
 
@@ -69,6 +72,7 @@ contract Cabal is UserService {
         User storage user = users[_user];
         assert(user.membership >= Membership.BANNED);
         assert(user.membership < _membership);
+
         user.membership = _membership;
     }
 
