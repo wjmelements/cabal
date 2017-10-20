@@ -1,8 +1,98 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
-import "proposal.sol";
+contract Proposal {
+    enum Position {
+        SKIP,
+        APPROVE,
+        AMEND,
+        REJECT,
+        LOL
+    }
+    enum State {
+        INVALID,
+        PROPOSED,
+        FAILED,
+        ENACTED
+    }
+    struct Argument {
+        address source;
+        Position position;
+        /**
+         * arbitrary encoding
+         */
+        string text;
+    }
 
-contract Cabal is UserService {
+    Cabal public cabal;
+    State public state;
+    /**
+     * The first argument is the proposal.
+     */
+    Argument[] public arguments;
+    /**
+     * The count on SKIP is the unsigned negative of the total,
+     * so sum(voteCounts) == 0
+     */
+    uint40[5] public voteCounts;
+    /**
+     * Nonvoters are in the SKIP state.
+     */
+    mapping (address => uint40) votes;
+
+    uint256 constant voteBounty = 100 szabo;
+    uint256 constant argumentBounty = 1 finney;
+
+    function Proposal(
+        Cabal _cabal,
+        address _source,
+        string _text
+    ) public {
+        assert(_cabal.contains(_source));
+
+        arguments.push(Argument(
+            _source,
+            Position.SKIP,
+            _text
+        ));
+        cabal = _cabal;
+    }
+
+    function changeVote(uint40 _argumentId) internal {
+        uint40 choice = votes[msg.sender];
+        Argument storage prior = arguments[choice];
+        Argument storage argument = arguments[_argumentId];
+        voteCounts[(uint8)(prior.position)]--;
+        voteCounts[(uint8)(argument.position)]++;
+        votes[msg.sender] = _argumentId;
+    }
+
+    function() payable public {}
+
+    function argue(Position _position, string _text) payable external returns (uint40) {
+        assert(_position != Position.SKIP);
+        assert(msg.value >= argumentBounty);
+        assert(cabal.contains(msg.sender));
+
+        arguments[0].source.send(argumentBounty);
+        msg.sender.send(this.balance * 2 / 25);
+        uint40 argumentId = (uint40)(arguments.length);
+        arguments.push(Argument(
+            msg.sender,
+            _position,
+            _text
+        ));
+        changeVote(argumentId);
+        return argumentId;
+    }
+
+    function side(uint40 _argumentId) payable external {
+        assert(cabal.contains(msg.sender));
+
+        changeVote(_argumentId);
+        arguments[_argumentId].source.send(voteBounty);
+    }
+}
+contract Cabal {
     Proposal[] public proposals;
 
     address source;
@@ -76,7 +166,7 @@ contract Cabal is UserService {
         user.membership = _membership;
     }
 
-    function contains(address _user) public returns (bool) {
+    function contains(address _user) public view returns (bool) {
         return users[_user].membership >= Membership.MEMBER;
     }
 
