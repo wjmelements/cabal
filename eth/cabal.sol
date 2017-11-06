@@ -68,13 +68,19 @@ contract Proposal {
 
     function() payable public {}
 
+    function argumentRebate()
+    public view
+    returns (uint256) {
+        return this.balance * 2 / 25;
+    }
+
     function argue(Position _position, string _text) payable external returns (uint40) {
         assert(_position != Position.SKIP);
         assert(msg.value >= argumentBounty);
         assert(cabal.contains(msg.sender));
 
         arguments[0].source.send(argumentBounty);
-        msg.sender.send(this.balance * 2 / 25);
+        msg.sender.send(argumentRebate());
         uint40 argumentId = (uint40)(arguments.length);
         arguments.push(Argument(
             msg.sender,
@@ -92,6 +98,7 @@ contract Proposal {
         arguments[_argumentId].source.send(voteBounty);
     }
 }
+
 contract Cabal {
     Proposal[] public proposals;
     Proposal[] public canon;
@@ -118,6 +125,12 @@ contract Cabal {
         string turingTest;
     }
 
+    event NewCanon(address canon);
+    event Applied(address member);
+    event Admitted(address member);
+    event Rejected(address member);
+    event Banned(address member, string reason);
+
     function Cabal(
         string _name,
         string _description
@@ -128,6 +141,12 @@ contract Cabal {
         users[msg.sender].turingTest = _description;
     }
 
+    function description()
+    public view
+    returns (string) {
+        return users[source].turingTest;
+    }
+
     function canonize(uint _index) external {
         User storage me = users[msg.sender];
         assert(me.membership >= Membership.BOARD);
@@ -136,7 +155,8 @@ contract Cabal {
         assert(approvals > proposal.voteCounts(2));
         assert(approvals > 19 * proposal.voteCounts(3));
         assert(approvals > 4 * proposal.voteCounts(4));
-        canon.push(proposals[_index]);
+        canon.push(proposal);
+        NewCanon(proposal);
     }
 
     function join(string _turingTest) external payable {
@@ -146,6 +166,7 @@ contract Cabal {
 
         user.membership = Membership.APPLIED;
         user.turingTest = _turingTest;
+        Applied(msg.sender);
     }
 
     uint256 public memberCount;
@@ -159,9 +180,10 @@ contract Cabal {
         user.membership = Membership.MEMBER;
         msg.sender.transfer(membershipBounty);
         memberCount++;
+        Admitted(_user);
     }
 
-    function ban(address _toBan) external {
+    function ban(address _toBan, string _reason) external {
         User storage me = users[msg.sender];
         assert(me.membership >= Membership.MODERATOR);
         User storage toBan = users[_toBan];
@@ -169,17 +191,21 @@ contract Cabal {
 
         toBan.membership = Membership.BANNED;
         memberCount--;
+        Banned(_toBan, _reason);
     }
 
-    function promote(address _user, Membership _membership) external {
+    event Promoted(address member, Membership level);
+
+    function promote(address _member, Membership _membership) external {
         User storage me = users[msg.sender];
         assert(me.membership >= Membership.BOARD);
         assert(me.membership >= _membership);
-        User storage user = users[_user];
+        User storage user = users[_member];
         assert(user.membership >= Membership.BANNED);
         assert(user.membership < _membership);
 
         user.membership = _membership;
+        Promoted(_member, _membership);
     }
 
     function contains(address _user) public view returns (bool) {
