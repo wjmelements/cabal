@@ -37,7 +37,7 @@ contract Proposal {
     /**
      * Nonvoters are in the SKIP state.
      */
-    mapping (address => uint40) votes;
+    mapping (address => uint40) public votes;
 
     uint256 constant voteBounty = 100 szabo;
     uint256 constant argumentBounty = 1 finney;
@@ -94,6 +94,7 @@ contract Proposal {
 }
 contract Cabal {
     Proposal[] public proposals;
+    Proposal[] public canon;
 
     address source;
     string public name;
@@ -127,6 +128,17 @@ contract Cabal {
         users[msg.sender].turingTest = _description;
     }
 
+    function canonize(uint _index) external {
+        User storage me = users[msg.sender];
+        assert(me.membership >= Membership.BOARD);
+        Proposal proposal = proposals[_index];
+        uint40 approvals = proposal.voteCounts(1);
+        assert(approvals > proposal.voteCounts(2));
+        assert(approvals > 19 * proposal.voteCounts(3));
+        assert(approvals > 4 * proposal.voteCounts(4));
+        canon.push(proposals[_index]);
+    }
+
     function join(string _turingTest) external payable {
         assert(msg.value >= membershipBounty);
         User storage user = users[msg.sender];
@@ -136,6 +148,8 @@ contract Cabal {
         user.turingTest = _turingTest;
     }
 
+    uint256 public memberCount;
+
     function admit(address _user) external {
         User storage me = users[msg.sender];
         assert(me.membership >= Membership.BOARD);
@@ -144,6 +158,7 @@ contract Cabal {
 
         user.membership = Membership.MEMBER;
         msg.sender.transfer(membershipBounty);
+        memberCount++;
     }
 
     function ban(address _toBan) external {
@@ -153,6 +168,7 @@ contract Cabal {
         assert(me.membership > toBan.membership);
 
         toBan.membership = Membership.BANNED;
+        memberCount--;
     }
 
     function promote(address _user, Membership _membership) external {
@@ -167,7 +183,19 @@ contract Cabal {
     }
 
     function contains(address _user) public view returns (bool) {
-        return users[_user].membership >= Membership.MEMBER;
+        if (users[_user].membership < Membership.MEMBER) {
+            return false;
+        }
+        uint canonSize = canon.length;
+        for (uint i = 0; i < canonSize; i++) {
+            Proposal doctrine = canon[i];
+            Proposal.Position position;
+            (,position,) = doctrine.arguments(doctrine.votes(_user));
+            if (position != Proposal.Position.APPROVE) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function propose(string _text) external payable returns (uint) {
@@ -183,5 +211,17 @@ contract Cabal {
         uint index = proposals.length;
         proposals.push(proposal);
         return index;
+    }
+
+    function proposalCount()
+    public view
+    returns (uint256) {
+        return proposals.length;
+    }
+
+    function canonCount()
+    public view
+    returns (uint256) {
+        return canon.length;
     }
 }
