@@ -1,0 +1,65 @@
+ul.pos li {
+  list-style: none;
+  border-style: solid;
+  display: inline-block;
+  border-width: thin;
+  border-radius: 0.5em;
+  padding: 1em;
+  cursor:pointer;
+}
+.approve {
+  background-color:#33FF33;
+}
+.reject {
+  background-color:#FF3333;
+}
+.amend {
+  background-color:#23998D;
+}
+.lol {
+  background-color:#FCFF8B;
+}
+.skip {
+  background-color:#AD97BD;
+}
+ul.cases li {
+  list-style: none;
+  display: block;
+}
+ul.cases li p {
+  border-style: solid;
+  border-width: thin;
+  border-radius: 0.5em;
+  padding: 1em;
+  display:inline-block;
+  margin:0.1em;
+  cursor:pointer;
+}
+ul.pos,ul.cases {
+  padding:0;
+  margin:0;
+  max-height:21em;
+  overflow-y:scroll;
+}
+h2.prop {
+  margin-bottom:0;
+}
+p.instr {
+  margin-top:0.5em;
+}
+textarea.case {
+  padding:1em;
+  border-radius:0.5em;
+  min-width:19em;
+}
+input.btn {
+  border-radius:0.5em;
+  cursor:pointer;
+  appearance:none;
+  padding:1em;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+}
+input.btn:disabled {
+  cursor:not-allowed;
+}

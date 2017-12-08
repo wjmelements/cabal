@@ -1,0 +1,46 @@
+<head>
+  <title>Cabal</title>
+</head>
+
+<body>
+  <h1>Cabal</h1>
+
+  {{> proposal}}
+</body>
+
+<template name="proposal">
+    <h2 class="prop">{{proposal}}</h2>
+    {{> Template.dynamic template=page data=choice}}
+</template>
+<template name="positions">
+  <ul class="pos">
+    <li class="approve">Approve</li>
+    <li class="amend">Amend</li>
+    <li class="reject">Reject</li>
+    <li class="lol">LOL</li>
+    <li class="skip">Skip</li>
+  </ul>
+  <p class="instr">
+    Determine your position on the topic.
+  </p>
+</template>
+<template name="cases">
+  <p class="instr">
+    Choose a supporting argument, or write your own. 
+  </p>
+  <p>
+    <ul class="cases">
+      {{#each case in cases}}
+        <li class="case">
+          {{case.voteCount}} <p>{{case.text}}</p>
+        </li>
+      {{/each}}
+    </ul>
+  </p>
+  <div>
+    <textarea class="case" placeholder="Write your own argument here"></textarea>
+  </div>
+  <div>
+    <input class="btn" type="button" value="Submit"/>
+  </div>
+</template>
