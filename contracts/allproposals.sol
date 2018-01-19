@@ -433,7 +433,7 @@ contract AllCabals {
     mapping (address => Info) infoMap;
 
     Cabal[] public allCabals;
-    Proposal[] public allProposals;
+    ProposalInterface[] public allProposals;
 
     function AllCabals()
     public
@@ -444,7 +444,7 @@ contract AllCabals {
     event NewVoter(address voter);
     event Deregistered(address voter);
     event NewBoard(address board);
-    event NewProposal(Proposal proposal);
+    event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
 
     function cabalCount()
@@ -535,7 +535,7 @@ contract AllCabals {
     // - ensure it properly transfers the VOTE token
     // - open-source it using Etherscan or equivalent
     // - pay a manual verification fee
-    function propose(Proposal _proposal)
+    function propose(ProposalInterface _proposal)
     external payable
     {
         assert(msg.value == outsideProposalVerificationFee);
@@ -544,7 +544,7 @@ contract AllCabals {
         info.membership = Membership.PENDING_PROPOSAL;
     }
 
-    function confirmProposal(Proposal _proposal)
+    function confirmProposal(ProposalInterface _proposal)
     external
     {
         assert(infoMap[msg.sender].membership == Membership.BOARD);
