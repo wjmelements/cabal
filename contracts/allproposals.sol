@@ -172,8 +172,8 @@ contract Cabal {
 
     string public name;
     address[] members;
-    Proposal[] proposals;
-    Proposal[] public canon;
+    ProposalInterface[] proposals;
+    ProposalInterface[] public canon;
 
     function canonCount()
     public view
@@ -183,7 +183,7 @@ contract Cabal {
 
     modifier followsCanon() {
         for (uint256 i = 0; i < canon.length; i++) {
-            Proposal proposal = canon[i];
+            ProposalInterface proposal = canon[i];
             require(proposal.getPosition(msg.sender) == Proposal.Position.APPROVE);
         }
         _;
@@ -245,12 +245,12 @@ contract Cabal {
     }
     
     // useful RPC call but please avoid dependending on this function in contracts
-    function voteCounts(Proposal proposal)
+    function voteCounts(ProposalInterface proposal)
     public view
     returns (uint256[5]) {
         return voteCounts(proposal, Membership.MEMBER);
     }
-    function voteCounts(Proposal proposal, Membership level)
+    function voteCounts(ProposalInterface proposal, Membership level)
     public view
     returns (uint256[5]) {
         uint256[5] memory counts;
@@ -353,7 +353,7 @@ contract Cabal {
         Reconciled(msg.sender);
     }
 
-    function denounceHeretics(Proposal proposal)
+    function denounceHeretics(ProposalInterface proposal)
     external
     mustBe(Membership.MODERATOR) {
         require(membership[proposal] == Membership.CANON);
@@ -371,7 +371,7 @@ contract Cabal {
 
     // proposal events
     event NewProposal(Proposal proposal);
-    event NewCanon(Proposal proposal);
+    event NewCanon(ProposalInterface proposal);
 
     function propose(Proposal proposal)
     external
@@ -388,7 +388,7 @@ contract Cabal {
     mustBe(Membership.BOARD) {
         require(membership[proposal] == Membership.PROPOSAL);
         // proposal must already be linked here
-        Proposal proposal = proposals[proposalId];
+        ProposalInterface proposal = proposals[proposalId];
         // verify vote counts:
         uint256[5] memory counts = voteCounts(proposal);
         // prevent rogue board instacanon attacks
