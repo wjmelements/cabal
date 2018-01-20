@@ -42,21 +42,21 @@ contract Vote is ERC20 {
         return approved[_owner][_spender];
     }
     function transfer(address _to, uint _value) public returns (bool) {
-        assert(balances[msg.sender] <= _value);
+        require(balances[msg.sender] <= _value);
         balances[msg.sender] -= _value;
         balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
     }
     function transferFrom(address _from, address _to, uint _value) public returns (bool) {
-        assert(balances[_from] >= _value);
-        assert(approved[_from][msg.sender] >= _value);
+        require(balances[_from] >= _value);
+        require(approved[_from][msg.sender] >= _value);
         approved[_from][msg.sender] -= _value;
         balances[_from] -= _value;
         balances[_to] += _value;
         Transfer(_from, _to, _value);
     }
     function faucet() external {
-        assert(allCabals.canVote(msg.sender));
+        require(allCabals.canVote(msg.sender));
         uint256 lastAccess = faucetDate[msg.sender];
         uint256 grant = (now - lastAccess) / 48 minutes;
         if (grant > 30) {
@@ -67,15 +67,15 @@ contract Vote is ERC20 {
         faucetDate[msg.sender] = now;
     }
     function vote(address _voter, address _votee) public {
-        assert(allCabals.isProposal(msg.sender));
-        assert(allCabals.canVote(_voter));
-        assert(balances[_voter] >= 10);
+        require(allCabals.isProposal(msg.sender));
+        require(allCabals.canVote(_voter));
+        require(balances[_voter] >= 10);
         balances[_voter] -= 10;
         balances[developerFund] += 5;
         balances[_votee] += 5;
     }
     function moveDeveloperFund(address _newDeveloperFund) external {
-        assert(msg.sender == developerFund);
+        require(msg.sender == developerFund);
         balances[_newDeveloperFund] += balances[developerFund];
         balances[developerFund] = 0;
         developerFund = _newDeveloperFund;
@@ -84,7 +84,7 @@ contract Vote is ERC20 {
     // PLEASE allow users to deregister before allowing mass murder
     function murder()
     external {
-        assert(msg.sender == developerFund);
+        require(msg.sender == developerFund);
         selfdestruct(msg.sender);
     }
 }
@@ -182,7 +182,7 @@ contract Proposal is ProposalInterface {
 
     function murder()
     external {
-        assert(voteToken.totalSupply() == 0);
+        require(voteToken.totalSupply() == 0);
         selfdestruct(msg.sender);
     }
 }
@@ -528,7 +528,7 @@ contract AllCabals is AllProposals {
     function register()
     external payable
     {
-        assert(msg.value == registrationBounty);
+        require(msg.value == registrationBounty);
         Info storage info = infoMap[msg.sender];
         require(info.membership == Membership.UNCONTACTED);
         info.membership = Membership.VOTER;
@@ -540,8 +540,8 @@ contract AllCabals is AllProposals {
     external
     {
         Info storage info = infoMap[msg.sender];
-        assert(info.membership == Membership.VOTER);
-        assert(info.registrationDate > now - 7 days);
+        require(info.membership == Membership.VOTER);
+        require(info.registrationDate > now - 7 days);
         info.membership = Membership.UNCONTACTED;
         msg.sender.transfer(registrationBounty);
         Deregistered(msg.sender);
@@ -567,8 +567,8 @@ contract AllCabals is AllProposals {
     function appoint(address _board)
     external
     {
-        assert(infoMap[msg.sender].membership == Membership.BOARD);
-        assert(infoMap[_board].membership == Membership.VOTER || infoMap[_board].membership == Membership.UNCONTACTED);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[_board].membership == Membership.VOTER || infoMap[_board].membership == Membership.UNCONTACTED);
         infoMap[_board].membership = Membership.BOARD;
         NewBoard(_board);
     }
@@ -592,18 +592,18 @@ contract AllCabals is AllProposals {
     function propose(ProposalInterface _proposal)
     external payable
     {
-        assert(msg.value == outsideProposalVerificationFee);
+        require(msg.value == outsideProposalVerificationFee);
         Info storage info = infoMap[_proposal];
-        assert(info.membership == Membership.UNCONTACTED);
+        require(info.membership == Membership.UNCONTACTED);
         info.membership = Membership.PENDING_PROPOSAL;
     }
 
     function confirmProposal(ProposalInterface _proposal)
     external
     {
-        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_proposal];
-        assert(info.membership == Membership.PENDING_PROPOSAL);
+        require(info.membership == Membership.PENDING_PROPOSAL);
         info.membership = Membership.PROPOSAL;
         msg.sender.transfer(outsideProposalVerificationFee);
         allProposals.push(_proposal);
@@ -616,10 +616,10 @@ contract AllCabals is AllProposals {
     function banProposal(ProposalInterface _proposal, string _reason)
     external payable
     {
-        assert(msg.value == outsideProposalRejectionBurn);
-        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        require(msg.value == outsideProposalRejectionBurn);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_proposal];
-        assert(info.membership == Membership.PROPOSAL);
+        require(info.membership == Membership.PROPOSAL);
         info.membership = Membership.UNCONTACTED;
         burn.transfer(msg.value);
         BannedProposal(_proposal, _reason);
@@ -628,18 +628,29 @@ contract AllCabals is AllProposals {
     function rejectProposal(ProposalInterface _proposal)
     external
     {
-        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_proposal];
-        assert(info.membership == Membership.PENDING_PROPOSAL);
+        require(info.membership == Membership.PENDING_PROPOSAL);
         info.membership = Membership.UNCONTACTED;
         msg.sender.transfer(outsideProposalRejectionBounty);
         burn.transfer(outsideProposalRejectionBurn); 
     }
 
+
+    uint256 allowedMurderDate = 0;
+    function premeditateMurder()
+    external {
+        require(voteToken.totalSupply() == 0);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
+        allowedMurderDate = now + 4 weeks;
+    }
+
     function murder()
     external {
-        assert(voteToken.totalSupply() == 0);
-        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        require(voteToken.totalSupply() == 0);
+        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(allowedMurderDate != 0);
+        require(now > allowedMurderDate);
         selfdestruct(msg.sender);
     }
 }
