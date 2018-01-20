@@ -1,8 +1,5 @@
 pragma solidity ^0.4.18;
-// v2 goal: shared proposal pool
-// I can merge AllProposals and AllCabals and AllMembers because they have the same address space
 
-// TODO Dai or VOTE
 interface ERC20 {
     function totalSupply() public constant returns (uint supply);
     function balanceOf(address _owner) public constant returns (uint balance);
@@ -62,7 +59,7 @@ contract Vote is ERC20 {
         supply+=2;
     }
     function vote(address _voter, address _votee) public {
-        assert(allCabals.isProposal(msg.sender)); // FIXME use DELEGATECALL
+        assert(allCabals.isProposal(msg.sender));
         assert(allCabals.canVote(_voter)); // TODO consider removing this check?
         assert(balances[_voter] > 0);
         balances[_voter] -= 2;
@@ -162,7 +159,12 @@ contract Proposal is ProposalInterface {
     pays(argumentId) {
     }
 }
-contract Cabal {
+interface CabalInterface {
+    function memberCount() public view returns (uint256);
+    function canonCount() public view returns (uint256);
+    function proposalCount() public view returns (uint256);
+}
+contract Cabal is CabalInterface {
     uint256 constant public membershipFee = 1 finney;
     uint256 constant public rejectionBounty = 100 szabo;
     uint256 constant public rejectionBurn = 900 szabo;
@@ -172,8 +174,14 @@ contract Cabal {
 
     string public name;
     address[] members;
-    ProposalInterface[] proposals;
+    ProposalInterface[] public proposals;
     ProposalInterface[] public canon;
+
+    function proposalCount()
+    public view
+    returns (uint256) {
+        return proposals.length;
+    }
 
     function canonCount()
     public view
@@ -555,5 +563,4 @@ contract AllCabals {
         allProposals.push(_proposal);
         NewProposal(_proposal);
     }
-
 }
