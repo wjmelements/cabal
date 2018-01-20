@@ -16,10 +16,11 @@ contract Vote is ERC20 {
     mapping (address => mapping (address => uint256)) approved;
     mapping (address => uint256) faucetDate;
 
-    AllCabals allCabals; // FIXME initialize this
+    AllCabals allCabals;
     address public developerFund;
 
     function Vote(address _developerFund, uint256 _fundSize) public {
+        allCabals = AllCabals(msg.sender);
         developerFund = _developerFund;
         supply = _fundSize;
         balances[_developerFund] = _fundSize;
@@ -52,15 +53,21 @@ contract Vote is ERC20 {
         Transfer(_from, _to, _value);
     }
     function faucet() external {
-        assert(faucetDate[msg.sender] + 8 hours <= now);
         assert(allCabals.canVote(msg.sender));
+        uint256 lastAccess = faucetDate[msg.sender];
+        assert(lastAccess + 8 hours <= now);
+        uint256 grant = (now - lastAccess) / 8 hours;
+        if (grant > 3) {
+            grant = 3;
+        }
+        grant *= 2;
+        balances[msg.sender] += grant;
+        supply += grant;
         faucetDate[msg.sender] = now;
-        balances[msg.sender]+=2;
-        supply+=2;
     }
     function vote(address _voter, address _votee) public {
         assert(allCabals.isProposal(msg.sender));
-        assert(allCabals.canVote(_voter)); // TODO consider removing this check?
+        assert(allCabals.canVote(_voter));
         assert(balances[_voter] > 0);
         balances[_voter] -= 2;
         balances[developerFund]++;
@@ -77,7 +84,7 @@ interface ProposalInterface {
 contract Proposal is ProposalInterface {
     mapping (address => uint256) public votes;
 
-    Vote voteToken; // FIXME initialize
+    Vote voteToken;
 
     function getPosition(address _user)
     public view
@@ -120,9 +127,10 @@ contract Proposal is ProposalInterface {
         return arguments.length;
     }
 
-    function Proposal(bytes _resolution, address _source)
+    function Proposal(bytes _resolution, address _source, Vote _voteToken)
     public {
         arguments.push(Argument(_source, Position.SKIP, 0, _resolution));
+        voteToken = _voteToken;
     }
 
     function resolution()
@@ -176,6 +184,7 @@ contract Cabal is CabalInterface {
     address[] members;
     ProposalInterface[] public proposals;
     ProposalInterface[] public canon;
+    AllCabals public allCabals;
 
     function proposalCount()
     public view
@@ -227,11 +236,12 @@ contract Cabal is CabalInterface {
         _;
     }
 
-    function Cabal(string _name)
+    function Cabal(string _name, AllCabals _allCabals)
     public {
         name = _name;
         membership[msg.sender] = Membership.SOURCE;
         members.push(msg.sender);
+        allCabals = _allCabals;
     }
 
     // useful RPC call but please avoid depending on this function
@@ -385,7 +395,7 @@ contract Cabal is CabalInterface {
     external
     mustBe(Membership.MEMBER) {
         require(membership[proposal] == Membership.UNCONTACTED);
-        require(proposal.getPosition(msg.sender) == Proposal.Position.APPROVE); // FIXME use AllProposals to verify it is a proposal
+        require(allCabals.isProposal(proposal));
         membership[proposal] = Membership.PROPOSAL;
         proposals.push(proposal);
         NewProposal(proposal);
@@ -442,11 +452,13 @@ contract AllCabals {
 
     Cabal[] public allCabals;
     ProposalInterface[] public allProposals;
+    Vote public voteToken;
 
     function AllCabals()
     public
     {
         infoMap[msg.sender].membership = Membership.BOARD;
+        voteToken = new Vote(msg.sender, 0);
     }
 
     event NewVoter(address voter);
@@ -474,9 +486,9 @@ contract AllCabals {
 
     function confirmCabal(Cabal _cabal)
     external {
+        require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_cabal];
         require(info.membership == Membership.PENDING_CABAL);
-        // FIXME require permissions
         info.membership = Membership.CABAL;
         allCabals.push(_cabal);
     }
@@ -531,7 +543,7 @@ contract AllCabals {
     external
     returns (Proposal)
     {
-        Proposal proposal = new Proposal(_resolution, msg.sender);
+        Proposal proposal = new Proposal(_resolution, msg.sender, voteToken);
         infoMap[proposal].membership = Membership.PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
