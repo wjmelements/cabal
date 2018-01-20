@@ -18,6 +18,7 @@ contract Vote is ERC20 {
 
     AllCabals allCabals;
     address public developerFund;
+    uint8 public constant decimals = 1;
 
     function Vote(address _developerFund, uint256 _fundSize) public {
         allCabals = AllCabals(msg.sender);
@@ -55,12 +56,10 @@ contract Vote is ERC20 {
     function faucet() external {
         assert(allCabals.canVote(msg.sender));
         uint256 lastAccess = faucetDate[msg.sender];
-        assert(lastAccess + 8 hours <= now);
-        uint256 grant = (now - lastAccess) / 8 hours;
-        if (grant > 3) {
-            grant = 3;
+        uint256 grant = (now - lastAccess) / 48 minutes;
+        if (grant > 30) {
+            grant = 30;
         }
-        grant *= 2;
         balances[msg.sender] += grant;
         supply += grant;
         faucetDate[msg.sender] = now;
@@ -68,10 +67,16 @@ contract Vote is ERC20 {
     function vote(address _voter, address _votee) public {
         assert(allCabals.isProposal(msg.sender));
         assert(allCabals.canVote(_voter));
-        assert(balances[_voter] > 0);
-        balances[_voter] -= 2;
-        balances[developerFund]++;
-        balances[_votee]++;
+        assert(balances[_voter] >= 10);
+        balances[_voter] -= 10;
+        balances[developerFund] += 5;
+        balances[_votee] += 5;
+    }
+    function moveDeveloperFund(address _newDeveloperFund) {
+        assert(msg.sender == developerFund);
+        balances[_newDeveloperFund] += balances[developerFund];
+        balances[developerFund] = 0;
+        developerFund = _newDeveloperFund;
     }
 }
 interface ProposalInterface {
