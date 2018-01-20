@@ -498,6 +498,7 @@ contract AllCabals is AllProposals {
     event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
     event BannedProposal(ProposalInterface proposal, string reason);
+    event PlannedShutdown(uint256 shutdownTime);
 
     function cabalCount()
     public view
@@ -643,6 +644,7 @@ contract AllCabals is AllProposals {
         require(voteToken.totalSupply() == 0);
         require(infoMap[msg.sender].membership == Membership.BOARD);
         allowedMurderDate = now + 4 weeks;
+        PlannedShutdown(allowedMurderDate);
     }
 
     function murder()
