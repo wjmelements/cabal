@@ -19,6 +19,8 @@ contract Vote is ERC20 {
     AllCabals allCabals;
     address public developerFund;
     uint8 public constant decimals = 1;
+    string public symbol = "VOTE";
+    string public name = "Cabal Proposal Vote";
 
     function Vote(address _developerFund, uint256 _fundSize) public {
         allCabals = AllCabals(msg.sender);
@@ -72,11 +74,18 @@ contract Vote is ERC20 {
         balances[developerFund] += 5;
         balances[_votee] += 5;
     }
-    function moveDeveloperFund(address _newDeveloperFund) {
+    function moveDeveloperFund(address _newDeveloperFund) external {
         assert(msg.sender == developerFund);
         balances[_newDeveloperFund] += balances[developerFund];
         balances[developerFund] = 0;
         developerFund = _newDeveloperFund;
+    }
+
+    // PLEASE allow users to deregister before allowing mass murder
+    function murder()
+    external {
+        assert(msg.sender == developerFund);
+        selfdestruct(msg.sender);
     }
 }
 interface ProposalInterface {
@@ -103,7 +112,6 @@ contract Proposal is ProposalInterface {
         arguments[votes[msg.sender] = _argumentId].count++;
     }
 
-    event FailedMicropayment(address destination);
     modifier pays(uint256 argumentId) {
         _;
         address destination = arguments[argumentId].source;
@@ -171,11 +179,20 @@ contract Proposal is ProposalInterface {
     setVote(argumentId)
     pays(argumentId) {
     }
+
+    function murder()
+    external {
+        assert(voteToken.totalSupply() == 0);
+        selfdestruct(msg.sender);
+    }
 }
 interface CabalInterface {
     function memberCount() public view returns (uint256);
     function canonCount() public view returns (uint256);
     function proposalCount() public view returns (uint256);
+}
+interface AllProposals {
+    function isProposal(address _proposal) public view returns (bool);
 }
 contract Cabal is CabalInterface {
     uint256 constant public membershipFee = 1 finney;
@@ -183,13 +200,13 @@ contract Cabal is CabalInterface {
     uint256 constant public rejectionBurn = 900 szabo;
     uint256 constant public admissionBounty = 1 finney;
 
-    address constant public burn = 0xdead;
+    address constant burn = 0xdead;
 
     string public name;
     address[] members;
     ProposalInterface[] public proposals;
     ProposalInterface[] public canon;
-    AllCabals public allCabals;
+    AllProposals public allProposals;
 
     function proposalCount()
     public view
@@ -241,12 +258,12 @@ contract Cabal is CabalInterface {
         _;
     }
 
-    function Cabal(string _name, AllCabals _allCabals)
+    function Cabal(string _name, AllProposals _allCabals)
     public {
         name = _name;
         membership[msg.sender] = Membership.SOURCE;
         members.push(msg.sender);
-        allCabals = _allCabals;
+        allProposals = _allCabals;
     }
 
     // useful RPC call but please avoid depending on this function
@@ -316,6 +333,7 @@ contract Cabal is CabalInterface {
     event Appointed(address member, Membership role);
     event NewHeretic(address member);
     event Reconciled(address member);
+    event Migrated(address allProposals);
 
     function join()
     external payable
@@ -400,7 +418,7 @@ contract Cabal is CabalInterface {
     external
     mustBe(Membership.MEMBER) {
         require(membership[proposal] == Membership.UNCONTACTED);
-        require(allCabals.isProposal(proposal));
+        require(allProposals.isProposal(proposal));
         membership[proposal] = Membership.PROPOSAL;
         proposals.push(proposal);
         NewProposal(proposal);
@@ -429,13 +447,21 @@ contract Cabal is CabalInterface {
 
         this.denounceHeretics(proposal);
     }
+
+    function migrate(AllProposals _upgradedAllCabals)
+    external
+    mustBe(Membership.BOARD) {
+        allProposals = _upgradedAllCabals;
+    }
 }
-contract AllCabals {
+contract AllCabals is AllProposals {
     
     uint256 constant public registrationBounty = 1 finney;
     uint256 constant public outsideProposalVerificationFee = 50 finney;
     uint256 constant public outsideProposalRejectionBurn = 25 finney;
     uint256 constant public outsideProposalRejectionBounty = 25 finney;
+
+    address burn = 0xdead;
 
     enum Membership {
         // default
@@ -471,6 +497,7 @@ contract AllCabals {
     event NewBoard(address board);
     event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
+    event BannedProposal(ProposalInterface proposal, string reason);
 
     function cabalCount()
     public view
@@ -520,7 +547,8 @@ contract AllCabals {
         Deregistered(msg.sender);
     }
 
-    function canVote(address _voter) public view
+    function canVote(address _voter)
+    public view
     returns (bool)
     {
         Info storage info = infoMap[_voter];
@@ -528,7 +556,8 @@ contract AllCabals {
             || info.membership == Membership.BOARD;
     }
 
-    function isProposal(address _proposal) public view
+    function isProposal(address _proposal)
+    public view
     returns (bool)
     {
         return infoMap[_proposal].membership == Membership.PROPOSAL;
@@ -557,7 +586,7 @@ contract AllCabals {
 
     // To submit an outside proposal contract, you must:
     // - ensure it conforms to ProposalInterface
-    // - ensure it properly transfers the VOTE token
+    // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
     // - open-source it using Etherscan or equivalent
     // - pay a manual verification fee
     function propose(ProposalInterface _proposal)
@@ -579,5 +608,38 @@ contract AllCabals {
         msg.sender.transfer(outsideProposalVerificationFee);
         allProposals.push(_proposal);
         NewProposal(_proposal);
+    }
+
+    // this should only be used to stop a proposal that is abusing the VOTE token
+    // this should not be used for censorship
+    // the burn is to penalize bans
+    function banProposal(ProposalInterface _proposal, string _reason)
+    external payable
+    {
+        assert(msg.value == outsideProposalRejectionBurn);
+        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        Info storage info = infoMap[_proposal];
+        assert(info.membership == Membership.PROPOSAL);
+        info.membership = Membership.UNCONTACTED;
+        burn.transfer(msg.value);
+        BannedProposal(_proposal, _reason);
+    }
+
+    function rejectProposal(ProposalInterface _proposal)
+    external
+    {
+        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        Info storage info = infoMap[_proposal];
+        assert(info.membership == Membership.PENDING_PROPOSAL);
+        info.membership = Membership.UNCONTACTED;
+        msg.sender.transfer(outsideProposalRejectionBounty);
+        burn.transfer(outsideProposalRejectionBurn); 
+    }
+
+    function murder()
+    external {
+        assert(voteToken.totalSupply() == 0);
+        assert(infoMap[msg.sender].membership == Membership.BOARD);
+        selfdestruct(msg.sender);
     }
 }
