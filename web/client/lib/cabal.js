@@ -2,36 +2,38 @@ var proposals = [
     {
         arguments:[
             [
+            ],
+            [
                 {
                     text:"ayy",
                     voteCount:4,
-                    position:0
+                    position:1
                 },
                 {
                     text:"lmao",
                     voteCount:3,
-                    position:0
+                    position:1
                 }
             ],
             [
                 {
                     text:"wording",
                     voteCount:2,
-                    position:1
+                    position:2
                 }
             ],
             [
                 {
                     text:"boo",
                     voteCount:5,
-                    position:2
+                    position:3
                 }
             ],
             [
                 {
                     text:"lol",
                     voteCount:1,
-                    position:3
+                    position:4
                 }
             ]
         ]
@@ -51,7 +53,7 @@ Cabal = {
             inverse = inverse.concat(proposal.arguments[pos]);
         }
         inverse.sort(function (a,b) {
-            return a.voteCount - b.voteCount;
+            return b.voteCount - a.voteCount;
         });
         return inverse;
     }

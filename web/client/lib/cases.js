@@ -1,24 +1,11 @@
 Template.cases.onCreated(function() {
     this.position = this.data;
-    switch (this.position) {
-        case "approve":
-            this.pos = 0;
-            break;
-        case "amend":
-            this.pos = 1;
-            break;
-        case "reject":
-            this.pos = 2;
-            break;
-        case "lol":
-            this.pos = 3;
-            break;
-    }
+    this.pos = parseInt(this.position.substr(3));
     this.cases = new ReactiveVar();
     onChoice();
 });
 Template.cases.onRendered(function() {
-    $('.case p').addClass(this.data);
+    console.log(this.data);
     $('textarea.case').addClass(this.position);
     onChange.bind(this)(this.find('textarea'));
 });

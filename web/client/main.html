@@ -14,11 +14,11 @@
 </template>
 <template name="positions">
   <ul class="pos">
-    <li class="approve">Approve</li>
-    <li class="amend">Amend</li>
-    <li class="reject">Reject</li>
-    <li class="lol">LOL</li>
-    <li class="skip">Skip</li>
+    <li class="pos1">Approve</li>
+    <li class="pos2">Amend</li>
+    <li class="pos3">Reject</li>
+    <li class="pos4">LOL</li>
+    <li class="pos0">Skip</li>
   </ul>
   <p class="instr">
     Determine your position on the topic.
@@ -32,7 +32,7 @@
     <ul class="cases">
       {{#each case in cases}}
         <li class="case">
-          {{case.voteCount}} <p>{{case.text}}</p>
+          {{case.voteCount}} <p class=" pos{{case.position}}">{{case.text}}</p>
         </li>
       {{/each}}
     </ul>

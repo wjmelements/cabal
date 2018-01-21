@@ -7,19 +7,19 @@ ul.pos li {
   padding: 1em;
   cursor:pointer;
 }
-.approve {
+.pos1 {
   background-color:#33FF33;
 }
-.reject {
+.pos3 {
   background-color:#FF3333;
 }
-.amend {
+.pos2 {
   background-color:#23998D;
 }
-.lol {
+.pos4 {
   background-color:#FCFF8B;
 }
-.skip {
+.pos0 {
   background-color:#AD97BD;
 }
 ul.cases li {
