@@ -19,8 +19,8 @@ contract Vote is ERC20 {
     AllCabals allCabals;
     address public developerFund;
     uint8 public constant decimals = 1;
-    string public symbol = "VOTE";
-    string public name = "Cabal Proposal Vote";
+    string public symbol = "REV";
+    string public name = "Registered Ether Vote";
 
     function Vote(address _developerFund, uint256 _fundSize) public {
         allCabals = AllCabals(msg.sender);
@@ -81,7 +81,6 @@ contract Vote is ERC20 {
         developerFund = _newDeveloperFund;
     }
 
-    // PLEASE allow users to deregister before allowing mass murder
     function murder()
     external {
         require(msg.sender == developerFund);
@@ -182,7 +181,7 @@ contract Proposal is ProposalInterface {
 
     function murder()
     external {
-        require(voteToken.totalSupply() == 0);
+        require(Vote(voteToken).totalSupply() == 0);
         selfdestruct(msg.sender);
     }
 }
@@ -466,6 +465,7 @@ contract AllCabals is AllProposals {
     enum Membership {
         // default
         UNCONTACTED,
+        FRAUD,
         VOTER,
         PENDING_PROPOSAL,
         PROPOSAL,
@@ -504,6 +504,12 @@ contract AllCabals is AllProposals {
     public view
     returns (uint256) {
         return allCabals.length;
+    }
+
+    function proposalCount()
+    public view
+    returns (uint256) {
+        return allProposals.length;
     }
 
     // To register a Cabal, you must
@@ -614,14 +620,15 @@ contract AllCabals is AllProposals {
     // this should only be used to stop a proposal that is abusing the VOTE token
     // this should not be used for censorship
     // the burn is to penalize bans
-    function banProposal(ProposalInterface _proposal, string _reason)
+    function banProposal(ProposalInterface _proposal, uint256 _proposalIndex, string _reason)
     external payable
     {
         require(msg.value == outsideProposalRejectionBurn);
         require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_proposal];
         require(info.membership == Membership.PROPOSAL);
-        info.membership = Membership.UNCONTACTED;
+        require(allProposals[_proposalIndex] == _proposal);
+        info.membership = Membership.FRAUD;
         burn.transfer(msg.value);
         BannedProposal(_proposal, _reason);
     }
@@ -632,7 +639,7 @@ contract AllCabals is AllProposals {
         require(infoMap[msg.sender].membership == Membership.BOARD);
         Info storage info = infoMap[_proposal];
         require(info.membership == Membership.PENDING_PROPOSAL);
-        info.membership = Membership.UNCONTACTED;
+        info.membership = Membership.FRAUD;
         msg.sender.transfer(outsideProposalRejectionBounty);
         burn.transfer(outsideProposalRejectionBurn); 
     }
@@ -641,15 +648,16 @@ contract AllCabals is AllProposals {
     uint256 allowedMurderDate = 0;
     function premeditateMurder()
     external {
-        require(voteToken.totalSupply() == 0);
+        require(Vote(voteToken).totalSupply() == 0);
         require(infoMap[msg.sender].membership == Membership.BOARD);
-        allowedMurderDate = now + 4 weeks;
+        // allow more than enough time for anyone in the solar system to deregister
+        allowedMurderDate = now + 1 years;
         PlannedShutdown(allowedMurderDate);
     }
 
     function murder()
     external {
-        require(voteToken.totalSupply() == 0);
+        require(Vote(voteToken).totalSupply() == 0);
         require(infoMap[msg.sender].membership == Membership.BOARD);
         require(allowedMurderDate != 0);
         require(now > allowedMurderDate);
