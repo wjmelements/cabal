@@ -11,22 +11,21 @@ interface ERC20 {
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
 contract Vote is ERC20 {
-    uint256 supply;
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) approved;
-    mapping (address => uint256) faucetDate;
-
-    AllCabals allCabals;
+    uint256 supply = 0;
+    AccountRegistry allCabals;
     address public developerFund;
+
     uint8 public constant decimals = 1;
     string public symbol = "REV";
     string public name = "Registered Ether Vote";
 
-    function Vote(address _developerFund, uint256 _fundSize) public {
-        allCabals = AllCabals(msg.sender);
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) approved;
+    mapping (address => uint256) faucetDate;
+
+    function Vote(address _developerFund) public {
+        allCabals = AccountRegistry(msg.sender);
         developerFund = _developerFund;
-        supply = _fundSize;
-        balances[_developerFund] = _fundSize;
     }
     function totalSupply() public constant returns (uint) {
         return supply;
@@ -74,17 +73,11 @@ contract Vote is ERC20 {
         balances[developerFund] += 5;
         balances[_votee] += 5;
     }
-    function moveDeveloperFund(address _newDeveloperFund) external {
+    function transferDeveloperFund(address _newDeveloperFund) external {
         require(msg.sender == developerFund);
         balances[_newDeveloperFund] += balances[developerFund];
         balances[developerFund] = 0;
         developerFund = _newDeveloperFund;
-    }
-
-    function murder()
-    external {
-        require(msg.sender == developerFund);
-        selfdestruct(msg.sender);
     }
 }
 interface ProposalInterface {
@@ -108,7 +101,9 @@ contract Proposal is ProposalInterface {
     modifier setVote(uint256 _argumentId) {
         _;
         arguments[votes[msg.sender]].count--;
-        arguments[votes[msg.sender] = _argumentId].count++;
+        arguments[
+            votes[msg.sender] = _argumentId
+        ].count++;
     }
 
     modifier pays(uint256 argumentId) {
@@ -177,12 +172,6 @@ contract Proposal is ProposalInterface {
     external payable
     setVote(argumentId)
     pays(argumentId) {
-    }
-
-    function murder()
-    external {
-        require(Vote(voteToken).totalSupply() == 0);
-        selfdestruct(msg.sender);
     }
 }
 interface CabalInterface {
@@ -447,13 +436,13 @@ contract Cabal is CabalInterface {
         this.denounceHeretics(proposal);
     }
 
-    function migrate(AllProposals _upgradedAllCabals)
+    function migrate(AllProposals _upgradedAccountRegistry)
     external
     mustBe(Membership.BOARD) {
-        allProposals = _upgradedAllCabals;
+        allProposals = _upgradedAccountRegistry;
     }
 }
-contract AllCabals is AllProposals {
+contract AccountRegistry is AllProposals {
     
     uint256 constant public registrationBounty = 1 finney;
     uint256 constant public outsideProposalVerificationFee = 50 finney;
@@ -462,22 +451,28 @@ contract AllCabals is AllProposals {
 
     address burn = 0xdead;
 
-    enum Membership {
-        // default
-        UNCONTACTED,
-        FRAUD,
-        VOTER,
-        PENDING_PROPOSAL,
-        PROPOSAL,
-        PENDING_CABAL,
-        CABAL,
-        BOARD
-        // TODO determine if proposals and cabals can be board members
-        // TODO if proposals can be board members, we have to update the vote token code
-    }
+    /* uint8 membership bitmap:
+     * 0 - fraud
+     * 1 - registered to vote
+     * 2 - pending proposal
+     * 3 - proposal
+     * 4 - board member
+     * 5 - pending cabal
+     * 6 - cabal
+     * 7 - board
+     */
+    uint8 constant UNCONTACTED = 0;
+    uint8 constant FRAUD = 1;
+    uint8 constant VOTER = 2;
+    uint8 constant PENDING_PROPOSAL = 4;
+    uint8 constant PROPOSAL = 8;
+    uint8 constant PENDING_CABAL = 16;
+    uint8 constant CABAL = 32;
+    uint8 constant BOARD = 64;
     struct Info {
-        Membership membership;
+        // TODO compare to gas costs when this is flipped the other way
         uint256 registrationDate;
+        uint8 membership;
     }
     mapping (address => Info) infoMap;
 
@@ -485,11 +480,11 @@ contract AllCabals is AllProposals {
     ProposalInterface[] public allProposals;
     Vote public voteToken;
 
-    function AllCabals()
+    function AccountRegistry()
     public
     {
-        infoMap[msg.sender].membership = Membership.BOARD;
-        voteToken = new Vote(msg.sender, 0);
+        infoMap[msg.sender].membership ^= BOARD;
+        voteToken = new Vote(msg.sender);
     }
 
     event NewVoter(address voter);
@@ -514,21 +509,21 @@ contract AllCabals is AllProposals {
 
     // To register a Cabal, you must
     // - implement CabalInterface
-    // - open-source your Cabal
+    // - open-source your Cabal on Etherscan or equivalent
     function registerCabal(Cabal _cabal)
     external {
         Info storage info = infoMap[_cabal];
-        require(info.membership == Membership.UNCONTACTED);
-        info.membership = Membership.PENDING_CABAL;
+        require((info.membership & ~(PENDING_CABAL | CABAL)) == info.membership);
+        info.membership |= PENDING_CABAL;
         NewCabal(_cabal);
     }
 
     function confirmCabal(Cabal _cabal)
     external {
-        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
         Info storage info = infoMap[_cabal];
-        require(info.membership == Membership.PENDING_CABAL);
-        info.membership = Membership.CABAL;
+        require(info.membership & PENDING_CABAL == PENDING_CABAL);
+        info.membership ^= (CABAL | PENDING_CABAL);
         allCabals.push(_cabal);
     }
 
@@ -537,9 +532,9 @@ contract AllCabals is AllProposals {
     {
         require(msg.value == registrationBounty);
         Info storage info = infoMap[msg.sender];
-        require(info.membership == Membership.UNCONTACTED);
-        info.membership = Membership.VOTER;
+        require(info.membership & ~VOTER == info.membership);
         info.registrationDate = now;
+        info.membership |= VOTER;
         NewVoter(msg.sender);
     }
 
@@ -547,9 +542,9 @@ contract AllCabals is AllProposals {
     external
     {
         Info storage info = infoMap[msg.sender];
-        require(info.membership == Membership.VOTER);
+        require(info.membership & VOTER == VOTER);
         require(info.registrationDate > now - 7 days);
-        info.membership = Membership.UNCONTACTED;
+        info.membership &= ~VOTER;
         msg.sender.transfer(registrationBounty);
         Deregistered(msg.sender);
     }
@@ -558,25 +553,28 @@ contract AllCabals is AllProposals {
     public view
     returns (bool)
     {
-        Info storage info = infoMap[_voter];
-        return info.membership == Membership.VOTER
-            || info.membership == Membership.BOARD;
+        return infoMap[_voter].membership & VOTER == VOTER;
     }
 
     function isProposal(address _proposal)
     public view
     returns (bool)
     {
-        return infoMap[_proposal].membership == Membership.PROPOSAL;
+        return infoMap[_proposal].membership & PROPOSAL == PROPOSAL;
     }
 
-    // board members gain superpowers but cannot claim their deposit
+    function isFraud(address _account)
+    public view
+    returns (bool)
+    {
+        return infoMap[_account].membership & FRAUD == FRAUD;
+    }
+
     function appoint(address _board)
     external
     {
-        require(infoMap[msg.sender].membership == Membership.BOARD);
-        require(infoMap[_board].membership == Membership.VOTER || infoMap[_board].membership == Membership.UNCONTACTED);
-        infoMap[_board].membership = Membership.BOARD;
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
+        infoMap[_board].membership |= BOARD;
         NewBoard(_board);
     }
 
@@ -585,7 +583,7 @@ contract AllCabals is AllProposals {
     returns (Proposal)
     {
         Proposal proposal = new Proposal(_resolution, msg.sender, voteToken);
-        infoMap[proposal].membership = Membership.PROPOSAL;
+        infoMap[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
         return proposal;
@@ -601,66 +599,47 @@ contract AllCabals is AllProposals {
     {
         require(msg.value == outsideProposalVerificationFee);
         Info storage info = infoMap[_proposal];
-        require(info.membership == Membership.UNCONTACTED);
-        info.membership = Membership.PENDING_PROPOSAL;
+        require(info.membership & ~(PENDING_PROPOSAL | PROPOSAL) == info.membership);
+        info.membership |= PENDING_PROPOSAL;
     }
 
     function confirmProposal(ProposalInterface _proposal)
     external
     {
-        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
         Info storage info = infoMap[_proposal];
-        require(info.membership == Membership.PENDING_PROPOSAL);
-        info.membership = Membership.PROPOSAL;
+        require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        info.membership ^= (PROPOSAL | PENDING_PROPOSAL);
         msg.sender.transfer(outsideProposalVerificationFee);
         allProposals.push(_proposal);
         NewProposal(_proposal);
     }
 
+    // bans prevent accounts from voting through this proposal
     // this should only be used to stop a proposal that is abusing the VOTE token
-    // this should not be used for censorship
-    // the burn is to penalize bans
-    function banProposal(ProposalInterface _proposal, uint256 _proposalIndex, string _reason)
+    // the burn is to penalize bans, so that they cannot suppress ideas
+    function banProposal(ProposalInterface _proposal, string _reason)
     external payable
     {
-        require(msg.value == outsideProposalRejectionBurn);
-        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(msg.value == outsideProposalVerificationFee);
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
         Info storage info = infoMap[_proposal];
-        require(info.membership == Membership.PROPOSAL);
-        require(allProposals[_proposalIndex] == _proposal);
-        info.membership = Membership.FRAUD;
+        require(info.membership & PROPOSAL == PROPOSAL);
+        info.membership ^= (FRAUD | PROPOSAL);
         burn.transfer(msg.value);
         BannedProposal(_proposal, _reason);
     }
 
+    // board members reserve the right to reject outside proposals for any reason
     function rejectProposal(ProposalInterface _proposal)
     external
     {
-        require(infoMap[msg.sender].membership == Membership.BOARD);
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
         Info storage info = infoMap[_proposal];
-        require(info.membership == Membership.PENDING_PROPOSAL);
-        info.membership = Membership.FRAUD;
+        require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        info.membership ^= (FRAUD | PENDING_PROPOSAL);
         msg.sender.transfer(outsideProposalRejectionBounty);
         burn.transfer(outsideProposalRejectionBurn); 
     }
 
-
-    uint256 allowedMurderDate = 0;
-    function premeditateMurder()
-    external {
-        require(Vote(voteToken).totalSupply() == 0);
-        require(infoMap[msg.sender].membership == Membership.BOARD);
-        // allow more than enough time for anyone in the solar system to deregister
-        allowedMurderDate = now + 1 years;
-        PlannedShutdown(allowedMurderDate);
-    }
-
-    function murder()
-    external {
-        require(Vote(voteToken).totalSupply() == 0);
-        require(infoMap[msg.sender].membership == Membership.BOARD);
-        require(allowedMurderDate != 0);
-        require(now > allowedMurderDate);
-        selfdestruct(msg.sender);
-    }
 }
