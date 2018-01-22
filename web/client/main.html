@@ -25,22 +25,34 @@
   </p>
 </template>
 <template name="cases">
+  
+  {{#if hasChoice}}
+    <li class="case">
+      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p>
+    </li>
+    <p class="instr">
+      Please consider the following opposing views.
+    </p>
+  {{else}}
   <p class="instr">
     Choose a supporting argument, or write your own. 
   </p>
+  {{/if}}
   <p>
     <ul class="cases">
       {{#each case in cases}}
         <li class="case">
-          {{case.voteCount}} <p class=" pos{{case.position}}">{{case.text}}</p>
+          {{case.voteCount}} <p id="arg{{case.index}}" class="pos{{case.position}}">{{case.text}}</p>
         </li>
       {{/each}}
     </ul>
   </p>
-  <div>
+  {{#unless hasChoice}}
+  <div id="custom-arg">
     <textarea class="case" placeholder="Write your own argument here"></textarea>
   </div>
   <div>
     <input class="btn" type="button" value="Submit"/>
   </div>
+  {{/unless}}
 </template>

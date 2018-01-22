@@ -14,7 +14,6 @@ Template.proposal.helpers({
 });
 Template.proposal.events({
     "click ul.pos li"(event) {
-        console.log(event.target);
         Template.instance().choice.set(event.target.className);
     }
 });

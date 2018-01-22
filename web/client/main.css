@@ -22,11 +22,11 @@ ul.pos li {
 .pos0 {
   background-color:#AD97BD;
 }
-ul.cases li {
+li.case {
   list-style: none;
   display: block;
 }
-ul.cases li p {
+li.case p {
   border-style: solid;
   border-width: thin;
   border-radius: 0.5em;
