@@ -57,9 +57,9 @@ contract Vote is ERC20 {
     function faucet() external {
         require(allCabals.canVote(msg.sender));
         uint256 lastAccess = faucetDate[msg.sender];
-        uint256 grant = (now - lastAccess) / 48 minutes;
-        if (grant > 30) {
-            grant = 30;
+        uint256 grant = (now - lastAccess) / 72 minutes;
+        if (grant > 40) {
+            grant = 40;
         }
         balances[msg.sender] += grant;
         supply += grant;
