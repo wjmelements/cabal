@@ -65,6 +65,17 @@ contract Vote is ERC20 {
         supply += grant;
         faucetDate[msg.sender] = now;
     }
+
+    function availableFaucet(address _account)
+    public view
+    returns (uint256) {
+        uint256 grant = (now - faucetDate[_account]) / 72 minutes;
+        if (grant > 40) {
+            grant = 40;
+        }
+        return grant;
+    }
+
     function vote(address _voter, address _votee) public {
         require(accountRegistry.isProposal(msg.sender));
         require(accountRegistry.canVote(_voter));
