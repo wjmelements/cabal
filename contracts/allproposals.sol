@@ -526,7 +526,6 @@ contract AccountRegistry is AllProposals {
     event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
     event BannedProposal(ProposalInterface proposal, string reason);
-    event PlannedShutdown(uint256 shutdownTime);
 
     function cabalCount()
     public view
