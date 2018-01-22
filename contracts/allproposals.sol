@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 interface ERC20 {
     function totalSupply() public constant returns (uint supply);
@@ -79,11 +79,15 @@ contract Vote is ERC20 {
         balances[developerFund] = 0;
         developerFund = _newDeveloperFund;
     }
+    function migrateAccountRegistry(AccountRegistry _newAccountRegistry) external {
+        require(msg.sender == developerFund);
+        allCabals = _newAccountRegistry;      
+    }
 }
 interface ProposalInterface {
-    function getPosition(address user) public view returns (Proposal.Position);
+    function getPosition(address _user) public view returns (Proposal.Position);
     function argumentCount() public view returns (uint256);
-    function vote(uint256 argumentId) external payable;
+    function vote(uint256 _argumentId) external payable;
     function resolution() public view returns (bytes);
     function voteCount() public view returns (uint256);
 }
@@ -106,9 +110,9 @@ contract Proposal is ProposalInterface {
         ].count++;
     }
 
-    modifier pays(uint256 argumentId) {
+    modifier pays(uint256 _argumentId) {
         _;
-        address destination = arguments[argumentId].source;
+        address destination = arguments[_argumentId].source;
         voteToken.vote(msg.sender, destination);
     }
     
@@ -132,6 +136,24 @@ contract Proposal is ProposalInterface {
     public view
     returns (uint256) {
         return arguments.length;
+    }
+
+    function argumentSource(uint256 _index)
+    public view
+    returns (address) {
+        return arguments[_index].source;
+    }
+
+    function argumentVoteCount(uint256 _index)
+    public view
+    returns (uint256) {
+        return arguments[_index].count;
+    }
+
+    function argumentPosition(uint256 _index)
+    public view
+    returns (Position) {
+        return arguments[_index].position;
     }
 
     function Proposal(bytes _resolution, address _source, Vote _voteToken)
@@ -158,20 +180,20 @@ contract Proposal is ProposalInterface {
         return arguments[0].source;
     }
 
-    function argue(Position position, bytes text)
+    function argue(Position _position, bytes _text)
     external payable
     setVote(arguments.length)
     pays(0)
     returns (uint256) {
         uint256 argumentId = arguments.length;
-        arguments.push(Argument(msg.sender, position, 0, text));
+        arguments.push(Argument(msg.sender, _position, 0, _text));
         return argumentId;
     }
 
-    function vote(uint256 argumentId)
+    function vote(uint256 _argumentId)
     external payable
-    setVote(argumentId)
-    pays(argumentId) {
+    setVote(_argumentId)
+    pays(_argumentId) {
     }
 }
 interface CabalInterface {
@@ -258,13 +280,13 @@ contract Cabal is CabalInterface {
     function memberCount()
     public view
     returns (uint256) { return memberCount(Membership.MEMBER); }
-    function memberCount(Membership threshold)
+    function memberCount(Membership _threshold)
     public view
     returns (uint256) {
         uint256 count = 0;
         for (uint256 i = 0; i < members.length; i++) {
             address member = members[i];
-            if (membership[member] < threshold) {
+            if (membership[member] < _threshold) {
                 continue;
             }
             count++;
@@ -273,42 +295,42 @@ contract Cabal is CabalInterface {
     }
     
     // useful RPC call but please avoid dependending on this function in contracts
-    function voteCounts(ProposalInterface proposal)
+    function voteCounts(ProposalInterface _proposal)
     public view
     returns (uint256[5]) {
-        return voteCounts(proposal, Membership.MEMBER);
+        return voteCounts(_proposal, Membership.MEMBER);
     }
-    function voteCounts(ProposalInterface proposal, Membership level)
+    function voteCounts(ProposalInterface _proposal, Membership _level)
     public view
     returns (uint256[5]) {
         uint256[5] memory counts;
         for (uint256 i = 0; i < members.length; i++) {
             address member = members[i];
-            if (membership[member] < level) {
+            if (membership[member] < _level) {
                 continue;
             }
-            Proposal.Position position = proposal.getPosition(member);
+            Proposal.Position position = _proposal.getPosition(member);
             counts[uint8(position)]++;
         }
         return counts;
     }
 
     // useful RPC call but please avoid dependending on this function in contracts
-    function argumentCounts(Proposal proposal)
+    function argumentCounts(Proposal _proposal)
     public view
     returns (uint256[]) {
-        return argumentCounts(proposal, Membership.MEMBER);
+        return argumentCounts(_proposal, Membership.MEMBER);
     }
-    function argumentCounts(Proposal proposal, Membership level)
+    function argumentCounts(Proposal _proposal, Membership _level)
     public view
     returns (uint256[]) {
-        uint256[] memory counts = new uint256[](proposal.argumentCount());
+        uint256[] memory counts = new uint256[](_proposal.argumentCount());
         for (uint256 i = 0; i < members.length; i++) {
             address member = members[i];
-            if (membership[member] < level) {
+            if (membership[member] < _level) {
                 continue;
             }
-            counts[proposal.votes(member)]++;
+            counts[_proposal.votes(member)]++;
         }
 
         return counts;
@@ -335,40 +357,40 @@ contract Cabal is CabalInterface {
         NewMember(msg.sender);
     }
 
-    function reject(address applicant, string reason)
+    function reject(address _applicant, string _reason)
     external
     mustBe(Membership.BOARD) {
-        require(membership[applicant] == Membership.PENDING);
-        membership[applicant] = Membership.REJECTED;
+        require(membership[_applicant] == Membership.PENDING);
+        membership[_applicant] = Membership.REJECTED;
         msg.sender.transfer(rejectionBounty);
         burn.transfer(rejectionBurn);
-        Rejected(applicant, reason);
+        Rejected(_applicant, _reason);
     }
 
-    function admit(address applicant)
+    function admit(address _applicant)
     external
     mustBe(Membership.BOARD) {
-        require(membership[applicant] == Membership.PENDING);
-        membership[applicant] = Membership.MEMBER;
+        require(membership[_applicant] == Membership.PENDING);
+        membership[_applicant] = Membership.MEMBER;
         msg.sender.transfer(admissionBounty);
-        Admitted(applicant);
+        Admitted(_applicant);
     }
 
-    function ban(address member)
+    function ban(address _member)
     external
     mustBe(Membership.MODERATOR) {
-        require(membership[member] > Membership.PENDING);
-        require(membership[member] <= membership[msg.sender]);
-        membership[member] = Membership.BANNED;
+        require(membership[_member] > Membership.PENDING);
+        require(membership[_member] <= membership[msg.sender]);
+        membership[_member] = Membership.BANNED;
     }
 
-    function appoint(address member, Membership role)
+    function appoint(address _member, Membership _role)
     external
     mustBe(Membership.BOARD) {
-        require(membership[member] >= Membership.MEMBER);
-        require(role == Membership.MODERATOR || role == Membership.BOARD);
-        membership[member] = role;
-        Appointed(member, role);
+        require(membership[_member] >= Membership.MEMBER);
+        require(_role == Membership.MODERATOR || _role == Membership.BOARD);
+        membership[_member] = _role;
+        Appointed(_member, _role);
     }
 
     function rejoin()
@@ -382,16 +404,16 @@ contract Cabal is CabalInterface {
         Reconciled(msg.sender);
     }
 
-    function denounceHeretics(ProposalInterface proposal)
+    function denounceHeretics(ProposalInterface _proposal)
     external
     mustBe(Membership.MODERATOR) {
-        require(membership[proposal] == Membership.CANON);
+        require(membership[_proposal] == Membership.CANON);
         for (uint256 i = 0; i < members.length; i++) {
             address member = members[i];
             if (membership[member] < Membership.MEMBER) {
                 continue;
             }
-            if (proposal.getPosition(member) != Proposal.Position.APPROVE) {
+            if (_proposal.getPosition(member) != Proposal.Position.APPROVE) {
                 membership[member] = Membership.HERETIC;
                 NewHeretic(member);
             }
@@ -402,22 +424,22 @@ contract Cabal is CabalInterface {
     event NewProposal(Proposal proposal);
     event NewCanon(ProposalInterface proposal);
 
-    function propose(Proposal proposal)
+    function propose(Proposal _proposal)
     external
     mustBe(Membership.MEMBER) {
-        require(membership[proposal] == Membership.UNCONTACTED);
-        require(allProposals.isProposal(proposal));
-        membership[proposal] = Membership.PROPOSAL;
-        proposals.push(proposal);
-        NewProposal(proposal);
+        require(membership[_proposal] == Membership.UNCONTACTED);
+        require(allProposals.isProposal(_proposal));
+        membership[_proposal] = Membership.PROPOSAL;
+        proposals.push(_proposal);
+        NewProposal(_proposal);
     }
 
-    function canonize(uint256 proposalId)
+    function canonize(uint256 _proposalId)
     external
     mustBe(Membership.BOARD) {
         require(membership[proposal] == Membership.PROPOSAL);
         // proposal must already be linked here
-        ProposalInterface proposal = proposals[proposalId];
+        ProposalInterface proposal = proposals[_proposalId];
         // verify vote counts:
         uint256[5] memory counts = voteCounts(proposal);
         // prevent rogue board instacanon attacks
@@ -434,6 +456,7 @@ contract Cabal is CabalInterface {
         NewCanon(proposal);
 
         this.denounceHeretics(proposal);
+        // TODO consider voting on this proposal
     }
 
     function migrate(AllProposals _upgradedAccountRegistry)
@@ -444,7 +467,7 @@ contract Cabal is CabalInterface {
 }
 contract AccountRegistry is AllProposals {
     
-    uint256 constant public registrationBounty = 1 finney;
+    uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public outsideProposalVerificationFee = 50 finney;
     uint256 constant public outsideProposalRejectionBurn = 25 finney;
     uint256 constant public outsideProposalRejectionBounty = 25 finney;
@@ -470,7 +493,6 @@ contract AccountRegistry is AllProposals {
     uint8 constant CABAL = 32;
     uint8 constant BOARD = 64;
     struct Info {
-        // TODO compare to gas costs when this is flipped the other way
         uint256 registrationDate;
         uint8 membership;
     }
@@ -530,7 +552,7 @@ contract AccountRegistry is AllProposals {
     function register()
     external payable
     {
-        require(msg.value == registrationBounty);
+        require(msg.value == registrationDeposit);
         Info storage info = infoMap[msg.sender];
         require(info.membership & ~VOTER == info.membership);
         info.registrationDate = now;
@@ -545,8 +567,15 @@ contract AccountRegistry is AllProposals {
         require(info.membership & VOTER == VOTER);
         require(info.registrationDate > now - 7 days);
         info.membership &= ~VOTER;
-        msg.sender.transfer(registrationBounty);
+        msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
+    }
+
+    function canDeregsiter(address _voter)
+    public view
+    returns (bool)
+    {
+        return infoMap[_voter].registrationDate > now - 7 days;
     }
 
     function canVote(address _voter)
@@ -563,11 +592,25 @@ contract AccountRegistry is AllProposals {
         return infoMap[_proposal].membership & PROPOSAL == PROPOSAL;
     }
 
+    function isPendingProposal(address _proposal)
+    public view
+    returns (bool)
+    {
+        return infoMap[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
+    }
+
     function isFraud(address _account)
     public view
     returns (bool)
     {
         return infoMap[_account].membership & FRAUD == FRAUD;
+    }
+
+    function isCabal(address _account)
+    public view
+    returns (bool)
+    {
+        return infoMap[_account].membership & CABAL == CABAL;
     }
 
     function appoint(address _board)
