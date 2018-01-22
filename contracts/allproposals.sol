@@ -12,7 +12,7 @@ interface ERC20 {
 }
 contract Vote is ERC20 {
     uint256 supply = 0;
-    AccountRegistry allCabals;
+    AccountRegistry public accountRegistry;
     address public developerFund;
 
     uint8 public constant decimals = 1;
@@ -24,7 +24,7 @@ contract Vote is ERC20 {
     mapping (address => uint256) faucetDate;
 
     function Vote(address _developerFund) public {
-        allCabals = AccountRegistry(msg.sender);
+        accountRegistry = AccountRegistry(msg.sender);
         developerFund = _developerFund;
     }
     function totalSupply() public constant returns (uint) {
@@ -55,7 +55,7 @@ contract Vote is ERC20 {
         Transfer(_from, _to, _value);
     }
     function faucet() external {
-        require(allCabals.canVote(msg.sender));
+        require(accountRegistry.canVote(msg.sender));
         uint256 lastAccess = faucetDate[msg.sender];
         uint256 grant = (now - lastAccess) / 72 minutes;
         if (grant > 40) {
@@ -66,8 +66,8 @@ contract Vote is ERC20 {
         faucetDate[msg.sender] = now;
     }
     function vote(address _voter, address _votee) public {
-        require(allCabals.isProposal(msg.sender));
-        require(allCabals.canVote(_voter));
+        require(accountRegistry.isProposal(msg.sender));
+        require(accountRegistry.canVote(_voter));
         require(balances[_voter] >= 10);
         balances[_voter] -= 10;
         balances[developerFund] += 5;
@@ -81,7 +81,7 @@ contract Vote is ERC20 {
     }
     function migrateAccountRegistry(AccountRegistry _newAccountRegistry) external {
         require(msg.sender == developerFund);
-        allCabals = _newAccountRegistry;      
+        accountRegistry = _newAccountRegistry;
     }
 }
 interface ProposalInterface {
