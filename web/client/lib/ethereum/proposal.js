@@ -19,6 +19,9 @@ Proposals = {
         });
     },
     getArgument(address, index, resultFn) {
+        if (!Proposals[address]) {
+            Proposals.init(address);
+        }
         Proposals[address].arguments(index, function(err, result) {
             if (err) {
                 console.error(err);

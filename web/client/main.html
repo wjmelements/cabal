@@ -5,8 +5,18 @@
 <body>
   <h1>Cabal</h1>
 
-  {{> proposal}}
+  {{> feed}}
 </body>
+<template name="feed">
+    {{> feeditem index=lastIndex}}
+</template>
+
+<template name="feeditem">
+    {{> proposal index=index}}
+    {{#if hasNext}}
+        {{> feeditem index=next}}
+    {{/if}}
+</template>
 
 <template name="proposal">
     <h2 class="prop">{{proposal}}</h2>
