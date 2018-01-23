@@ -1,13 +1,14 @@
 Template.cases.onCreated(function() {
-    this.position = this.data;
-    this.pos = new ReactiveVar(parseInt(this.position.substr(3)));
+    this.position = this.data.position;
+    this.address = this.data.address;
+    this.pos = new ReactiveVar(parseInt(this.position.get().substr(3)));
     this.cases = new ReactiveVar();
     this.inv = new ReactiveVar(false);
     this.choice = new ReactiveVar();
     onChoice();
 });
 Template.cases.onRendered(function() {
-    $('textarea.case').addClass(this.position);
+    $('textarea.case').addClass(this.position.get());
     onChange.bind(this)(this.find('textarea'));
 });
 Template.cases.helpers({
@@ -21,14 +22,21 @@ Template.cases.helpers({
         return Template.instance().inv.get();
     },
     choice() {
-        return Cabal.argument(0, Template.instance().choice.get());
+        return Template.instance().choice.get();
     },
 });
 function onChange(target) {
     this.find('.btn').disabled = !target.value;
 }
 function onChoice() {
-    Template.instance().cases.set(Cabal.arguments(0, Template.instance().pos.get(), Template.instance().inv.get()));
+    var cases;
+    if (Template.instance().inv.get()) {
+        cases = Proposals.argumentsOpposing(Template.instance().address.get(), Template.instance().pos.get());
+    } else {
+        cases = Proposals.argumentsSupporting(Template.instance().address.get(), Template.instance().pos.get());
+    }
+    console.log(cases.length);
+    Template.instance().cases.set(cases);
 }
 Template.cases.events({
     "keyup textarea.case"(event) {
@@ -38,10 +46,12 @@ Template.cases.events({
         onChange.bind(Template.instance())(event.target);
     },
     "click .case p"(event) {
-        Template.instance().choice.set(parseInt(event.target.id.substr(3)));
+        var choice = parseInt(event.target.id.substr(3));
         Template.instance().pos.set(parseInt(event.target.className.substr(3)));
         Template.instance().inv.set(true);
-        //Template.instance().find("#custom-arg").hidden = true;
-        onChoice();
+        Proposals.getArgument(Template.instance().address.get(), choice, function(choice) {
+            Template.instance().choice.set(choice);
+            onChoice();
+        });
     }
 });
