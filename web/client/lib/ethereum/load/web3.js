@@ -1,4 +1,5 @@
 nId = "4"; // TODO support main net
+var loaded = false;
 window.addEventListener('load', function() {
     if (typeof web3 === 'undefined') {
         console.log("Using infura");
@@ -6,6 +7,7 @@ window.addEventListener('load', function() {
     } else if (typeof web3.eth === 'undefined') {
         web3 = new Web3(web3.currentProvider);
     }
+    loaded = true;
     onWeb3();
 });
 var web3Delayed = [];
@@ -16,6 +18,10 @@ function onWeb3() {
 }
 Web3Loader = {
     onWeb3(web3Fn) {
+        if (loaded) {
+            web3Fn();
+            return;
+        }
         web3Delayed.push(web3Fn);
     },
 }

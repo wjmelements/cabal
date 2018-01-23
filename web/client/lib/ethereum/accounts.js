@@ -47,4 +47,32 @@ Accounts = {
             Accounts.register(resultFn);
         });
     },
+    proposalCount(resultFn) {
+        if (accountRegistry) {
+            return accountRegistry.proposalCount(function(err, result) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                resultFn(result);
+            });
+        }
+        onAccountRegistry.push(function() {
+            Accounts.proposalCount(resultFn);
+        });
+    },
+    getProposal(index, resultFn) {
+        if (accountRegistry) {
+            return accountRegistry.allProposals(index, function(err, result) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                resultFn(result);
+            });
+        }
+        onAccountRegistry.push(function() {
+            Accounts.getProposal(index, resultFn);
+        });
+    }
 }
