@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.18;
 
 interface ERC20 {
     function totalSupply() public constant returns (uint supply);
@@ -98,7 +98,7 @@ contract Vote is ERC20 {
 interface ProposalInterface {
     function getPosition(address _user) public view returns (Proposal.Position);
     function argumentCount() public view returns (uint256);
-    function vote(uint256 _argumentId) external payable;
+    function vote(uint256 _argumentId) external;
     function resolution() public view returns (bytes);
     function voteCount() public view returns (uint256);
 }
@@ -192,7 +192,7 @@ contract Proposal is ProposalInterface {
     }
 
     function argue(Position _position, bytes _text)
-    external payable
+    external
     setVote(arguments.length)
     pays(0)
     returns (uint256) {
@@ -202,7 +202,7 @@ contract Proposal is ProposalInterface {
     }
 
     function vote(uint256 _argumentId)
-    external payable
+    external
     setVote(_argumentId)
     pays(_argumentId) {
     }
