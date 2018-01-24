@@ -1,12 +1,34 @@
 <head>
-  <title>Cabal</title>
+  <title>FinneyVote</title>
 </head>
 
 <body>
-  <h1>Cabal</h1>
-
+  <div class="btmpad">
+    {{> register}}{{> claim}}{{> balance}}
+  </div>
+  <div id="withoutweb3">
+  </div>
+  <div id="withoutaccount">
+  </div>
+  {{> propose}}
   {{> feed}}
 </body>
+<template name="register">
+  {{#if registered}}
+    <span class="done">Registered!</span>{{/if}}<a class="btn submit">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
+</template>
+<template name="claim">
+  {{#if available}}<a class="btn submit">Claim {{available}} FinneyVotes!</a>{{else}}<span class="done">Claimed!</span>{{/if}}
+</template>
+<template name="balance">
+<span class="done">You have {{balance}} FV</span>
+</template>
+<template name="propose">
+  <div>
+    <textarea id="propose" placeholder="Propose something controversial"></textarea>
+    <a class="btn submit">Propose</a>
+  </div>
+</template>
 <template name="feed">
     {{> feeditem index=lastIndex}}
 </template>
@@ -19,8 +41,10 @@
 </template>
 
 <template name="proposal">
+  <div>
     <h2 class="prop">{{proposal}}</h2>
     {{> Template.dynamic template=page data=data}}
+  </div>
 </template>
 <template name="positions">
   <ul class="pos">
@@ -35,19 +59,25 @@
   </p>
 </template>
 <template name="cases">
-  
+  {{#if skip}}
+    <p class="instr">
+      Skipped
+    </p>
+  {{else}}
   {{#if hasChoice}}
     <li class="case">
-      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p>
+      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p> <a class='btn submit pos{{choice.position}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
     </li>
+  {{#if hasOptions}}
     <p class="instr">
       Please consider the following opposing views.
     </p>
-  {{else}}
-  <p class="instr">
-    Choose a supporting argument, or write your own. 
-  </p>
   {{/if}}
+  {{else}}
+  {{#if hasOptions}}
+  <p class="instr">
+    Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
+  </p>
   <p>
     <ul class="cases">
       {{#each case in cases}}
@@ -57,12 +87,17 @@
       {{/each}}
     </ul>
   </p>
+  {{else}}
+  <p class="instr">
+    Nobody has written a case for this position yet. Write a concise argument and earn half-votes when people vote with your case.
+  </p>
+  {{/if}}
+  {{/if}}
   {{#unless hasChoice}}
   <div id="custom-arg">
-    <textarea class="case" placeholder="Write your own argument here"></textarea>
-  </div>
-  <div>
-    <input class="btn" type="button" value="Submit"/>
+    <textarea class="case" placeholder="Write your succinct case here"></textarea>
+    <input class="btn {{position}}" type="button" value="Submit"/>
   </div>
   {{/unless}}
+  {{/if}}
 </template>

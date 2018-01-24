@@ -5,6 +5,7 @@ Template.cases.onCreated(function() {
     this.cases = new ReactiveVar();
     this.inv = new ReactiveVar(false);
     this.choice = new ReactiveVar();
+    this.voting = new ReactiveVar(false);
     onChoice();
 });
 Template.cases.onRendered(function() {
@@ -21,12 +22,28 @@ Template.cases.helpers({
     hasChoice() {
         return Template.instance().inv.get();
     },
+    hasOptions() {
+        var cases = Template.instance().cases.get();
+        return cases && cases.length;
+    },
     choice() {
         return Template.instance().choice.get();
     },
+    position() {
+        return Template.instance().position.get();
+    },
+    voting() {
+        console.log(Template.instance().voting.get());
+        return Template.instance().voting.get();
+    },
+    skip() {
+        return Template.instance().pos.get() == 0;
+    }
 });
 function onChange(target) {
-    this.find('.btn').disabled = !target.value;
+    if (target) {
+        this.find('.btn').disabled = !target.value;
+    }
 }
 function onChoice() {
     var cases;
@@ -35,7 +52,6 @@ function onChoice() {
     } else {
         cases = Proposals.argumentsSupporting(Template.instance().address.get(), Template.instance().pos.get());
     }
-    console.log(cases.length);
     Template.instance().cases.set(cases);
 }
 Template.cases.events({
@@ -53,5 +69,34 @@ Template.cases.events({
             Template.instance().choice.set(choice);
             onChoice();
         });
-    }
+    },
+    "click .submit"(event) {
+        var choice = Template.instance().choice.get();
+        var address = Template.instance().address.get();
+        Proposals.vote(address, choice.index, function (error, result) {
+            if (error) {
+                console.error(error);
+                // TODO show error
+            } else {
+                console.log(result);
+            }
+        });
+    },
+    "click #custom-arg input.btn"(event) {
+        var customCase = Template.instance().find('#custom-arg textarea');
+        Proposals.argue(
+            Template.instance().address.get(),
+            Template.instance().pos.get(),
+            customCase.value,
+            function(error, txhash) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                console.log(txhash);
+                this.voting.set(true);
+            }.bind(Template.instance())
+        );
+
+    },
 });

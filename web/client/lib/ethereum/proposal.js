@@ -104,6 +104,11 @@ Proposals = {
             return b.voteCount - a.voteCount;
         });
         return inverse;
-
+    },
+    vote(address, argumentIndex, resultFn) {
+        Proposals[address].vote(argumentIndex, resultFn);
+    },
+    argue(address, position, content, resultFn) {
+        Proposals[address].argue(position, content, resultFn);
     },
 };
