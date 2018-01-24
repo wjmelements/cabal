@@ -155,16 +155,22 @@ contract Proposal is ProposalInterface {
         return arguments[_index].source;
     }
 
+    function argumentPosition(uint256 _index)
+    public view
+    returns (Position) {
+        return arguments[_index].position;
+    }
+
     function argumentVoteCount(uint256 _index)
     public view
     returns (uint256) {
         return arguments[_index].count;
     }
 
-    function argumentPosition(uint256 _index)
+    function argumentText(uint256 _index)
     public view
-    returns (Position) {
-        return arguments[_index].position;
+    returns (bytes) {
+        return arguments[_index].text;
     }
 
     function Proposal(bytes _resolution, address _source, Vote _voteToken)
@@ -504,7 +510,7 @@ contract AccountRegistry is AllProposals {
     uint8 constant CABAL = 32;
     uint8 constant BOARD = 64;
     struct Info {
-        uint256 registrationDate;
+        uint256 deregistrationDate;
         uint8 membership;
     }
     mapping (address => Info) infoMap;
@@ -565,7 +571,7 @@ contract AccountRegistry is AllProposals {
         require(msg.value == registrationDeposit);
         Info storage info = infoMap[msg.sender];
         require(info.membership & ~VOTER == info.membership);
-        info.registrationDate = now;
+        info.deregistrationDate = now + 7 days;
         info.membership |= VOTER;
         NewVoter(msg.sender);
     }
@@ -575,7 +581,7 @@ contract AccountRegistry is AllProposals {
     {
         Info storage info = infoMap[msg.sender];
         require(info.membership & VOTER == VOTER);
-        require(info.registrationDate > now - 7 days);
+        require(info.deregistrationDate < now);
         info.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
@@ -585,7 +591,7 @@ contract AccountRegistry is AllProposals {
     public view
     returns (bool)
     {
-        return infoMap[_voter].registrationDate > now - 7 days;
+        return infoMap[_voter].deregistrationDate < now;
     }
 
     function canVote(address _voter)
@@ -647,7 +653,7 @@ contract AccountRegistry is AllProposals {
     // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
     // - open-source it using Etherscan or equivalent
     // - pay a manual verification fee
-    function propose(ProposalInterface _proposal)
+    function proposeExternal(ProposalInterface _proposal)
     external payable
     {
         require(msg.value == outsideProposalVerificationFee);
