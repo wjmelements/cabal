@@ -65,22 +65,24 @@ Proposals = {
                 console.error(err);
                 return;
             }
-            var pos = result[1].c[0];
-            var argument = {
-                index:index,
-                source:result[0],
-                position:pos,
-                voteCount:result[2].c[0],
-                text:bytesToStr(result[3])
-            };
-            Proposals[address][index] = argument;
-            var posKey = 'pos'+pos;
-            if (Proposals[address][posKey]) {
-                Proposals[address][posKey].push(argument);
-            } else {
-                Proposals[address][posKey] = [argument];
+            if (!Proposals[address][index]) {
+                var pos = result[1].c[0];
+                var argument = {
+                    index:index,
+                    source:result[0],
+                    position:pos,
+                    voteCount:result[2].c[0],
+                    text:bytesToStr(result[3])
+                };
+                Proposals[address][index] = argument;
+                var posKey = 'pos'+pos;
+                if (Proposals[address][posKey]) {
+                    Proposals[address][posKey].push(argument);
+                } else {
+                    Proposals[address][posKey] = [argument];
+                }
             }
-            resultFn(argument);
+            resultFn(Proposals[address][index]);
         });
     },
     prefetchArguments(address) {
@@ -116,4 +118,15 @@ Proposals = {
     argue(address, position, content, resultFn) {
         Proposals[address].argue(position, content, resultFn);
     },
+    getMyVote(address, resultFn) {
+        Accounts.current(function(account) {
+            Proposals[address].votes(account, function(error, result) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                resultFn(result.c[0]);
+            });
+        });
+    }
 };

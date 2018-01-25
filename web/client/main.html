@@ -46,6 +46,14 @@
     {{> Template.dynamic template=page data=data}}
   </div>
 </template>
+<template name="voted">
+  <div>
+    <li class="case">
+      You voted <p id="arg{{vote.index}}" class="pos{{vote.position}}">{{vote.text}}</p>
+      <a class="btn reset">Change</a>
+    </li>
+  </div>
+</template>
 <template name="positions">
   <ul class="pos">
     <li class="pos1">Approve</li>

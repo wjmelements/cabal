@@ -1,12 +1,13 @@
 Template.cases.onCreated(function() {
     this.position = this.data.position;
     this.address = this.data.address;
+    this.choice = this.data.choice;
+    this.voted = this.data.voted;
     var pos = parseInt(this.position.get().substr(3));
     this.pos = new ReactiveVar(pos);
     this.skip = new ReactiveVar(pos == 0);
     this.cases = new ReactiveVar();
     this.inv = new ReactiveVar(false);
-    this.choice = new ReactiveVar();
     this.voting = new ReactiveVar(false);
     onChoice();
 });
@@ -48,7 +49,6 @@ Template.cases.helpers({
         return Template.instance().position.get();
     },
     voting() {
-        console.log(Template.instance().voting.get());
         return Template.instance().voting.get();
     },
     skip() {
@@ -94,7 +94,7 @@ Template.cases.events({
     "change textarea.case"(event) {
         onChange.bind(Template.instance())(event.target);
     },
-    "click .case p,li"(event) {
+    "click .case p,.case li,.pos li"(event) {
         var pos = parseInt(event.target.className.substr(3));
         console.log(pos);
         Template.instance().pos.set(pos);
@@ -142,6 +142,7 @@ Template.cases.events({
 
     },
     "click .reset"(event) {
+        console.log('reset');
         Template.instance().position.set(undefined);
     }
 });
