@@ -121,7 +121,7 @@ Proposals = {
     argumentsOpposing(address, position) {
         var inverse = [];
         var proposal = Proposals[address];
-        for (var pos = 1; pos < 4; pos++) {
+        for (var pos = 1; pos < 5; pos++) {
             if (pos == position) {
                 continue;
             }

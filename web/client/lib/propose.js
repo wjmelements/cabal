@@ -21,6 +21,7 @@ Template.propose.events({
                 return;
             }
             console.log(txhash);
+            // TODO awaitProposal()
         });
     },
     "change textarea.case"(event) {

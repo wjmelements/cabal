@@ -60,9 +60,8 @@
 }
 li.case {
   list-style: none;
-  display: block;
 }
-li.case pre {
+.case pre {
   border-style: solid;
   border-width: thin;
   border-radius: 1px;

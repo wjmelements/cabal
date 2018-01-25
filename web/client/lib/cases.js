@@ -97,8 +97,10 @@ function onChoice() {
 }
 function checkArgument(address, i, argumentCount, customCase) {
     Proposals.getArgument(address, i, function(argument) {
-        if (argument.text == customCase) {
+        if (argument.text == customCase.text) {
             this.voting.set(false);
+            this.voted.set(argument);
+            this.choice.set(argument);
         } else if (i < argumentCount) {
             checkArgument.bind(this)(address, i + 1, argumentCount, customCase);
         } else {
@@ -106,14 +108,14 @@ function checkArgument(address, i, argumentCount, customCase) {
         }
     }.bind(this));
 }
-function awaitArgument(address, lastArgumentCount, customCase) {
+function awaitArgument(address, lastArgumentCount, argument) {
     Proposals.getArgumentCount(address, function(argumentCount) {
         if (argumentCount > lastArgumentCount) {
-            checkArgument.bind(this)(address, lastArgumentCount, argumentCount, customCase);
+            checkArgument.bind(this)(address, lastArgumentCount, argumentCount, argument);
             return;
         }
         window.setTimeout(function() {
-            awaitArgument.bind(this)(address, lastArgumentCount, customCase);
+            awaitArgument.bind(this)(address, lastArgumentCount, argument);
         }.bind(this), 4000);
     }.bind(this));
 }
@@ -168,6 +170,7 @@ Template.cases.events({
                 return;
             }
             this.voting.set(true);
+            Balance.set(Balance.get() - 1);
             awaitVoted.bind(this)(address, choiceIndex, choice);
         }.bind(Template.instance()));
     },
@@ -192,15 +195,17 @@ Template.cases.events({
                         return;
                     }
                     console.log(txhash);
-                    this.choice.set({
+                    var argument = {
+                        source:web3.eth.coinbase,
                         position:position,
                         index:argumentCount,
                         text:customCase
-                    });
+                    };
+                    this.choice.set(argument);
                     this.voting.set(true);
                     this.inv.set(true);
                     Balance.set(Balance.get() - 1);
-                    awaitArgument.bind(this)(address, argumentCount, customCase);
+                    awaitArgument.bind(this)(address, argumentCount, argument);
                 }.bind(this)
             );
         }.bind(Template.instance()));

@@ -38,15 +38,17 @@ checkAccount();
 
 Accounts = {
     current(resultFn) {
-        if (!web3.eth.accounts[0]) {
-            onCurrentAccount.push(function() {
-                Accounts.current(resultFn);
-            });
+        Web3Loader.onWeb3(function() {
+            if (!web3.eth.accounts[0]) {
+                onCurrentAccount.push(function() {
+                    Accounts.current(resultFn);
+                });
 
-            return;
-        }
-        // FIXME compare to web3.eth.coinbase
-        resultFn(web3.eth.accounts[0]);
+                return;
+            }
+            // FIXME compare to web3.eth.coinbase
+            resultFn(web3.eth.accounts[0]);
+        });
     },
     getAddress(resultFn) {
         switch (nId) {
