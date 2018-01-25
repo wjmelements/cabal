@@ -587,7 +587,7 @@ contract AccountRegistry is AllProposals {
         Deregistered(msg.sender);
     }
 
-    function canDeregsiter(address _voter)
+    function canDeregister(address _voter)
     public view
     returns (bool)
     {
