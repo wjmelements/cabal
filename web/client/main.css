@@ -3,7 +3,7 @@
 }
 .ib {
   display:inline-block;
-  margin-left:2em;
+  margin-left:1em;
 }
 .dt {
   display:table;
@@ -13,6 +13,11 @@
   display:table-cell;
   vertical-align:middle;
 }
+.w1 {
+  width:1px;
+  background-color:red;
+  margin-left:2px;
+}
 .pos li {
   list-style: none;
   border-style: solid;
@@ -21,6 +26,10 @@
   border-radius: 0.5em;
   padding: 1em;
   cursor:pointer;
+}
+.disabled {
+  border-color:#FDB8B8;
+  cursor:not-allowed !important;
 }
 .pos1 {
   background-color:#33FF33;
@@ -78,17 +87,6 @@ textarea.case {
   min-width:19em;
   border-width:2px;
   border-style:inset;
-}
-input.btn {
-  border-radius:0.5em;
-  cursor:pointer;
-  appearance:none;
-  padding:1em;
-  -webkit-appearance:none;
-  -moz-appearance:none;
-}
-input.btn:disabled {
-  cursor:not-allowed;
 }
 .btn {
   display:inline-block;

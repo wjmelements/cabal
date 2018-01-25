@@ -57,16 +57,17 @@ Proposals = {
         if (!Proposals[address]) {
             Proposals.init(address);
         }
-        if (Proposals[address][index]) {
-            resultFn(Proposals[address][index]);
+        var proposal = Proposals[address];
+        if (proposal[index]) {
+            resultFn(proposal[index]);
             return;
         }
-        Proposals[address].arguments(index, function(err, result) {
+        proposal.arguments(index, function(err, result) {
             if (err) {
                 console.error(err);
                 return;
             }
-            if (!Proposals[address][index]) {
+            if (!proposal[index]) {
                 var pos = result[1].c[0];
                 var voteCount = result[2].c[0];
                 // FIXME support uint256 for voteCount
@@ -77,21 +78,36 @@ Proposals = {
                     voteCount:voteCount,
                     text:bytesToStr(result[3])
                 };
-                Proposals[address][index] = argument;
-                var posKey = 'pos'+pos;
-                if (Proposals[address][posKey]) {
-                    Proposals[address][posKey].push(argument);
+                proposal[index] = argument;
+                var casesKey = 'pos'+pos;
+                var voteKey = 'votes'+pos;
+                if (proposal[casesKey]) {
+                    proposal[casesKey].push(argument);
                 } else {
-                    Proposals[address][posKey] = [argument];
+                    proposal[casesKey] = [argument];
+                }
+                if (typeof proposal[voteKey] == "undefined") {
+                    proposal[voteKey] = voteCount;
+                } else {
+                    proposal[voteKey] += voteCount;
                 }
             }
             resultFn(Proposals[address][index]);
         });
     },
-    prefetchArguments(address) {
+    prefetchArguments(address, onComplete) {
         Proposals.argumentCount(address, function(argumentCount){
+            var counter = new ReactiveVar(argumentCount - 1);
+            function checkDone(counter) {
+                console.log(address);
+                console.log(counter.get());
+                counter.set(counter.get() - 1);
+                if (counter.get() == 0) {
+                    onComplete();
+                }
+            }
             for (var i = 1; i < argumentCount; i++) {
-                Proposals.getArgument(address, i, function(){});
+                Proposals.getArgument(address, i, function(){checkDone(counter);});
             }
         });
     },

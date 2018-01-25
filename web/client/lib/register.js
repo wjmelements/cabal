@@ -4,6 +4,11 @@ function refresh() {
         this.account.set(currentAccount);
         Accounts.isRegistered(currentAccount, function(isRegistered) {
             this.registered.set(isRegistered);
+            if (isRegistered) {
+                Accounts.canDeregister(function (canDeregister) {
+                    this.canDeregister.set(canDeregister);
+                }.bind(this));
+            }
         }.bind(this));
     }.bind(this));
 }
@@ -11,6 +16,7 @@ Template.register.onCreated(function() {
     this.registered = new ReactiveVar();
     this.account = new ReactiveVar();
     this.registering = new ReactiveVar(false);
+    this.canDeregister = new ReactiveVar(true);
     refresh.bind(this)();
 });
 Template.register.helpers({
@@ -19,6 +25,9 @@ Template.register.helpers({
     },
     registering() {
         return Template.instance().registering.get();
+    },
+    canDeregister() {
+        return Template.instance().canDeregister.get();
     },
 });
 function awaitRegistered(account) {
@@ -39,6 +48,9 @@ function awaitRegistered(account) {
 }
 Template.register.events({
     "click .submit"(event) {
+        if (!Template.instance().canDeregister.get()) {
+            return;
+        }
         var account = Template.instance().account.get();
         if (Template.instance().registered.get()) {
             Accounts.deregister(function(txhash) {
@@ -52,4 +64,7 @@ Template.register.events({
             }.bind(Template.instance()));
         }
     },
+    "hover .submit"(event) {
+        //Tutorial.set('Registered accounts can claim FinneyVotes')
+    }
 });

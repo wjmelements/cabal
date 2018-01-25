@@ -7,6 +7,8 @@ Template.proposal.onCreated(function() {
     this.address = new ReactiveVar();
     this.argumentChoice = new ReactiveVar();
     this.voteCount = new ReactiveVar();
+    this.gradient = document.createElement('style');
+    document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
         Proposals.getArgument(address, 0, function(proposal) {
@@ -18,7 +20,24 @@ Template.proposal.onCreated(function() {
         Proposals.voteCount(address, function(voteCount) {
             this.voteCount.set(voteCount);
         }.bind(this));
-        Proposals.prefetchArguments(address);
+        Proposals.prefetchArguments(address, function() {
+            var proposal = Proposals[address];
+            var total = 0;
+            for (var i = 1; i < 5; i++) {
+                var contribution = proposal['votes'+i];
+                total += contribution  ? contribution : 0;
+            }
+            var positionPcts = []
+            var runningTotal = total;
+            total /= 100;
+            for (var i = 4; i > 0; i--) {
+                var contribution = proposal['votes'+i];
+                runningTotal -= contribution ? contribution : 0;
+                positionPcts.push(parseInt(100 - runningTotal / total));
+            }
+            this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FCFF8B '+ (positionPcts[0])+"%, #FFD8D8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
+            console.log(this.gradient);
+        }.bind(this));
         Proposals.getMyVote(address, function(myVote) {
             if (!myVote) {
                 return;
@@ -32,6 +51,9 @@ Template.proposal.onCreated(function() {
             }.bind(this));
         }.bind(this));
     }.bind(this));
+});
+Template.proposal.onDestroyed(function() {
+    document.head.removeChild(this.gradient);
 });
 Template.proposal.helpers({
     proposal() {
@@ -58,7 +80,11 @@ Template.proposal.helpers({
             choice:Template.instance().argumentChoice,
             voted:Template.instance().voted,
         };
-    }
+    },
+    addressId() {
+        var address = Template.instance().address.get();
+        return address && address.substring(1);
+    },
 });
 Template.proposal.events({
     "click ul.pos li"(event) {

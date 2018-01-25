@@ -74,7 +74,13 @@ Template.cases.helpers({
 });
 function onChange(target) {
     if (target) {
-        this.find('.btn').disabled = !target.value;
+        var submitBtn = this.find('.btn');
+        console.log(submitBtn);
+        if (!target.value) {
+            $(submitBtn).addClass('disabled');
+        } else {
+            $(submitBtn).removeClass('disabled');
+        }
     }
 }
 function onChoice() {
@@ -139,6 +145,9 @@ Template.cases.events({
     },
     "click #custom-arg input.btn"(event) {
         var customCase = Template.instance().find('#custom-arg textarea').value;
+        if (!customCase) {
+            return;
+        }
         Proposals.argue(
             Template.instance().address.get(),
             Template.instance().pos.get(),

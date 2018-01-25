@@ -31,7 +31,7 @@ function checkAccount(refreshId) {
         var refreshIndirect = []; 
         refreshIndirect.push(setInterval(function () {
             checkAccount(refreshIndirect[0]);
-        }, 2000));
+        }, 500));
     }
 }
 checkAccount();
@@ -130,5 +130,17 @@ Accounts = {
     propose(proposal, resultFn) {
         console.log(proposal);
         accountRegistry.propose(proposal, resultFn);
+    },
+    canDeregister(resultFn) {
+        Accounts.current(function (account) {
+            // XXX canDeregister typo
+            accountRegistry.canDeregsiter(account, function(error, result) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                resultFn(result);
+            });
+        });
     },
 }

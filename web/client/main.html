@@ -15,7 +15,7 @@
 </body>
 <template name="register">
   {{#if registered}}
-    <span class="done">Registered!</span>{{/if}}<a class="btn submit">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
+    <span class="done">Registered!</span>{{/if}}<a class="btn submit {{#unless canDeregister}}disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
 </template>
 <template name="claim">
   {{#if available}}<a class="btn submit">Claim {{available}} FinneyVotes!</a>{{else}}<span class="done">Claimed!</span>{{/if}}
@@ -47,6 +47,8 @@
     <p class="h100">
       {{voteCount}}
     </p>
+    <div id="{{addressId}}" class="h100 w1">
+    </div>
     <div class="ib">
       <h2 class="prop inline">{{proposal}}</h2>
       {{> Template.dynamic template=page data=data}}
