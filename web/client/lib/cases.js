@@ -59,7 +59,6 @@ Template.cases.helpers({
     },
     otherPositions() {
         var position = Template.instance().pos.get();
-        console.log(position);
         var others = [];
         for (var i = 0; i < 5; i++) {
             if (position == i) {
@@ -96,7 +95,6 @@ Template.cases.events({
     },
     "click .case p,.case li,.pos li"(event) {
         var pos = parseInt(event.target.className.substr(3));
-        console.log(pos);
         Template.instance().pos.set(pos);
         Template.instance().position.set('pos'+pos);
         Template.instance().skip.set(pos == 0);
@@ -119,9 +117,7 @@ Template.cases.events({
                 console.error(error);
                 return;
             }
-            console.log(this.voting);
             this.voting.set(true);
-            console.log(result);
         });
     },
     "click #custom-arg input.btn"(event) {

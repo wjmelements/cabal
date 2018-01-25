@@ -13,7 +13,6 @@ Template.proposal.onCreated(function() {
         }.bind(this));
         Proposals.prefetchArguments(address);
         Proposals.getMyVote(address, function(myVote) {
-            console.log(myVote);
             if (!myVote) {
                 return;
             }
