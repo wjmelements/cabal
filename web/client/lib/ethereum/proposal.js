@@ -29,6 +29,7 @@ function bytesToStr(bytes) {
 }
 Web3Loader.onWeb3(function() {
     var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"},{"name":"text","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"resolution","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_resolution","type":"bytes"},{"name":"_source","type":"address"},{"name":"_voteToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
+    // TODO see if web3.eth.contract(proposalABI) localvar is better
     Proposals.init = function(address) {
         Proposals[address] = web3.eth.contract(proposalABI).at(address);
     };
@@ -67,11 +68,13 @@ Proposals = {
             }
             if (!Proposals[address][index]) {
                 var pos = result[1].c[0];
+                var voteCount = result[2].c[0];
+                // FIXME support uint256 for voteCount
                 var argument = {
                     index:index,
                     source:result[0],
                     position:pos,
-                    voteCount:result[2].c[0],
+                    voteCount:voteCount,
                     text:bytesToStr(result[3])
                 };
                 Proposals[address][index] = argument;
@@ -127,6 +130,15 @@ Proposals = {
                 }
                 resultFn(result.c[0]);
             });
+        });
+    },
+    voteCount(address, resultFn) {
+        Proposals[address].voteCount(function(error, result) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            resultFn(result.c[0]);
         });
     }
 };

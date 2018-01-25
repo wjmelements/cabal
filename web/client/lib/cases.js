@@ -86,6 +86,21 @@ function onChoice() {
     }
     Template.instance().cases.set(cases);
 }
+function awaitVoted(address, choiceIndex, argument) {
+    Proposals.getMyVote(address, function(myVote) {
+        if (this.address.get() != address) {
+            return;
+        }
+        if (myVote == choiceIndex) {
+            this.voting.set(false);
+            this.voted.set(argument);
+            return;
+        }
+        window.setTimeout(function () {
+            awaitVoted.bind(this)(address, choiceIndex, argument);
+        }.bind(this), 5000);
+    }.bind(this));
+}
 Template.cases.events({
     "keyup textarea.case"(event) {
         onChange.bind(Template.instance())(event.target);
@@ -112,13 +127,15 @@ Template.cases.events({
     "click .submit"(event) {
         var choice = Template.instance().choice.get();
         var address = Template.instance().address.get();
-        Proposals.vote(address, choice.index, function (error, result) {
+        var choiceIndex = choice.index;
+        Proposals.vote(address, choiceIndex, function (error, result) {
             if (error) {
                 console.error(error);
                 return;
             }
             this.voting.set(true);
-        });
+            awaitVoted.bind(this)(address, choiceIndex, choice);
+        }.bind(Template.instance()));
     },
     "click #custom-arg input.btn"(event) {
         var customCase = Template.instance().find('#custom-arg textarea').value;

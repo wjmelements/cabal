@@ -1,15 +1,26 @@
+var lastSize = 0; // TODO store size
+function onResize() {
+    // this hack resizes the feed
+    this.noRender.set(true);
+    window.setTimeout(function() {this.noRender.set(false)}.bind(this), 1);
+}
 Template.feed.onCreated(function() {
-    this.count = new ReactiveVar(1);
+    this.lastIndex = new ReactiveVar(lastSize);
+    this.noRender = new ReactiveVar(false)
     Accounts.proposalCount(function(count) {
-        this.count.set(count);
+        this.lastIndex.set(count - 1);
+        onResize.bind(this)();
     }.bind(this));
 });
 Template.feed.onDestroyed(function() {
 });
 Template.feed.helpers({
     lastIndex() {
-        return Template.instance().count.get() - 1;
-    }
+        return Template.instance().lastIndex.get();
+    },
+    noRender() {
+        return Template.instance().noRender.get();
+    },
 });
 
 Template.feeditem.onCreated(function() {
