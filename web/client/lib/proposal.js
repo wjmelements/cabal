@@ -30,11 +30,12 @@ Template.proposal.helpers({
         return Template.instance().title.get();
     },
     page() {
-        console.log(Template.instance().positionChoice.get());
-        console.log(Template.instance().voted.get());
-        return Template.instance().voted.get()
-            ? "voted"
-            : Template.instance().positionChoice.get() ? "cases" : "positions";
+        var instance = Template.instance();
+        return instance.positionChoice.get()
+            ? (instance.argumentChoice.get() && instance.argumentChoice.get().index) == (instance.voted.get() && instance.voted.get().index)
+                ? "voted"
+                : "cases"
+            : "positions";
     },
     choice() {
         return Template.instance().positionChoice.get();
