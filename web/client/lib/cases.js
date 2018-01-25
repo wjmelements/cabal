@@ -75,7 +75,6 @@ Template.cases.helpers({
 function onChange(target) {
     if (target) {
         var submitBtn = this.find('.btn');
-        console.log(submitBtn);
         if (!target.value) {
             $(submitBtn).addClass('disabled');
         } else {

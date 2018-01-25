@@ -1,5 +1,4 @@
 Template.proposal.onCreated(function() {
-    console.log("proposal.onCreated");
     this.positionChoice = new ReactiveVar();
     this.title = new ReactiveVar("Loading...");
     this.voted = new ReactiveVar();
@@ -7,6 +6,7 @@ Template.proposal.onCreated(function() {
     this.address = new ReactiveVar();
     this.argumentChoice = new ReactiveVar();
     this.voteCount = new ReactiveVar();
+    this.argumentCount = new ReactiveVar();
     this.gradient = document.createElement('style');
     document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
@@ -43,12 +43,13 @@ Template.proposal.onCreated(function() {
                 return;
             }
             Proposals.getArgument(address, myVote, function(argument) {
-                console.log(myVote);
-                console.log(argument);
                 this.argumentChoice.set(argument);
                 this.voted.set(argument);
                 this.positionChoice.set('pos'+argument.position);
             }.bind(this));
+        }.bind(this));
+        Proposals.getArgumentCount(address, function(argumentCount) {
+            this.argumentCount.set(argumentCount);
         }.bind(this));
     }.bind(this));
 });

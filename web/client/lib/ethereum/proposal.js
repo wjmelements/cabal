@@ -156,5 +156,14 @@ Proposals = {
             }
             resultFn(result.c[0]);
         });
-    }
+    },
+    getArgumentCount(address, resultFn) {
+        Proposals[address].argumentCount(function(error, result) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            resultFn(result);
+        });
+    },
 };

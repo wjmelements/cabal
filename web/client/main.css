@@ -31,6 +31,9 @@
   border-color:#FDB8B8;
   cursor:not-allowed !important;
 }
+.disabled.submit.btn {
+  border-color:#FDB8B8;
+}
 .pos1 {
   background-color:#33FF33;
 }
@@ -95,6 +98,9 @@ textarea.case {
   border-style:outset;
   border-radius:1px;
   cursor:pointer;
+}
+.submit.btn {
+  border-color:#33FF33;
 }
 .done {
   padding:1em;

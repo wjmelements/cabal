@@ -18,14 +18,15 @@
     <span class="done">Registered!</span>{{/if}}<a class="btn submit {{#unless canDeregister}}disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
 </template>
 <template name="claim">
-  {{#if available}}<a class="btn submit">Claim {{available}} FinneyVotes!</a>{{else}}<span class="done">Claimed!</span>{{/if}}
+  {{#if available}}<a class="btn{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">Claim {{available}} FinneyVotes!</a>{{else}}<span class="done">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
 <span class="done">You have {{balance}} FV</span>
 </template>
 <template name="propose">
   <div class="dt">
-    <textarea id="propose" class="h100" placeholder="Propose something controversial"></textarea>
+    <textarea id="propose" class="h100" placeholder="Propose something controversial
+Collect 0.5 FV per case"></textarea>
     <a class="btn submit h100">Propose</a>
   </div>
 </template>
