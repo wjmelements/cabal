@@ -13,8 +13,11 @@
   display:table-cell;
   vertical-align:middle;
 }
+.btn.h100 {
+  display:table-cell;
+}
 .w1 {
-  width:1px;
+  width:2px;
   background-color:red;
   margin-left:2px;
 }
@@ -46,6 +49,9 @@
 .pos4 {
   background-color:#FCFF8B;
 }
+.ac {
+  color:#AD97BD;
+}
 .pos0 {
   background-color:#AD97BD;
 }
@@ -56,7 +62,7 @@ li.case {
   list-style: none;
   display: block;
 }
-li.case p {
+li.case pre {
   border-style: solid;
   border-width: thin;
   border-radius: 1px;
@@ -64,6 +70,7 @@ li.case p {
   display:inline-block;
   margin:0.1em;
   cursor:pointer;
+  font-family:serif;
 }
 ul.pos,ul.cases {
   padding:0;
@@ -83,13 +90,16 @@ textarea#propose {
   min-width:19em;
   border-style:inset;
   border-width:2px;
+  font-size:small;
 }
 textarea.case {
   padding:1em;
   border-radius:1px;
   min-width:19em;
-  border-width:2px;
-  border-style:inset;
+  border-width:1px;
+  border-style:solid;
+  border-color:black;
+  font-size:small;
 }
 .btn {
   display:inline-block;
@@ -103,6 +113,7 @@ textarea.case {
   border-color:#33FF33;
 }
 .done {
+  display:inline-block;
   padding:1em;
   border-width:medium;
   border-style:dashed;

@@ -49,7 +49,7 @@ Template.proposal.onCreated(function() {
             }.bind(this));
         }.bind(this));
         Proposals.getArgumentCount(address, function(argumentCount) {
-            this.argumentCount.set(argumentCount);
+            this.argumentCount.set(argumentCount - 1);
         }.bind(this));
     }.bind(this));
 });
@@ -86,6 +86,9 @@ Template.proposal.helpers({
         var address = Template.instance().address.get();
         return address && address.substring(1);
     },
+    argumentCount() {
+        return Template.instance().argumentCount.get();
+    }
 });
 Template.proposal.events({
     "click ul.pos li"(event) {

@@ -1,9 +1,6 @@
 function onChange(target) {
    if (target) {
         var submitBtn = this.find('.btn');
-        console.log(submitBtn);
-        console.log(target.value);
-        console.log(!target.value);
         if (!target.value) {
             $(submitBtn).addClass('disabled');
         } else {

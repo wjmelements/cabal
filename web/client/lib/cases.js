@@ -9,6 +9,8 @@ Template.cases.onCreated(function() {
     this.cases = new ReactiveVar();
     this.inv = new ReactiveVar(false);
     this.voting = new ReactiveVar(false);
+    this.cannotVote = new ReactiveVar(true);
+    this.cannotArgue = new ReactiveVar(true);
     onChoice();
 });
 Template.cases.onRendered(function() {
@@ -71,15 +73,17 @@ Template.cases.helpers({
         }
         return others;
     },
+    cannotVote() {
+        return Template.instance().cannotVote.get();
+    },
+    cannotArgue() {
+        return Template.instance().cannotArgue.get();
+    },
 });
 function onChange(target) {
     if (target) {
-        var submitBtn = this.find('.btn');
-        if (!target.value) {
-            $(submitBtn).addClass('disabled');
-        } else {
-            $(submitBtn).removeClass('disabled');
-        }
+        Template.instance().cannotVote.set(Balance.get() < 1);
+        Template.instance().cannotArgue.set(!target.value || Balance.get() < 1);
     }
 }
 function onChoice() {
@@ -90,6 +94,28 @@ function onChoice() {
         cases = Proposals.argumentsSupporting(Template.instance().address.get(), Template.instance().pos.get());
     }
     Template.instance().cases.set(cases);
+}
+function checkArgument(address, i, argumentCount, customCase) {
+    Proposals.getArgument(address, i, function(argument) {
+        if (argument.text == customCase) {
+            this.voting.set(false);
+        } else if (i < argumentCount) {
+            checkArgument.bind(this)(address, i + 1, argumentCount, customCase);
+        } else {
+            awaitArgument.bind(this)(address, argumentCount, customCase);
+        }
+    }.bind(this));
+}
+function awaitArgument(address, lastArgumentCount, customCase) {
+    Proposals.getArgumentCount(address, function(argumentCount) {
+        if (argumentCount > lastArgumentCount) {
+            checkArgument.bind(this)(address, lastArgumentCount, argumentCount, customCase);
+            return;
+        }
+        window.setTimeout(function() {
+            awaitArgument.bind(this)(address, lastArgumentCount, customCase);
+        }.bind(this), 4000);
+    }.bind(this));
 }
 function awaitVoted(address, choiceIndex, argument) {
     Proposals.getMyVote(address, function(myVote) {
@@ -113,7 +139,7 @@ Template.cases.events({
     "change textarea.case"(event) {
         onChange.bind(Template.instance())(event.target);
     },
-    "click .case p,.case li,.pos li"(event) {
+    "click .case pre,.case li,.pos li"(event) {
         var pos = parseInt(event.target.className.substr(3));
         Template.instance().pos.set(pos);
         Template.instance().position.set('pos'+pos);
@@ -129,7 +155,10 @@ Template.cases.events({
             onChoice();
         });
     },
-    "click .submit"(event) {
+    "click .vote"(event) {
+        if (Template.instance().cannotVote.get()) {
+            return;
+        }
         var choice = Template.instance().choice.get();
         var address = Template.instance().address.get();
         var choiceIndex = choice.index;
@@ -142,28 +171,41 @@ Template.cases.events({
             awaitVoted.bind(this)(address, choiceIndex, choice);
         }.bind(Template.instance()));
     },
-    "click #custom-arg input.btn"(event) {
+    "click #custom-arg a.btn"(event) {
         var customCase = Template.instance().find('#custom-arg textarea').value;
         if (!customCase) {
             return;
         }
-        Proposals.argue(
-            Template.instance().address.get(),
-            Template.instance().pos.get(),
-            customCase,
-            function(error, txhash) {
-                if (error) {
-                    console.error(error);
-                    return;
-                }
-                console.log(txhash);
-                // TODO show pending argument
-            }.bind(Template.instance())
-        );
-
+        if (Template.instance().cannotVote.get()) {
+            return;
+        }
+        var address = Template.instance().address.get();
+        var position = Template.instance().pos.get();
+        Proposals.getArgumentCount(address, function(argumentCount) {
+            Proposals.argue(
+                address,
+                position,
+                customCase,
+                function(error, txhash) {
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                    console.log(txhash);
+                    this.choice.set({
+                        position:position,
+                        index:argumentCount,
+                        text:customCase
+                    });
+                    this.voting.set(true);
+                    this.inv.set(true);
+                    Balance.set(Balance.get() - 1);
+                    awaitArgument.bind(this)(address, argumentCount, customCase);
+                }.bind(this)
+            );
+        }.bind(Template.instance()));
     },
     "click .reset"(event) {
-        console.log('reset');
         Template.instance().position.set(undefined);
     }
 });

@@ -40,6 +40,8 @@ function awaitRegistered(account) {
             if (isRegistered) {
                 this.registered.set(true);
                 this.registering.set(false);
+                this.canDeregister.set(false);
+                Accounts.reportRegistrationChange();
             } else {
                 window.setTimeout(function(){awaitRegistered.bind(this)(account)}.bind(this), 5000);
             }

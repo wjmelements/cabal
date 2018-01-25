@@ -1,11 +1,22 @@
 Template.balance.onCreated(function() {
-    this.balance = new ReactiveVar(0);
     Token.balance(function(balance) {
-        this.balance.set(balance.c[0] / 10);
+        Balance.set(balance.c[0] / 10);
+    }.bind(this));
+    this.finney = new ReactiveVar();
+    Accounts.current(function(account) {
+        web3.eth.getBalance(account, function (error, balance) {
+            console.log(balance);
+            var finney = balance.c[0] / 10 + balance.c[1] / 10e14;
+            finney = Math.floor(finney * 1000) / 1000;
+            this.finney.set(finney);
+        }.bind(this));
     }.bind(this));
 });
 Template.balance.helpers({
     balance() {
-        return Template.instance().balance.get();
+        return Balance.get();
+    },
+    finney() {
+        return Template.instance().finney.get();
     },
 });

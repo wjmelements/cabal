@@ -55,3 +55,4 @@ Token = {
         });
     },
 };
+Balance = new ReactiveVar();

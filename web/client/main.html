@@ -18,15 +18,15 @@
     <span class="done">Registered!</span>{{/if}}<a class="btn submit {{#unless canDeregister}}disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
 </template>
 <template name="claim">
-  {{#if available}}<a class="btn{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">Claim {{available}} FinneyVotes!</a>{{else}}<span class="done">Claimed!</span>{{/if}}
+  {{#if available}}<a class="btn{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}</a>{{else}}<span class="done">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
-<span class="done">You have {{balance}} FV</span>
+<span class="done">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>
 </template>
 <template name="propose">
   <div class="dt">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
-Collect 0.5 FV per case"></textarea>
+Earn 0.5 FV per case"></textarea>
     <a class="btn submit h100">Propose</a>
   </div>
 </template>
@@ -45,9 +45,14 @@ Collect 0.5 FV per case"></textarea>
 
 <template name="proposal">
   <div class="dt">
-    <p class="h100">
-      {{voteCount}}
-    </p>
+    <div class="h100">
+      <p class="vc">
+        {{voteCount}}
+      </p>
+      <p class="ac">
+        {{argumentCount}}
+      </p>
+    </div>
     <div id="{{addressId}}" class="h100 w1">
     </div>
     <div class="ib">
@@ -59,7 +64,7 @@ Collect 0.5 FV per case"></textarea>
 <template name="voted">
   <div>
     <li class="case">
-      You voted <p id="arg{{vote.index}}" class="pos{{vote.position}}">{{vote.text}}</p>
+      You voted <pre id="arg{{vote.index}}" class="pos{{vote.position}}">{{vote.text}}</pre>
       <a class="btn reset">Change</a>
     </li>
   </div>
@@ -81,11 +86,11 @@ Collect 0.5 FV per case"></textarea>
   <div class="pos">
     Skipped! <a class="btn reset pos0">Reset</a>
   </div>
-  {{else}}
+{{else}}
   {{#if hasChoice}}
     <li class="case">
-      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p><a class='btn submit pos{{choice.position}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
-    <a class="btn reset">Reset</a>
+      You chose <pre id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</pre><a class='pos{{choice.position}} vote btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
+      <a class="btn reset">Reset</a>
     </li>
     {{#if hasOptions}}
       <p class="instr">
@@ -105,30 +110,33 @@ Collect 0.5 FV per case"></textarea>
       {{/each}}
       </ul>
     </div>
-    {{#if hasOptions}}
+  {{/if}}
+  {{#if hasOptions}}
     <p>
       <ul class="cases">
         {{#each case in cases}}
           <li class="case">
-            {{case.voteCount}} <p id="arg{{case.index}}" class="pos{{case.position}}">{{case.text}}</p>
+            {{case.voteCount}} <pre id="arg{{case.index}}" class="pos{{case.position}}">{{case.text}}</pre>
           </li>
         {{/each}}
       </ul>
     </p>
-    <p class="instr">
-      Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
-    </p>
-    {{else}}
-    <p class="instr">
-      Nobody has written a case for this position yet. Write a concise argument and earn half-votes when people vote with your case.
-    </p>
-    {{/if}}
   {{/if}}
   {{#unless hasChoice}}
-  <div id="custom-arg" class="dt">
-    <textarea class="{{position}} case h100" placeholder="Write your succinct case here"></textarea>
-    <a class="{{position}} btn h100">Submit</a>
-  </div>
+    {{#if hasOptions}}
+      <p class="instr">
+        Vote with an existing case, or write your own.
+      </p>
+    {{else}}
+      <p class="instr">
+        Nobody has a case for this position yet.
+      </p>
+    {{/if}}
+    <div id="custom-arg" class="dt">
+      <textarea class="{{position}} case h100" placeholder="Write a succinct case
+Earn 0.5 FV per vote"></textarea>
+      <a class="{{position}} btn h100{{#if cannotArgue}} disabled{{/if}}">Submit</a>
+    </div>
   {{/unless}}
 {{/if}}
 </template>

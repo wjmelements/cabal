@@ -1,3 +1,24 @@
+var refresh = function () {
+    Accounts.current(function(account) {
+        Accounts.isRegistered(account, function(isRegistered) {
+            this.cannotClaim.set(!isRegistered);
+            this.onRegistrationChange = refresh.bind(this);
+            Accounts.registrationSubscribe(this.onRegistrationChange);
+        }.bind(this));
+    }.bind(this));
+};
+function awaitClaimed() {
+    Token.availableFaucet(function (amount) {
+        var prior = this.available.get();
+        this.available.set(amount / 10);
+        if (amount == 0) {
+            Balance.set(Balance.get() + prior);
+            this.claiming.set(false);
+            return;
+        }
+        window.setTimeout(awaitClaimed.bind(this), 4000);
+    }.bind(this));
+}
 Template.claim.onCreated(function() {
     this.available = new ReactiveVar();
     Token.availableFaucet(function(amount) {
@@ -9,11 +30,10 @@ Template.claim.onCreated(function() {
     Token.balance(function(balance) {
         this.balance.set(balance / 10);
     }.bind(this));
-    Accounts.current(function(account) {
-        Accounts.isRegistered(account, function(isRegistered) {
-            this.cannotClaim.set(!isRegistered);
-        }.bind(this));
-    }.bind(this));
+    refresh.bind(this)();
+});
+Template.claim.onDestroyed(function() {
+    Accounts.registrationUnsubscribe(this.onRegistrationChange);
 });
 Template.claim.helpers({
     available() {
@@ -28,15 +48,19 @@ Template.claim.helpers({
     cannotClaim() {
         return Template.instance().cannotClaim.get();
     },
+    claiming() {
+        return Template.instance().claiming.get();
+    },
 });
 Template.claim.events({
-    "click .submit"(event) {
+    "click .btn"(event) {
         if (Template.instance().cannotClaim.get()) {
             return;
         }
         Token.claim(function(txhash) {
             console.log(txhash);
             this.claiming.set(true);
+            awaitClaimed.bind(this)();
         }.bind(Template.instance()));
     },
 });

@@ -143,4 +143,18 @@ Accounts = {
             });
         });
     },
+    registrationSubscribe(changeFn) {
+        if (!Accounts.onRegistrationChange) {
+            Accounts.onRegistrationChange = [];
+        }
+        Accounts.onRegistrationChange.push(changeFn);
+    },
+    registrationUnsubscribe(changeFn) {
+        Accounts.onRegistrationChange.filter(function(a){ return a != changeFn;});
+    },
+    reportRegistrationChange() {
+        while(Accounts.onRegistrationChange.length) {
+            Accounts.onRegistrationChange.pop()();
+        }
+    }
 }

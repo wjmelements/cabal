@@ -113,7 +113,10 @@ Proposals = {
     },
     argumentsSupporting(address, position) {
         // FIXME these aren't always prefetched
-        return Proposals[address]['pos'+position];
+        var arr = Proposals[address]['pos'+position];
+        return arr && arr.sort(function(a,b) {
+            return b.voteCount - a.voteCount;
+        });
     },
     argumentsOpposing(address, position) {
         var inverse = [];
