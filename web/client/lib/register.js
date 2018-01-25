@@ -1,6 +1,5 @@
 function refresh() {
     Accounts.current(function(currentAccount) {
-        console.log(currentAccount);
         this.account.set(currentAccount);
         Accounts.isRegistered(currentAccount, function(isRegistered) {
             this.registered.set(isRegistered);

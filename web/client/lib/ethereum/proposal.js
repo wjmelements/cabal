@@ -99,8 +99,6 @@ Proposals = {
         Proposals.argumentCount(address, function(argumentCount){
             var counter = new ReactiveVar(argumentCount - 1);
             function checkDone(counter) {
-                console.log(address);
-                console.log(counter.get());
                 counter.set(counter.get() - 1);
                 if (counter.get() == 0) {
                     onComplete();
