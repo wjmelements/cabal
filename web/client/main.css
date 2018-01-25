@@ -1,6 +1,18 @@
 .inline {
   display:inline;
 }
+.ib {
+  display:inline-block;
+  margin-left:2em;
+}
+.dt {
+  display:table;
+}
+.h100 {
+  height:100%;
+  display:table-cell;
+  vertical-align:middle;
+}
 .pos li {
   list-style: none;
   border-style: solid;
@@ -65,6 +77,7 @@ textarea.case {
   border-radius:1px;
   min-width:19em;
   border-width:2px;
+  border-style:inset;
 }
 input.btn {
   border-radius:0.5em;

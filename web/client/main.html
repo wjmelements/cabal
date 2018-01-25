@@ -24,13 +24,15 @@
 <span class="done">You have {{balance}} FV</span>
 </template>
 <template name="propose">
-  <div>
-    <textarea id="propose" placeholder="Propose something controversial"></textarea>
-    <a class="btn submit">Propose</a>
+  <div class="dt">
+    <textarea id="propose" class="h100" placeholder="Propose something controversial"></textarea>
+    <a class="btn submit h100">Propose</a>
   </div>
 </template>
 <template name="feed">
+  {{#unless noRender}}
     {{> feeditem index=lastIndex}}
+  {{/unless}}
 </template>
 
 <template name="feeditem">
@@ -41,9 +43,14 @@
 </template>
 
 <template name="proposal">
-  <div>
-    <h2 class="prop">{{proposal}}</h2>
-    {{> Template.dynamic template=page data=data}}
+  <div class="dt">
+    <p class="h100">
+      {{voteCount}}
+    </p>
+    <div class="ib">
+      <h2 class="prop inline">{{proposal}}</h2>
+      {{> Template.dynamic template=page data=data}}
+    </div>
   </div>
 </template>
 <template name="voted">
@@ -96,9 +103,6 @@
       </ul>
     </div>
     {{#if hasOptions}}
-    <p class="instr">
-      Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
-    </p>
     <p>
       <ul class="cases">
         {{#each case in cases}}
@@ -108,6 +112,9 @@
         {{/each}}
       </ul>
     </p>
+    <p class="instr">
+      Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
+    </p>
     {{else}}
     <p class="instr">
       Nobody has written a case for this position yet. Write a concise argument and earn half-votes when people vote with your case.
@@ -115,9 +122,9 @@
     {{/if}}
   {{/if}}
   {{#unless hasChoice}}
-  <div id="custom-arg">
-    <textarea class="case {{position}}" placeholder="Write your succinct case here"></textarea>
-    <input class="btn {{position}}" type="button" value="Submit"/>
+  <div id="custom-arg" class="dt">
+    <textarea class="{{position}} case h100" placeholder="Write your succinct case here"></textarea>
+    <a class="{{position}} btn h100">Submit</a>
   </div>
   {{/unless}}
 {{/if}}
