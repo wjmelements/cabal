@@ -1,4 +1,7 @@
-ul.pos li {
+.inline {
+  display:inline;
+}
+.pos li {
   list-style: none;
   border-style: solid;
   display: inline-block;
@@ -75,6 +78,7 @@ input.btn:disabled {
   cursor:not-allowed;
 }
 .btn {
+  display:inline-block;
   padding:1em;
   border-width:medium;
   border-style:outset;

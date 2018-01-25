@@ -39,12 +39,17 @@ Proposals = {
         if (!Proposals[address]) {
             Proposals.init(address);
         }
+        if (Proposals[address].argCount) {
+            return resultFn(Proposals[address].argCount);
+        }
         Proposals[address].argumentCount(function(err, result) {
             if (err) {
                 console.error(err);
                 return;
             }
-            resultFn(result.c[0]);
+            var argCount = result.c[0];
+            Proposals[address].argCount = argCount;
+            resultFn(argCount);
         });
     },
     getArgument(address, index, resultFn) {

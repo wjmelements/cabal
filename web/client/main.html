@@ -59,45 +59,58 @@
   </p>
 </template>
 <template name="cases">
-  {{#if skip}}
-    <p class="instr">
-      Skipped
-    </p>
+{{#if skip}}
+  <div class="pos">
+    Skipped! <a class="btn reset pos0">Reset</a>
+  </div>
   {{else}}
   {{#if hasChoice}}
     <li class="case">
-      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p> <a class='btn submit pos{{choice.position}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
+      You chose <p id="arg{{choice.index}}" class="pos{{choice.position}}">{{choice.text}}</p><a class='btn submit pos{{choice.position}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
+    <a class="btn reset">Reset</a>
     </li>
-  {{#if hasOptions}}
-    <p class="instr">
-      Please consider the following opposing views.
-    </p>
-  {{/if}}
+    {{#if hasOptions}}
+      <p class="instr">
+        Please consider the following opposing views.
+      </p>
+    {{/if}}
   {{else}}
-  {{#if hasOptions}}
-  <p class="instr">
-    Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
-  </p>
-  <p>
-    <ul class="cases">
-      {{#each case in cases}}
-        <li class="case">
-          {{case.voteCount}} <p id="arg{{case.index}}" class="pos{{case.position}}">{{case.text}}</p>
-        </li>
+    <div class="pos">
+      You chose
+      <li class="{{position}} inline">
+        {{positionName}}
+      </li>
+      Switch to
+      <ul class="inline pos">
+      {{#each otherPosition in otherPositions}}
+        <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
       {{/each}}
-    </ul>
-  </p>
-  {{else}}
-  <p class="instr">
-    Nobody has written a case for this position yet. Write a concise argument and earn half-votes when people vote with your case.
-  </p>
-  {{/if}}
+      </ul>
+    </div>
+    {{#if hasOptions}}
+    <p class="instr">
+      Vote with an existing case, or write your own. When people vote with your case, you receive half of their vote.
+    </p>
+    <p>
+      <ul class="cases">
+        {{#each case in cases}}
+          <li class="case">
+            {{case.voteCount}} <p id="arg{{case.index}}" class="pos{{case.position}}">{{case.text}}</p>
+          </li>
+        {{/each}}
+      </ul>
+    </p>
+    {{else}}
+    <p class="instr">
+      Nobody has written a case for this position yet. Write a concise argument and earn half-votes when people vote with your case.
+    </p>
+    {{/if}}
   {{/if}}
   {{#unless hasChoice}}
   <div id="custom-arg">
-    <textarea class="case" placeholder="Write your succinct case here"></textarea>
+    <textarea class="case {{position}}" placeholder="Write your succinct case here"></textarea>
     <input class="btn {{position}}" type="button" value="Submit"/>
   </div>
   {{/unless}}
-  {{/if}}
+{{/if}}
 </template>

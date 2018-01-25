@@ -3,7 +3,6 @@ Template.feed.onCreated(function() {
     Accounts.proposalCount(function(count) {
         this.count.set(count);
     }.bind(this));
-    console.log("feed.onCreated");
 });
 Template.feed.onDestroyed(function() {
 });
@@ -14,7 +13,6 @@ Template.feed.helpers({
 });
 
 Template.feeditem.onCreated(function() {
-    console.log("feeditem.onCreated");
     this.index = new ReactiveVar(this.data.index);
     this.next = new ReactiveVar(this.data.index - 1);
 });

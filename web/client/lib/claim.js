@@ -7,6 +7,7 @@ Template.claim.onCreated(function() {
 });
 Template.claim.helpers({
     available() {
+        // TODO maybe only show if it would get you to the next FinneyVote
         return Template.instance().available.get();
     },
 });
