@@ -38,3 +38,17 @@ Web3Loader.onWeb3(function() {
         GasRender.gasPrice.set(gasPrice.c[0] / 1E12);
     });
 });
+function fetchETHPrice() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open('GET', 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD', true /*asynchronous*/);
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.responseText) {
+            var response = JSON.parse(xmlHttp.responseText);
+            var etherPriceUSD = response.USD;
+            console.log("Price is " + etherPriceUSD);
+            GasRender.etherPriceUSD.set(etherPriceUSD);
+        }   
+    }   
+    xmlHttp.send(null);
+}
+window.addEventListener('load', fetchETHPrice);
