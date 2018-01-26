@@ -131,8 +131,8 @@ contract Proposal is ProposalInterface {
         SKIP,
         APPROVE,
         AMEND,
-        REJECT,
-        LOL
+        LOL,
+        REJECT
     }
     struct Argument {
         address source;
