@@ -28,3 +28,13 @@ GasRender.method = new ReactiveVar();
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);
+Web3Loader.onWeb3(function() {
+    web3.eth.getGasPrice(function (error, gasPrice) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        console.log(gasPrice.c[0]);
+        GasRender.gasPrice.set(gasPrice.c[0] / 1E12);
+    });
+});

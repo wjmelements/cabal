@@ -1,11 +1,15 @@
-// TODO load gas preference
 Template.gas.onCreated(function() {
-    GasRender.method.set("gas");
-    
+    var priorMethod = localStorage.getItem('gasmethod');
+    GasRender.method.set(priorMethod || 'finney');
+});
+Template.gas.onRendered(function() {
+    this.find('select').value = GasRender.method.get();
 });
 Template.gas.events({
     "change select"(event) {
-        GasRender.method.set(event.target.value);
+        var val = event.target.value;
+        GasRender.method.set(val);
+        localStorage.setItem('gasmethod', val);
     }
 });
 
