@@ -3,8 +3,8 @@
 </head>
 
 <body>
-  <div class="btmpad">
-    {{> register}}{{> claim}}{{> balance}}
+  <div class="btmpad dt">
+    {{> register}}{{> claim}}{{> balance}}{{> gas}}
   </div>
   <div id="withoutweb3">
   </div>
@@ -15,19 +15,28 @@
 </body>
 <template name="register">
   {{#if registered}}
-    <span class="done">Registered!</span>{{/if}}<a class="btn submit {{#unless canDeregister}}disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
+    <span class="done h100">Registered!</span>{{/if}}<a class="btn submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
 </template>
 <template name="claim">
-  {{#if available}}<a class="btn{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}</a>{{else}}<span class="done">Claimed!</span>{{/if}}
+  {{#if available}}<a class="btn h100{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}</a>{{else}}<span class="done">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
-<span class="done">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>
+<span class="done h100">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>
+</template>
+<template name="gas">
+<span class="done h100">Show: <select>
+  <option value="gas">gas</option>
+  <option value="ether">ether</option>
+  <option value="finney">finney</option>
+  <option value="szabo">szabo</option>
+  <option value="usd">USD</option>
+</select></span>
 </template>
 <template name="propose">
   <div class="dt">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
 Earn 0.5 FV per case"></textarea>
-    <a class="btn submit h100 ap">Propose<div class="cost">{{gasCost}}</div></a>
+    <a class="btn submit h100 ap">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
   </div>
 </template>
 <template name="feed">

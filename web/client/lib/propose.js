@@ -2,18 +2,6 @@ function onChange(target) {
    if (target) {
         var submitBtn = $(this.find('.btn'));
         if (target.value) {
-            if (this.lastValue != target.value) {
-                this.lastValue = target.value;
-                Web3Loader.onWeb3(function() {
-                    accountRegistry.propose.estimateGas(this.lastValue, function(error, estimatedGas) {
-                        if (error) {
-                            console.error(error);
-                            return;
-                        }
-                        this.gasCost.set(GasRender.toString(estimatedGas));
-                    }.bind(this));
-                }.bind(this));
-            }
             submitBtn.removeClass('disabled');
         } else {
             submitBtn.addClass('disabled');
@@ -23,6 +11,7 @@ function onChange(target) {
 }
 Template.propose.onCreated(function() {
     this.gasCost = new ReactiveVar();
+    this.showGas = new ReactiveVar(false);
     this.lastValue = undefined;
 });
 Template.propose.events({
@@ -40,6 +29,26 @@ Template.propose.events({
             // TODO awaitProposal()
         });
     },
+    "mouseover .submit"(event) {
+        var instance = Template.instance();
+        var proposal = Template.instance().find('#propose').value;
+        instance.showGas.set(true);
+        if (instance.lastValue != proposal) {
+            instance.lastValue = proposal;
+            Web3Loader.onWeb3(function() {
+                accountRegistry.propose.estimateGas(this.lastValue, function(error, estimatedGas) {
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                    this.gasCost.set(GasRender.toString(estimatedGas));
+                }.bind(this));
+            }.bind(instance));
+        }
+    },
+    "mouseout .submit"(event) {
+        Template.instance().showGas.set(false);
+    },
     "change textarea.case"(event) {
         onChange.bind(Template.instance())(event.target);
     },
@@ -53,5 +62,8 @@ Template.propose.onRendered(function() {
 Template.propose.helpers({
     gasCost() {
         return Template.instance().gasCost.get();
+    },
+    showGas() {
+        return Template.instance().showGas.get();
     },
 });
