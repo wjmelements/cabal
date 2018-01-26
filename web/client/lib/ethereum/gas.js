@@ -28,14 +28,27 @@ GasRender.method = new ReactiveVar();
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);
+function fetchGasPrice() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open('GET', 'https://ethgasstation.info/json/ethgasAPI.json', true /*asynchronous*/);
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.responseText) {
+            var response = JSON.parse(xmlHttp.responseText);
+            xmlHttp.onreadystatechange = null;
+            GasRender.gasPrice.set(response.safeLow / 1000);
+        }
+    };
+    xmlHttp.send(null);
+}
 Web3Loader.onWeb3(function() {
     web3.eth.getGasPrice(function (error, gasPrice) {
         if (error) {
             console.error(error);
+            fetchGasPrice();
             return;
         }
-        console.log(gasPrice.c[0]);
         GasRender.gasPrice.set(gasPrice.c[0] / 1E12);
+        fetchGasPrice();
     });
 });
 function fetchETHPrice() {
@@ -47,6 +60,7 @@ function fetchETHPrice() {
             var etherPriceUSD = response.USD;
             console.log("Price is " + etherPriceUSD);
             GasRender.etherPriceUSD.set(etherPriceUSD);
+            xmlHttp.onreadystatechange = null;
         }   
     }   
     xmlHttp.send(null);
