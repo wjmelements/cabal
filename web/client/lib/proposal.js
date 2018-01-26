@@ -35,7 +35,7 @@ Template.proposal.onCreated(function() {
                 runningTotal -= contribution ? contribution : 0;
                 positionPcts.push(parseInt(100 - runningTotal / total));
             }
-            this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FCFF8B '+ (positionPcts[0])+"%, #FFD8D8 "+ (positionPcts[0]+1) + "%, #FFD8D8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1]+1)+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2]+1)+'%, #33FF33 '+(positionPcts[3])+'%);}';
+            this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]+1) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1]+1)+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2]+1)+'%, #33FF33 '+(positionPcts[3])+'%);}';
             console.log(this.gradient);
         }.bind(this));
         Proposals.getMyVote(address, function(myVote) {

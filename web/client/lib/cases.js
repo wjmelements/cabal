@@ -14,7 +14,14 @@ Template.cases.onCreated(function() {
     onChoice();
 });
 Template.cases.onRendered(function() {
-    onChange.bind(this)(this.find('textarea'));
+    this.balanceListener = function () {
+        onChange.bind(this)(this.find('textarea'));
+    }.bind(this);
+    Balance.listeners.push(this.balanceListener);
+    this.balanceListener();
+});
+Template.cases.onDestroyed(function() {
+    Balance.removeListener(this.balanceListeners);
 });
 function positionToName(position) {
     switch(position) {
@@ -25,9 +32,9 @@ function positionToName(position) {
         case 2:
             return 'Amend';
         case 3:
-            return 'Reject';
-        case 4:
             return 'LOL';
+        case 4:
+            return 'Reject';
     }
 }
 Template.cases.helpers({
@@ -82,8 +89,9 @@ Template.cases.helpers({
 });
 function onChange(target) {
     if (target) {
-        Template.instance().cannotVote.set(Balance.get() < 1);
-        Template.instance().cannotArgue.set(!target.value || Balance.get() < 1);
+        console.log(Balance.get());
+        this.cannotVote.set(Balance.get() < 1);
+        this.cannotArgue.set(!target.value || Balance.get() < 1);
     }
 }
 function onChoice() {
@@ -171,6 +179,7 @@ Template.cases.events({
             }
             this.voting.set(true);
             Balance.set(Balance.get() - 1);
+            Balance.onChange();
             awaitVoted.bind(this)(address, choiceIndex, choice);
         }.bind(Template.instance()));
     },

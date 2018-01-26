@@ -32,7 +32,7 @@ Template.register.helpers({
 function awaitRegistered(account) {
     Accounts.current(function(currentAccount) {
         if (currentAccount != account) {
-            refresh();
+            refresh.bind(this)();
             return;
         }
         Accounts.isRegistered(currentAccount, function(isRegistered) {
