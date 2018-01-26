@@ -1,14 +1,17 @@
 function onChange(target) {
    if (target) {
-        var submitBtn = this.find('.btn');
-        if (!target.value) {
-            $(submitBtn).addClass('disabled');
+        var submitBtn = $(this.find('.btn'));
+        if (target.value) {
+            submitBtn.removeClass('disabled');
         } else {
-            $(submitBtn).removeClass('disabled');
+            submitBtn.addClass('disabled');
         }
     }
  
 }
+Template.propose.onCreated(function() {
+    this.gasCost = new ReactiveVar();
+});
 Template.propose.events({
     "click .submit"(event) {
         var proposal = Template.instance().find('#propose').value;
@@ -33,4 +36,10 @@ Template.propose.events({
 });
 Template.propose.onRendered(function() {
     onChange.bind(this)(this.find('textarea'));
+});
+Template.propose.helpers({
+    gasCost() {
+        // TODO
+        return Template.instance().gasCost.get();
+    },
 });

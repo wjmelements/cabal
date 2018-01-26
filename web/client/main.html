@@ -27,7 +27,7 @@
   <div class="dt">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
 Earn 0.5 FV per case"></textarea>
-    <a class="btn submit h100">Propose</a>
+    <a class="btn submit h100">Propose</a>{{gasCost}}
   </div>
 </template>
 <template name="feed">
@@ -45,15 +45,13 @@ Earn 0.5 FV per case"></textarea>
 
 <template name="proposal">
   <div class="dt">
-    <div class="h100">
+    <div id="{{addressId}}" class="h100">
       <p class="vc">
         {{voteCount}}
       </p>
       <p class="ac">
         {{argumentCount}}
       </p>
-    </div>
-    <div id="{{addressId}}" class="h100 w1">
     </div>
     <div class="ib">
       <h2 class="prop inline">{{proposal}}</h2>
