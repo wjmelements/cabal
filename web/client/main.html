@@ -94,7 +94,7 @@ Earn 0.5 FV per case"></textarea>
 {{else}}
   {{#if hasChoice}}
     <li class="case dt">
-      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a class='pos{{choice.position}} vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}Voting{{else}}Vote{{/if}}</a>
+      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}Voting{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
     {{#if hasOptions}}
@@ -140,7 +140,7 @@ Earn 0.5 FV per case"></textarea>
     <div id="custom-arg" class="dt">
       <textarea class="{{position}} case h100" placeholder="Write a succinct case
 Earn 0.5 FV per vote"></textarea>
-      <a class="{{position}} btn h100{{#if cannotArgue}} disabled{{/if}}">Submit</a>
+      <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">Submit{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
     </div>
   {{/unless}}
 {{/if}}

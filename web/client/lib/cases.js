@@ -11,6 +11,8 @@ Template.cases.onCreated(function() {
     this.voting = new ReactiveVar(false);
     this.cannotVote = new ReactiveVar(true);
     this.cannotArgue = new ReactiveVar(true);
+    this.showCost = new ReactiveVar(false);
+    this.cost = new ReactiveVar();
     onChoice();
 });
 Template.cases.onRendered(function() {
@@ -63,6 +65,12 @@ Template.cases.helpers({
     skip() {
         return Template.instance().skip.get();
     },
+    cost() {
+        return Template.instance().cost.get();
+    },
+    showCost() {
+        return Template.instance().showCost.get();
+    },
     positionName() {
         return positionToName(Template.instance().pos.get());
     },
@@ -89,7 +97,6 @@ Template.cases.helpers({
 });
 function onChange(target) {
     if (target) {
-        console.log(Balance.get());
         this.cannotVote.set(Balance.get() < 1);
         this.cannotArgue.set(!target.value || Balance.get() < 1);
     }
@@ -165,6 +172,24 @@ Template.cases.events({
             onChoice();
         });
     },
+    "mouseover .vote"(event) {
+        if (Template.instance().cannotVote.get()) {
+            return;
+        }
+        Template.instance().showCost.set(true);
+        Proposals[Template.instance().address.get()].vote.estimateGas(
+            Template.instance().choice.get().index,
+            function (error, gas) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                this.cost.set(GasRender.toString(gas));
+        }.bind(Template.instance()));
+    },
+    "mouseout .vote"(event) {
+        Template.instance().showCost.set(false);
+    },
     "click .vote"(event) {
         if (Template.instance().cannotVote.get()) {
             return;
@@ -182,6 +207,22 @@ Template.cases.events({
             Balance.onChange();
             awaitVoted.bind(this)(address, choiceIndex, choice);
         }.bind(Template.instance()));
+    },
+    "mouseover #custom-arg a.btn"(event) {
+        if (Template.instance().cannotArgue.get()) {
+            return;
+        }
+        Proposals[Template.instance().address.get()].argue.estimateGas(Template.instance().pos.get(), Template.instance().find('#custom-arg textarea').value, function (error, gas) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            this.cost.set(GasRender.toString(gas));
+        }.bind(Template.instance()));
+        Template.instance().showCost.set(true);
+    },
+    "mouseout #custom-arg a.btn"(event) {
+        Template.instance().showCost.set(false);
     },
     "click #custom-arg a.btn"(event) {
         var customCase = Template.instance().find('#custom-arg textarea').value;
