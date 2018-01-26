@@ -22,6 +22,15 @@
   background-color:red;
   margin-left:2px;
 }
+.ap {
+  position:relative;
+}
+.cost {
+  position:absolute;
+  bottom:0px;
+  right:0px;
+  font-size:xx-small;
+}
 .pos li {
   list-style: none;
   border-style: solid;
