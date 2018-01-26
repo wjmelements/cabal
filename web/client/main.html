@@ -15,10 +15,10 @@
 </body>
 <template name="register">
   {{#if registered}}
-    <span class="done h100">Registered!</span>{{/if}}<a class="btn submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}</a> 
+    <span class="done h100">Registered!</span>{{/if}}<a class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a> 
 </template>
 <template name="claim">
-  {{#if available}}<a class="btn h100{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}</a>{{else}}<span class="done">Claimed!</span>{{/if}}
+  {{#if available}}<a class="btn h100{{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
 <span class="done h100">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>

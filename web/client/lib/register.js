@@ -16,6 +16,8 @@ Template.register.onCreated(function() {
     this.account = new ReactiveVar();
     this.registering = new ReactiveVar(false);
     this.canDeregister = new ReactiveVar(true);
+    this.cost = new ReactiveVar();
+    this.showCost = new ReactiveVar(false);
     refresh.bind(this)();
 });
 Template.register.helpers({
@@ -27,6 +29,12 @@ Template.register.helpers({
     },
     canDeregister() {
         return Template.instance().canDeregister.get();
+    },
+    showCost() {
+        return Template.instance().showCost.get();
+    },
+    cost() {
+        return Template.instance().cost.get();
     },
 });
 function awaitRegistered(account) {
@@ -65,7 +73,24 @@ Template.register.events({
             }.bind(Template.instance()));
         }
     },
-    "hover .submit"(event) {
-        //Tutorial.set('Registered accounts can claim FinneyVotes')
-    }
+    "mouseover .submit"(event) {
+        Template.instance().showCost.set(true);
+        var resultFn = function(error, gas) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            this.cost.set(GasRender.toString(gas));
+        }.bind(Template.instance());
+        if (Template.instance().registered.get()) {
+            if (Template.instance().canDeregister.get()) {
+                accountRegistry.deregister.estimateGas(resultFn);
+            }
+        } else {
+            accountRegistry.register.estimateGas({value: 1E15}, resultFn);
+        }
+    },
+    "mouseout .submit"(event) {
+        Template.instance().showCost.set(false);
+    },
 });
