@@ -27,6 +27,8 @@ Template.claim.onCreated(function() {
     this.claiming = new ReactiveVar(false);
     this.balance = new ReactiveVar(0);
     this.cannotClaim = new ReactiveVar(false);
+    this.cost = new ReactiveVar();
+    this.showCost = new ReactiveVar(false);
     Token.balance(function(balance) {
         this.balance.set(balance / 10);
     }.bind(this));
@@ -51,6 +53,12 @@ Template.claim.helpers({
     claiming() {
         return Template.instance().claiming.get();
     },
+    showCost() {
+        return Template.instance().showCost.get();
+    },
+    cost() {
+        return Template.instance().cost.get();
+    },
 });
 Template.claim.events({
     "click .btn"(event) {
@@ -62,5 +70,21 @@ Template.claim.events({
             this.claiming.set(true);
             awaitClaimed.bind(this)();
         }.bind(Template.instance()));
+    },
+    "mouseover .btn"(event) {
+        if (Template.instance().cannotClaim.get()) {
+            return;
+        }
+        token.faucet.estimateGas(function(error, gas) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            this.cost.set(GasRender.toString(gas));
+        }.bind(Template.instance()));
+        Template.instance().showCost.set(true);
+    },
+    "mouseout .btn"(event) {
+        Template.instance().showCost.set(false);
     },
 });
