@@ -33,7 +33,7 @@ Template.propose.events({
         var instance = Template.instance();
         var proposal = Template.instance().find('#propose').value;
         instance.showGas.set(true);
-        if (instance.lastValue != proposal) {
+        if (instance.lastValue != proposal || GasRender.method.get() != instance.lastMethod) {
             instance.lastValue = proposal;
             Web3Loader.onWeb3(function() {
                 accountRegistry.propose.estimateGas(this.lastValue, function(error, estimatedGas) {
@@ -42,6 +42,7 @@ Template.propose.events({
                         return;
                     }
                     this.gasCost.set(GasRender.toString(estimatedGas));
+                    this.lastMethod = GasRender.method.get();
                 }.bind(this));
             }.bind(instance));
         }

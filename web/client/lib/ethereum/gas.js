@@ -20,6 +20,7 @@ GasRender = {
             throw new Error("Unsupported:"+method);
         }
         cost *= GasRender.etherPriceUSD.get();
+        cost = Math.round(cost * 100) / 100;
         return cost;
     },
 }
