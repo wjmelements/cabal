@@ -126,7 +126,7 @@ Earn 0.5 FV per case"></textarea>
 {{else}}
   {{#if hasChoice}}
     <li class="case dt bs">
-      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs5"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
     {{#if hasOptions}}
