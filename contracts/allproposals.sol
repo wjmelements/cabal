@@ -127,22 +127,18 @@ library ProposalLib {
         return self.arguments[self.votes[_user]].position;
     }
 
-    modifier setVote(Storage storage self, uint256 _argumentId) {
-        _;
-        self.arguments[self.votes[msg.sender]].count--;
-        self.arguments[
-            self.votes[msg.sender] = _argumentId
-        ].count++;
-    }
-    modifier pays(Storage storage self, uint256 _argumentId) {
-        _;
+    function pays(Storage storage self, uint256 _argumentId)
+    internal {
         address destination = self.arguments[_argumentId].source;
         voteToken.vote(msg.sender, destination);
     }
     function vote(Storage storage self, uint256 _argumentId)
-    internal
-    setVote(self, _argumentId)
-    pays(self, _argumentId) {
+    internal {
+        self.arguments[self.votes[msg.sender]].count--;
+        self.arguments[
+            self.votes[msg.sender] = _argumentId
+        ].count++;
+        pays(self, _argumentId);
     }
 
     function argumentCount(Storage storage self) public view returns (uint256) {
@@ -167,35 +163,36 @@ library ProposalLib {
     }
 
     function argumentText(Storage storage self, uint256 _index)
-    internal
+    internal view
     returns (bytes storage) {
         return self.arguments[_index].text;
     }
 
     function resolution(Storage storage self)
-    internal
+    internal view
     returns (bytes storage) {
         return self.arguments[0].text;
     }
 
     function voteCount(Storage storage self)
-    public view
+    internal view
     returns (uint256) {
         return -self.arguments[0].count;
     }
     function source(Storage storage self)
-    public view
+    internal view
     returns (address) {
         return self.arguments[0].source;
     }
 
     function argue(Storage storage self, Position _position, bytes _text)
     internal
-    pays(self, 0)
-    setVote(self, self.arguments.length)
     returns (uint256) {
         uint256 argumentId = self.arguments.length;
-        self.arguments.push(Argument(msg.sender, _position, 0, _text));
+        self.arguments.push(Argument(msg.sender, _position, 1, _text));
+        self.arguments[self.votes[msg.sender]].count--;
+        self.votes[msg.sender] = argumentId;
+        pays(self, 0);
         return argumentId;
     }
 
