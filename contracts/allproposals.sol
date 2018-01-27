@@ -23,9 +23,8 @@ contract Vote is ERC20 {
     mapping (address => mapping (address => uint256)) approved;
     mapping (address => uint256) faucetDate;
 
-    function Vote(address _developerFund) public {
-        accountRegistry = AccountRegistry(msg.sender);
-        developerFund = _developerFund;
+    function Vote() public {
+        developerFund = msg.sender;
     }
     function totalSupply() public constant returns (uint) {
         return supply;
@@ -222,6 +221,12 @@ contract Proposal is ProposalInterface {
     public view
     returns (uint256) {
         return proposal.argumentCount();
+    }
+    
+    function arguments(uint256 _index)
+    public view
+    returns (ProposalLib.Argument) {
+        return proposal.arguments[_index];
     }
 
     function argumentSource(uint256 _index)
@@ -586,13 +591,11 @@ contract AccountRegistry is AllProposals {
 
     Cabal[] public allCabals;
     ProposalInterface[] public allProposals;
-    Vote public voteToken;
 
     function AccountRegistry()
     public
     {
         infoMap[msg.sender].membership ^= BOARD;
-        voteToken = new Vote(msg.sender);
     }
 
     event NewVoter(address voter);
