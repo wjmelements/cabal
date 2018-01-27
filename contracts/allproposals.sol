@@ -96,37 +96,14 @@ contract Vote is ERC20 {
     }
 }
 interface ProposalInterface {
-    function getPosition(address _user) public view returns (Proposal.Position);
+    function getPosition(address _user) public view returns (ProposalLib.Position);
     function argumentCount() public view returns (uint256);
     function vote(uint256 _argumentId) external;
     function resolution() public view returns (bytes);
     function voteCount() public view returns (uint256);
 }
-contract Proposal is ProposalInterface {
-    mapping (address => uint256) public votes;
-
-    Vote voteToken;
-
-    function getPosition(address _user)
-    public view
-    returns (Position) {
-        return arguments[votes[_user]].position;
-    }
-
-    modifier setVote(uint256 _argumentId) {
-        _;
-        arguments[votes[msg.sender]].count--;
-        arguments[
-            votes[msg.sender] = _argumentId
-        ].count++;
-    }
-
-    modifier pays(uint256 _argumentId) {
-        _;
-        address destination = arguments[_argumentId].source;
-        voteToken.vote(msg.sender, destination);
-    }
-    
+library ProposalLib {
+    Vote constant voteToken = Vote(0xdead);//FIXME
     enum Position {
         SKIP,
         APPROVE,
@@ -140,77 +117,172 @@ contract Proposal is ProposalInterface {
         uint256 count;
         bytes text;
     }
+    struct Storage {
+        mapping (address => uint256) votes;
+        Argument[] arguments;
+    }
+    function getPosition(Storage storage self, address _user)
+    public view
+    returns (Position) {
+        return self.arguments[self.votes[_user]].position;
+    }
 
-    Argument[] public arguments;
+    modifier setVote(Storage storage self, uint256 _argumentId) {
+        _;
+        self.arguments[self.votes[msg.sender]].count--;
+        self.arguments[
+            self.votes[msg.sender] = _argumentId
+        ].count++;
+    }
+    modifier pays(Storage storage self, uint256 _argumentId) {
+        _;
+        address destination = self.arguments[_argumentId].source;
+        voteToken.vote(msg.sender, destination);
+    }
+    function vote(Storage storage self, uint256 _argumentId)
+    internal
+    setVote(self, _argumentId)
+    pays(self, _argumentId) {
+    }
+
+    function argumentCount(Storage storage self) public view returns (uint256) {
+        return self.arguments.length;
+    }
+    function argumentSource(Storage storage self, uint256 _index)
+    public view
+    returns (address) {
+        return self.arguments[_index].source;
+    }
+
+    function argumentPosition(Storage storage self, uint256 _index)
+    public view
+    returns (Position) {
+        return self.arguments[_index].position;
+    }
+
+    function argumentVoteCount(Storage storage self, uint256 _index)
+    public view
+    returns (uint256) {
+        return self.arguments[_index].count;
+    }
+
+    function argumentText(Storage storage self, uint256 _index)
+    internal
+    returns (bytes storage) {
+        return self.arguments[_index].text;
+    }
+
+    function resolution(Storage storage self)
+    internal
+    returns (bytes storage) {
+        return self.arguments[0].text;
+    }
+
+    function voteCount(Storage storage self)
+    public view
+    returns (uint256) {
+        return -self.arguments[0].count;
+    }
+    function source(Storage storage self)
+    public view
+    returns (address) {
+        return self.arguments[0].source;
+    }
+
+    function argue(Storage storage self, Position _position, bytes _text)
+    internal
+    pays(self, 0)
+    setVote(self, self.arguments.length)
+    returns (uint256) {
+        uint256 argumentId = self.arguments.length;
+        self.arguments.push(Argument(msg.sender, _position, 0, _text));
+        return argumentId;
+    }
+
+    function init(Storage storage self, address _source, bytes _resolution)
+    internal {
+        self.arguments.push(ProposalLib.Argument(_source, Position.SKIP, 0, _resolution));
+    }
+
+}
+contract Proposal is ProposalInterface {
+    using ProposalLib for ProposalLib.Storage;
+    ProposalLib.Storage proposal;
+
+    function getPosition(address _user)
+    public view
+    returns (ProposalLib.Position) {
+        return proposal.getPosition(_user);
+    }
+
+    function votes(address _user)
+    public view
+    returns (uint256) {
+        return proposal.votes[_user];
+    }
 
     function argumentCount()
     public view
     returns (uint256) {
-        return arguments.length;
+        return proposal.argumentCount();
     }
 
     function argumentSource(uint256 _index)
     public view
     returns (address) {
-        return arguments[_index].source;
+        return proposal.argumentSource(_index);
     }
 
     function argumentPosition(uint256 _index)
     public view
-    returns (Position) {
-        return arguments[_index].position;
+    returns (ProposalLib.Position) {
+        return proposal.argumentPosition(_index);
     }
 
     function argumentVoteCount(uint256 _index)
     public view
     returns (uint256) {
-        return arguments[_index].count;
+        return proposal.argumentVoteCount(_index);
     }
 
     function argumentText(uint256 _index)
     public view
     returns (bytes) {
-        return arguments[_index].text;
+        return proposal.argumentText(_index);
     }
 
-    function Proposal(bytes _resolution, address _source, Vote _voteToken)
+    function Proposal(address _source, bytes _resolution)
     public {
-        arguments.push(Argument(_source, Position.SKIP, 0, _resolution));
-        voteToken = _voteToken;
+        proposal.init(_source, _resolution);
     }
 
     function resolution()
     public view
     returns (bytes) {
-        return arguments[0].text;
+        return proposal.resolution();
     }
 
     function voteCount()
     public view
     returns (uint256) {
-        return -arguments[0].count;
+        return proposal.voteCount();
     }
 
     function source()
     public view
     returns (address) {
-        return arguments[0].source;
+        return proposal.source();
     }
 
-    function argue(Position _position, bytes _text)
+    function argue(ProposalLib.Position _position, bytes _text)
     external
-    setVote(arguments.length)
-    pays(0)
     returns (uint256) {
-        uint256 argumentId = arguments.length;
-        arguments.push(Argument(msg.sender, _position, 0, _text));
-        return argumentId;
+        return proposal.argue(_position, _text);
     }
 
     function vote(uint256 _argumentId)
-    external
-    setVote(_argumentId)
-    pays(_argumentId) {
+    external {
+        proposal.vote(_argumentId);
     }
 }
 interface CabalInterface {
@@ -250,7 +322,7 @@ contract Cabal is CabalInterface {
     modifier followsCanon() {
         for (uint256 i = 0; i < canon.length; i++) {
             ProposalInterface proposal = canon[i];
-            require(proposal.getPosition(msg.sender) == Proposal.Position.APPROVE);
+            require(proposal.getPosition(msg.sender) == ProposalLib.Position.APPROVE);
         }
         _;
     }
@@ -326,7 +398,7 @@ contract Cabal is CabalInterface {
             if (membership[member] < _level) {
                 continue;
             }
-            Proposal.Position position = _proposal.getPosition(member);
+            ProposalLib.Position position = _proposal.getPosition(member);
             counts[uint8(position)]++;
         }
         return counts;
@@ -415,7 +487,7 @@ contract Cabal is CabalInterface {
     followsCanon {
         require(membership[msg.sender] == Membership.HERETIC);
         for (uint256 i = 0; i < canon.length; i++) {
-            require(canon[i].getPosition(msg.sender) == Proposal.Position.APPROVE);
+            require(canon[i].getPosition(msg.sender) == ProposalLib.Position.APPROVE);
         }
         membership[msg.sender] = Membership.MEMBER;
         Reconciled(msg.sender);
@@ -430,7 +502,7 @@ contract Cabal is CabalInterface {
             if (membership[member] < Membership.MEMBER) {
                 continue;
             }
-            if (_proposal.getPosition(member) != Proposal.Position.APPROVE) {
+            if (_proposal.getPosition(member) != ProposalLib.Position.APPROVE) {
                 membership[member] = Membership.HERETIC;
                 NewHeretic(member);
             }
@@ -460,13 +532,13 @@ contract Cabal is CabalInterface {
         // verify vote counts:
         uint256[5] memory counts = voteCounts(proposal);
         // prevent rogue board instacanon attacks
-        require(counts[uint8(Proposal.Position.APPROVE)] > 19);
+        require(counts[uint8(ProposalLib.Position.APPROVE)] > 19);
         // require 95% APPROVE to REJECT ratio
-        require(counts[uint8(Proposal.Position.APPROVE)] > 19 * counts[uint8(Proposal.Position.REJECT)]);
+        require(counts[uint8(ProposalLib.Position.APPROVE)] > 19 * counts[uint8(ProposalLib.Position.REJECT)]);
         // require APPROVE > AMEND
-        require(counts[uint8(Proposal.Position.APPROVE)] > counts[uint8(Proposal.Position.AMEND)]);
+        require(counts[uint8(ProposalLib.Position.APPROVE)] > counts[uint8(ProposalLib.Position.AMEND)]);
         // require APPROVE > LOL
-        require(counts[uint8(Proposal.Position.APPROVE)] > counts[uint8(Proposal.Position.LOL)]);
+        require(counts[uint8(ProposalLib.Position.APPROVE)] > counts[uint8(ProposalLib.Position.LOL)]);
 
         canon.push(proposal);
         membership[proposal] = Membership.CANON;
@@ -641,7 +713,7 @@ contract AccountRegistry is AllProposals {
     external
     returns (Proposal)
     {
-        Proposal proposal = new Proposal(_resolution, msg.sender, voteToken);
+        Proposal proposal = new Proposal(msg.sender, _resolution);
         infoMap[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
