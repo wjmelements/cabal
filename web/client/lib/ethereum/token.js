@@ -13,7 +13,7 @@ Token = {
             onToken.push(function(){Token.faucet(resultFn)});
             return;
         }
-        token.faucet(function (error, result) {
+        token.faucet({gasPrice:GasRender.gasPrice.get()*1e12}, function (error, result) {
             if (error) {
                 console.error(error);
                 return;

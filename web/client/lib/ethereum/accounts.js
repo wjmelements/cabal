@@ -115,6 +115,19 @@ Accounts = {
             Accounts.proposalCount(resultFn);
         });
     },
+    resizeSubscribe(resizeFn) {
+        Accounts.onResize.push(resizeFn);
+    },
+    resizeUnsubscribe(resizeFn) {
+        Accounts.onResize = Accounts.onResize.filter((fn)=>{return fn != resizeFn});
+    },
+    resize() {
+        Accounts.proposalCount((count)=>{
+            for (var i = Accounts.onResize.length; i --> 0; ) {
+                Accounts.onResize[i](count);
+            }
+        });
+    },
     getProposal(index, resultFn) {
         if (accountRegistry) {
             return accountRegistry.allProposals(index, function(err, result) {
@@ -131,7 +144,7 @@ Accounts = {
     },
     propose(proposal, resultFn) {
         console.log(proposal);
-        accountRegistry.propose(proposal, resultFn);
+        accountRegistry.propose(proposal, {gasPrice:parseInt(GasRender.gasPrice.get()*1e12)},resultFn);
     },
     canDeregister(resultFn) {
         Accounts.current(function (account) {
@@ -158,4 +171,5 @@ Accounts = {
             Accounts.onRegistrationChange.pop()();
         }
     }
-}
+};
+Accounts.onResize = [];

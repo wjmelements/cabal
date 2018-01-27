@@ -3,6 +3,7 @@ Template.cases.onCreated(function() {
     this.address = this.data.address;
     this.choice = this.data.choice;
     this.voted = this.data.voted;
+    this.onVote = this.data.refresh;
     var pos = parseInt(this.position.get().substr(3));
     this.pos = new ReactiveVar(pos);
     this.skip = new ReactiveVar(pos == 0);
@@ -12,6 +13,7 @@ Template.cases.onCreated(function() {
     this.cannotVote = new ReactiveVar(true);
     this.cannotArgue = new ReactiveVar(true);
     this.showCost = new ReactiveVar(false);
+    this.txhash = new ReactiveVar();
     this.cost = new ReactiveVar();
     onChoice();
 });
@@ -94,6 +96,12 @@ Template.cases.helpers({
     cannotArgue() {
         return Template.instance().cannotArgue.get();
     },
+    prefix() {
+        return Net.prefix.get();
+    },
+    txhash() {
+        return Template.instance().txhash.get();
+    },
 });
 function onChange(target) {
     if (target) {
@@ -116,6 +124,7 @@ function checkArgument(address, i, argumentCount, customCase) {
             this.voting.set(false);
             this.voted.set(argument);
             this.choice.set(argument);
+            this.onVote();
         } else if (i < argumentCount) {
             checkArgument.bind(this)(address, i + 1, argumentCount, customCase);
         } else {
@@ -142,6 +151,7 @@ function awaitVoted(address, choiceIndex, argument) {
         if (myVote == choiceIndex) {
             this.voting.set(false);
             this.voted.set(argument);
+            this.onVote();
             return;
         }
         window.setTimeout(function () {
@@ -176,6 +186,9 @@ Template.cases.events({
         if (Template.instance().cannotVote.get()) {
             return;
         }
+        if (Template.instance().voting.get()) {
+            return;
+        }
         Template.instance().showCost.set(true);
         Proposals[Template.instance().address.get()].vote.estimateGas(
             Template.instance().choice.get().index,
@@ -194,6 +207,9 @@ Template.cases.events({
         if (Template.instance().cannotVote.get()) {
             return;
         }
+        if (Template.instance().voting.get()) {
+            return;
+        }
         var choice = Template.instance().choice.get();
         var address = Template.instance().address.get();
         var choiceIndex = choice.index;
@@ -202,6 +218,7 @@ Template.cases.events({
                 console.error(error);
                 return;
             }
+            this.txhash.set(result);
             this.voting.set(true);
             Balance.set(Balance.get() - 1);
             Balance.onChange();
@@ -252,6 +269,7 @@ Template.cases.events({
                         text:customCase
                     };
                     this.choice.set(argument);
+                    this.txhash.set(txhash);
                     this.voting.set(true);
                     this.inv.set(true);
                     Balance.set(Balance.get() - 1);

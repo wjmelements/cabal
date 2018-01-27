@@ -18,6 +18,7 @@ Template.register.onCreated(function() {
     this.canDeregister = new ReactiveVar(true);
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
+    this.txhash = new ReactiveVar();
     refresh.bind(this)();
 });
 Template.register.helpers({
@@ -36,7 +37,14 @@ Template.register.helpers({
     cost() {
         return Template.instance().cost.get();
     },
+    prefix() {
+        return Net.prefix.get();
+    },
+    txhash() {
+        return Template.instance().txhash.get();
+    }
 });
+// TODO compare to checking tx status
 function awaitRegistered(account) {
     Accounts.current(function(currentAccount) {
         if (currentAccount != account) {
@@ -60,6 +68,9 @@ Template.register.events({
         if (!Template.instance().canDeregister.get()) {
             return;
         }
+        if (Template.instance().registering.get()) {
+            return;
+        }
         var account = Template.instance().account.get();
         if (Template.instance().registered.get()) {
             Accounts.deregister(function(txhash) {
@@ -69,6 +80,7 @@ Template.register.events({
             Accounts.register(function(txhash) {
                 console.log(txhash);
                 this.registering.set(true);
+                this.txhash.set(txhash);
                 awaitRegistered.bind(this)(account);
             }.bind(Template.instance()));
         }

@@ -29,6 +29,7 @@ Template.claim.onCreated(function() {
     this.cannotClaim = new ReactiveVar(false);
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
+    this.txhash = new ReactiveVar();
     Token.balance(function(balance) {
         this.balance.set(balance / 10);
     }.bind(this));
@@ -39,7 +40,6 @@ Template.claim.onDestroyed(function() {
 });
 Template.claim.helpers({
     available() {
-        // TODO maybe only show if it would get you to the next FinneyVote
         return Template.instance().available.get();
     },
     shouldClaim() {
@@ -59,14 +59,24 @@ Template.claim.helpers({
     cost() {
         return Template.instance().cost.get();
     },
+    txhash() {
+        return Template.instance().txhash.get();
+    },
+    prefix() {
+        return Net.prefix.get();
+    },
 });
 Template.claim.events({
     "click .btn"(event) {
         if (Template.instance().cannotClaim.get()) {
             return;
         }
+        if (Template.instance().claiming.get()) {
+            return;
+        }
         Token.claim(function(txhash) {
             console.log(txhash);
+            this.txhash.set(txhash);
             this.claiming.set(true);
             awaitClaimed.bind(this)();
         }.bind(Template.instance()));

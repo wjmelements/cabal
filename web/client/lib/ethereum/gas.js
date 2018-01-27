@@ -35,7 +35,8 @@ function fetchGasPrice() {
         if (xmlHttp.responseText) {
             var response = JSON.parse(xmlHttp.responseText);
             xmlHttp.onreadystatechange = null;
-            GasRender.gasPrice.set(response.safeLow / 1000);
+            GasRender.gasPrice.set(response.safeLow / 10000);
+            console.log(GasRender.gasPrice.get());
         }
     };
     xmlHttp.send(null);
@@ -48,6 +49,7 @@ Web3Loader.onWeb3(function() {
             return;
         }
         GasRender.gasPrice.set(gasPrice.c[0] / 1E12);
+        console.log(GasRender.gasPrice.get());
         fetchGasPrice();
     });
 });
@@ -57,12 +59,13 @@ function fetchETHPrice() {
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.responseText) {
             var response = JSON.parse(xmlHttp.responseText);
+            console.log(response);
             var etherPriceUSD = response.USD;
             console.log("Price is " + etherPriceUSD);
             GasRender.etherPriceUSD.set(etherPriceUSD);
             xmlHttp.onreadystatechange = null;
-        }   
-    }   
+        }
+    }
     xmlHttp.send(null);
 }
 window.addEventListener('load', fetchETHPrice);

@@ -36,12 +36,9 @@ Web3Loader.onWeb3(function() {
 });
 
 Proposals = {
-    argumentCount(address, resultFn) {
+    getArgumentCount(address, resultFn) {
         if (!Proposals[address]) {
             Proposals.init(address);
-        }
-        if (Proposals[address].argCount) {
-            return resultFn(Proposals[address].argCount);
         }
         Proposals[address].argumentCount(function(err, result) {
             if (err) {
@@ -96,7 +93,7 @@ Proposals = {
         });
     },
     prefetchArguments(address, onComplete) {
-        Proposals.argumentCount(address, function(argumentCount){
+        Proposals.getArgumentCount(address, function(argumentCount){
             var counter = new ReactiveVar(argumentCount - 1);
             function checkDone(counter) {
                 counter.set(counter.get() - 1);
@@ -133,7 +130,7 @@ Proposals = {
         return inverse;
     },
     vote(address, argumentIndex, resultFn) {
-        Proposals[address].vote(argumentIndex, resultFn);
+        Proposals[address].vote(argumentIndex, {gasPrice:parseInt(GasRender.gasPrice.get()*1e12)}, resultFn);
     },
     argue(address, position, content, resultFn) {
         Proposals[address].argue(position, content, resultFn);
@@ -156,15 +153,6 @@ Proposals = {
                 return;
             }
             resultFn(result.c[0]);
-        });
-    },
-    getArgumentCount(address, resultFn) {
-        Proposals[address].argumentCount(function(error, result) {
-            if (error) {
-                console.error(error);
-                return;
-            }
-            resultFn(result);
         });
     },
 };

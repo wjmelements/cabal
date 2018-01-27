@@ -9,9 +9,27 @@ function onChange(target) {
     }
  
 }
+function awaitProposal(txhash) {
+    web3.eth.getTransaction(txhash, function (error, result) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        if (result.blockNumber) {
+            var pendingproposals = this.pendingProposals.get();
+            pendingProposals.filter((proposal)=>{
+                return proposal.txhash != txhash;
+            });
+            Accounts.resize();
+            return;
+        }
+        setTimeout(function(){awaitProposal.bind(this)(txhash);}.bind(this),3000);
+    }.bind(this));
+}
 Template.propose.onCreated(function() {
     this.gasCost = new ReactiveVar();
     this.showGas = new ReactiveVar(false);
+    this.pendingProposals = new ReactiveVar([]);
     this.lastValue = undefined;
 });
 Template.propose.events({
@@ -26,8 +44,14 @@ Template.propose.events({
                 return;
             }
             console.log(txhash);
-            // TODO awaitProposal()
-        });
+            var pendingProposals = this.pendingProposals.get();
+            pendingProposals.push({
+                txhash:txhash,
+                title:proposal,
+            });
+            awaitProposal.bind(this)(txhash);
+            this.pendingProposals.set(pendingProposals);
+        }.bind(Template.instance()));
     },
     "mouseover .submit"(event) {
         var instance = Template.instance();
@@ -66,5 +90,8 @@ Template.propose.helpers({
     },
     showGas() {
         return Template.instance().showGas.get();
+    },
+    pendingProposals() {
+        return Template.instance().pendingProposals.get();
     },
 });

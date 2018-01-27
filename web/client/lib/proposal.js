@@ -1,3 +1,41 @@
+function refresh() {
+    var address = this.address.get();
+    Proposals.getArgumentCount(address, function(argumentCount) {
+        console.log(argumentCount);
+        this.argumentCount.set(argumentCount - 1);
+    }.bind(this));
+    Proposals.voteCount(address, function(voteCount) {
+        this.voteCount.set(voteCount);
+    }.bind(this));
+    Proposals.prefetchArguments(address, function() {
+        var proposal = Proposals[address];
+        var total = 0;
+        for (var i = 1; i < 5; i++) {
+            var contribution = proposal['votes'+i];
+            total += contribution  ? contribution : 0;
+        }
+        var positionPcts = []
+        var runningTotal = total;
+        total /= 100;
+        for (var i = 4; i > 0; i--) {
+            var contribution = proposal['votes'+i];
+            runningTotal -= contribution ? contribution : 0;
+            positionPcts.push(parseInt(100 - runningTotal / total));
+        }
+        this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
+        console.log(this.gradient);
+        Proposals.getMyVote(address, function(myVote) {
+            if (!myVote) {
+                return;
+            }
+            Proposals.getArgument(address, myVote, function(argument) {
+                this.argumentChoice.set(argument);
+                this.voted.set(argument);
+                this.positionChoice.set('pos'+argument.position);
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
+}
 Template.proposal.onCreated(function() {
     this.positionChoice = new ReactiveVar();
     this.title = new ReactiveVar("Loading...");
@@ -17,40 +55,8 @@ Template.proposal.onCreated(function() {
             console.log(proposal.voteCount);
             //this.voteCount.set(proposal.voteCount);
         }.bind(this));
-        Proposals.voteCount(address, function(voteCount) {
-            this.voteCount.set(voteCount);
-        }.bind(this));
-        Proposals.prefetchArguments(address, function() {
-            var proposal = Proposals[address];
-            var total = 0;
-            for (var i = 1; i < 5; i++) {
-                var contribution = proposal['votes'+i];
-                total += contribution  ? contribution : 0;
-            }
-            var positionPcts = []
-            var runningTotal = total;
-            total /= 100;
-            for (var i = 4; i > 0; i--) {
-                var contribution = proposal['votes'+i];
-                runningTotal -= contribution ? contribution : 0;
-                positionPcts.push(parseInt(100 - runningTotal / total));
-            }
-            this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
-            console.log(this.gradient);
-        }.bind(this));
-        Proposals.getMyVote(address, function(myVote) {
-            if (!myVote) {
-                return;
-            }
-            Proposals.getArgument(address, myVote, function(argument) {
-                this.argumentChoice.set(argument);
-                this.voted.set(argument);
-                this.positionChoice.set('pos'+argument.position);
-            }.bind(this));
-        }.bind(this));
-        Proposals.getArgumentCount(address, function(argumentCount) {
-            this.argumentCount.set(argumentCount - 1);
-        }.bind(this));
+        this.refresh = refresh.bind(this);
+        this.refresh(address);
     }.bind(this));
 });
 Template.proposal.onDestroyed(function() {
@@ -80,6 +86,7 @@ Template.proposal.helpers({
             position:Template.instance().positionChoice,
             choice:Template.instance().argumentChoice,
             voted:Template.instance().voted,
+            refresh:Template.instance().refresh,
         };
     },
     addressId() {
@@ -95,4 +102,3 @@ Template.proposal.events({
         Template.instance().positionChoice.set(event.target.className);
     }
 });
-

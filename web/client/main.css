@@ -110,6 +110,9 @@ textarea.case {
   border-color:black;
   font-size:small;
 }
+a.btn {
+  text-decoration:none;
+}
 .btn {
   display:inline-block;
   padding:1em;

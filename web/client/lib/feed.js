@@ -1,5 +1,6 @@
 var lastSize = 0; // TODO store size
-function onResize() {
+function onResize(count) {
+    this.lastIndex.set(count - 1);
     // this hack resizes the feed
     this.noRender.set(true);
     window.setTimeout(function() {this.noRender.set(false)}.bind(this), 1);
@@ -7,12 +8,12 @@ function onResize() {
 Template.feed.onCreated(function() {
     this.lastIndex = new ReactiveVar(lastSize);
     this.noRender = new ReactiveVar(false)
-    Accounts.proposalCount(function(count) {
-        this.lastIndex.set(count - 1);
-        onResize.bind(this)();
-    }.bind(this));
+    this.onResize = onResize.bind(this);
+    Accounts.resizeSubscribe(this.onResize);
+    Accounts.proposalCount(this.onResize);
 });
 Template.feed.onDestroyed(function() {
+    Accounts.resizeUnsubscribe(this.onResize);
 });
 Template.feed.helpers({
     lastIndex() {
