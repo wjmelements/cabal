@@ -49,6 +49,16 @@ Template.proposal.onCreated(function() {
     document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
+        var storedChoice = localStorage.getItem('choice'+this.address.get());
+        if (storedChoice) {
+            console.log(storedChoice);
+            console.log(address);
+            Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
+                this.argumentChoice.set(argument);
+                this.positionChoice.set('pos'+argument.position);
+                console.log(argument);
+            }.bind(this));
+        }
         Proposals.getArgument(address, 0, function(proposal) {
             this.title.set(proposal.text);
             // FIXME negative this should be the vote count
@@ -100,5 +110,8 @@ Template.proposal.helpers({
 Template.proposal.events({
     "click ul.pos li"(event) {
         Template.instance().positionChoice.set(event.target.className);
+        if (event.target.className.startsWith("pos0")) {
+            localStorage.setItem('choice'+Template.instance().address.get(), 0);
+        }
     }
 });

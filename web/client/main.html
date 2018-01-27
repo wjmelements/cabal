@@ -36,7 +36,7 @@
   <div class="dt">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
 Earn 0.5 FV per case"></textarea>
-    <a class="btn submit h100 ap">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
+    <a class="btn submit h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
   </div>
   {{#each proposal in pendingProposals}}
     {{> pendingproposal data=proposal}}

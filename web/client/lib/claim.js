@@ -85,6 +85,9 @@ Template.claim.events({
         if (Template.instance().cannotClaim.get()) {
             return;
         }
+        if (Template.instance().claiming.get()) {
+            return;
+        }
         token.faucet.estimateGas(function(error, gas) {
             if (error) {
                 console.error(error);

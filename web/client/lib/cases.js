@@ -8,7 +8,7 @@ Template.cases.onCreated(function() {
     this.pos = new ReactiveVar(pos);
     this.skip = new ReactiveVar(pos == 0);
     this.cases = new ReactiveVar();
-    this.inv = new ReactiveVar(false);
+    this.inv = new ReactiveVar(this.choice.get());
     this.voting = new ReactiveVar(false);
     this.cannotVote = new ReactiveVar(true);
     this.cannotArgue = new ReactiveVar(true);
@@ -25,7 +25,7 @@ Template.cases.onRendered(function() {
     this.balanceListener();
 });
 Template.cases.onDestroyed(function() {
-    Balance.removeListener(this.balanceListeners);
+    Balance.removeListener(this.balanceListener);
 });
 function positionToName(position) {
     switch(position) {
@@ -88,6 +88,7 @@ Template.cases.helpers({
                 name:positionToName(i),
             });
         }
+        console.log(others);
         return others;
     },
     cannotVote() {
@@ -172,6 +173,7 @@ Template.cases.events({
         Template.instance().position.set('pos'+pos);
         Template.instance().skip.set(pos == 0);
         var choice = parseInt(event.target.id.substr(3));
+        localStorage.setItem('choice'+Template.instance().address.get(), choice);
         if (!choice) {
             onChoice();
             return;

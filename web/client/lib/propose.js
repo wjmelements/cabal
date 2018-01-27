@@ -1,13 +1,7 @@
 function onChange(target) {
-   if (target) {
-        var submitBtn = $(this.find('.btn'));
-        if (target.value) {
-            submitBtn.removeClass('disabled');
-        } else {
-            submitBtn.addClass('disabled');
-        }
+    if (target) {
+        this.cannotPropose.set(!target.value);
     }
- 
 }
 function awaitProposal(txhash) {
     web3.eth.getTransaction(txhash, function (error, result) {
@@ -30,6 +24,7 @@ Template.propose.onCreated(function() {
     this.gasCost = new ReactiveVar();
     this.showGas = new ReactiveVar(false);
     this.pendingProposals = new ReactiveVar([]);
+    this.cannotPropose = new ReactiveVar(true);
     this.lastValue = undefined;
 });
 Template.propose.events({
@@ -56,6 +51,9 @@ Template.propose.events({
     "mouseover .submit"(event) {
         var instance = Template.instance();
         var proposal = Template.instance().find('#propose').value;
+        if (instance.cannotPropose.get()) {
+            return;
+        }
         instance.showGas.set(true);
         if (instance.lastValue != proposal || GasRender.method.get() != instance.lastMethod) {
             instance.lastValue = proposal;
@@ -93,5 +91,8 @@ Template.propose.helpers({
     },
     pendingProposals() {
         return Template.instance().pendingProposals.get();
+    },
+    cannotPropose() {
+        return Template.instance().cannotPropose.get();
     },
 });

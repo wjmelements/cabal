@@ -86,6 +86,9 @@ Template.register.events({
         }
     },
     "mouseover .submit"(event) {
+        if (!accountRegistry) {
+            return;
+        }
         Template.instance().showCost.set(true);
         var resultFn = function(error, gas) {
             if (error) {
