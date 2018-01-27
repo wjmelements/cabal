@@ -282,5 +282,6 @@ Template.cases.events({
     },
     "click .reset"(event) {
         Template.instance().position.set(undefined);
+        Template.instance().choice.set(undefined);
     }
 });
