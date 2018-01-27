@@ -37,6 +37,7 @@ function checkAccount(refreshId) {
 checkAccount();
 
 Accounts = {
+    check: checkAccount,
     current(resultFn) {
         Web3Loader.onWeb3(function() {
             if (!web3.eth.accounts[0]) {
@@ -51,9 +52,9 @@ Accounts = {
         });
     },
     getAddress(resultFn) {
-        switch (nId) {
+        switch (Net.id.get() || "4") {
         default:
-            console.error("No known AccountRegistry on this network:" + nId);
+            console.error("No known AccountRegistry on this network:" + Net.id.get());
         case "4":
             console.log("Using Rinkeby");
             return resultFn("0xbACD997eBbE8A539f7709ffe2709c0Ae8085FB82");

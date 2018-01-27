@@ -6,13 +6,18 @@
   <div class="btmpad dt">
     {{> register}}{{> claim}}{{> balance}}{{> gas}}
   </div>
-  <div id="withoutweb3">
-  </div>
-  <div id="withoutaccount">
-  </div>
+  {{> withoutweb3}}
   {{> propose}}
   {{> feed}}
 </body>
+<template name="withoutweb3">
+  <div id="withoutweb3" hidden>
+    <p class="error">Your browser does not support Ethereum. {{> errorHelp}}</p>
+  </div>
+  <div id="withoutaccount" hidden>
+    <p class="error">There is no account associated with your Ethereum client.</p>
+  </div>
+</template>
 <template name="register">
   {{#if registered}}
     <span class="done h100">Registered!</span>{{/if}}<a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
@@ -153,4 +158,18 @@ Earn 0.5 FV per vote"></textarea>
     </div>
   {{/unless}}
 {{/if}}
+</template>
+<template name="errorHelp">
+{{> Template.dynamic template=browserHelp }}
+</template>
+<template name="firefoxHelp">
+Please install the (<a href="https://github.com/MetaMask/">open source</a>) <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/?src=api">Metamask Firefox Plugin</a>.
+</template>
+
+<template name="chromeHelp">
+Please install the (<a href="https://github.com/MetaMask/">open source</a>) <a target="_blank" href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn">Metamask Chrome Extension</a>.
+</template>
+
+<template name="defaultHelp">
+If you are using Opera, Edge, Chrome or Firefox, install the <a target="_blank" href="https://github.com/MetaMask/metamask-extension/releases">Metamask browser extension</a>. Alternatively, download the <a target="_blank" href="https://github.com/ethereum/mist/releases">Mist browser</a>.
 </template>

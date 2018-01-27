@@ -1,4 +1,3 @@
-nId = "4"; // TODO support main net
 var loaded = false;
 window.addEventListener('load', function() {
     if (typeof web3 === 'undefined') {

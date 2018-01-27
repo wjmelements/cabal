@@ -1,7 +1,6 @@
 function refresh() {
     var address = this.address.get();
     Proposals.getArgumentCount(address, function(argumentCount) {
-        console.log(argumentCount);
         this.argumentCount.set(argumentCount - 1);
     }.bind(this));
     Proposals.voteCount(address, function(voteCount) {
@@ -51,19 +50,13 @@ Template.proposal.onCreated(function() {
         this.address.set(address);
         var storedChoice = localStorage.getItem('choice'+this.address.get());
         if (storedChoice) {
-            console.log(storedChoice);
-            console.log(address);
             Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
                 this.argumentChoice.set(argument);
                 this.positionChoice.set('pos'+argument.position);
-                console.log(argument);
             }.bind(this));
         }
         Proposals.getArgument(address, 0, function(proposal) {
             this.title.set(proposal.text);
-            // FIXME negative this should be the vote count
-            console.log(proposal.voteCount);
-            //this.voteCount.set(proposal.voteCount);
         }.bind(this));
         this.refresh = refresh.bind(this);
         this.refresh(address);

@@ -59,6 +59,14 @@
 .pos3 {
   background-color:#FCFF8B;
 }
+.error {
+  display:inline-block;
+  background-color:#FFDBDB;
+  padding:1em;
+  border-radius:1px;
+  border-width:1px;
+  border-style:solid;
+}
 .ac {
   color:#AD97BD;
 }
