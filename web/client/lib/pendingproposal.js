@@ -1,7 +1,8 @@
 Template.pendingproposal.onCreated(function() {
     var data = this.data;
-    this.title = new ReactiveVar(data.title);
-    this.txhash = new ReactiveVar(data.txhash);
+    console.log(data);
+    this.title = new ReactiveVar(data.data.title);
+    this.txhash = new ReactiveVar(data.data.txhash);
 });
 Template.pendingproposal.helpers({
     txhash() {

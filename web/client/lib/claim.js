@@ -13,6 +13,7 @@ function awaitClaimed() {
         this.available.set(amount / 10);
         if (amount == 0) {
             Balance.set(Balance.get() + prior);
+            Balance.onChange();
             this.claiming.set(false);
             return;
         }

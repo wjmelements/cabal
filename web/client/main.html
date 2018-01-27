@@ -31,10 +31,10 @@
 </template>
 <template name="register">
   {{#if registered}}
-    <span class="done h100">Registered!</span>{{/if}}<a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}Registering{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+    <span class="done h100">Registered!</span>{{/if}}<a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
 </template>
 <template name="claim">
-  {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}Claiming{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
+  {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
 <span class="done h100">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>
@@ -49,7 +49,7 @@
 </select></span>
 </template>
 <template name="propose">
-  <div class="dt">
+  <div class="dt spaced">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
 Earn 0.5 FV per case"></textarea>
     <a class="btn submit h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
@@ -59,9 +59,16 @@ Earn 0.5 FV per case"></textarea>
   {{/each}}
 </template>
 <template name="pendingproposal">
-  <div class="dt">
+  <div class="dt bs spaced">
+    <a target="_blank" href="https://{{prefix}}etherscan.io/tx/{{txhash}}" class="btn h100">
+      <div class="dt bs5">
+        <div class="h100">
+          <div class="loader"></div>
+        </div>
+        <p class="h100">Proposing</p>
+      </div>
+    </a>
     <h2 class="prop h100">{{title}}</h2>
-    <a target="_blank" href="https://{{prefix}}etherscan.io/tx/{{txhash}}" class="btn">Proposing</a>
   </div>
 </template>
 <template name="feed">
@@ -78,7 +85,7 @@ Earn 0.5 FV per case"></textarea>
 </template>
 
 <template name="proposal">
-  <div class="dt">
+  <div class="dt spaced">
     <div id="{{addressId}}" class="h100">
       <p class="vc">
         {{voteCount}}
@@ -94,7 +101,7 @@ Earn 0.5 FV per case"></textarea>
   </div>
 </template>
 <template name="voted">
-  <div class="case dt">
+  <div class="case dt bs">
     <p class="h100">You voted</p><pre id="arg{{vote.index}}" class="pos{{vote.position}} h100">{{vote.text}}</pre>
       <a class="btn reset h100">Change</a>
   </div>
@@ -118,8 +125,8 @@ Earn 0.5 FV per case"></textarea>
   </div>
 {{else}}
   {{#if hasChoice}}
-    <li class="case dt">
-      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}Voting{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+    <li class="case dt bs">
+      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs5"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
     {{#if hasOptions}}
@@ -145,7 +152,7 @@ Earn 0.5 FV per case"></textarea>
     <p>
       <ul class="cases">
         {{#each case in cases}}
-          <li class="case dt">
+          <li class="case dt bs5">
             <p class="h100">{{case.voteCount}}</p><pre id="arg{{case.index}}" class="pos{{case.position}} h100">{{case.text}}</pre>
           </li>
         {{/each}}

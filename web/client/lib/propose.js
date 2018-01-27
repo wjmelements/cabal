@@ -10,10 +10,11 @@ function awaitProposal(txhash) {
             return;
         }
         if (result.blockNumber) {
-            var pendingProposals = this.pendingProposals.get();
-            pendingProposals.filter((proposal)=>{
+            var pendingProposals = this.pendingProposals.get().slice(0);
+            pendingProposals = pendingProposals.filter((proposal)=>{
                 return proposal.txhash != txhash;
             });
+            this.pendingProposals.set(pendingProposals);
             Accounts.resize();
             return;
         }
@@ -39,11 +40,13 @@ Template.propose.events({
                 return;
             }
             console.log(txhash);
-            var pendingProposals = this.pendingProposals.get();
+            console.log(proposal);
+            var pendingProposals = this.pendingProposals.get().slice(0);
             pendingProposals.push({
                 txhash:txhash,
                 title:proposal,
             });
+            console.log(pendingProposals);
             awaitProposal.bind(this)(txhash);
             this.pendingProposals.set(pendingProposals);
         }.bind(Template.instance()));
