@@ -10,7 +10,7 @@ function awaitProposal(txhash) {
             return;
         }
         if (result.blockNumber) {
-            var pendingproposals = this.pendingProposals.get();
+            var pendingProposals = this.pendingProposals.get();
             pendingProposals.filter((proposal)=>{
                 return proposal.txhash != txhash;
             });
