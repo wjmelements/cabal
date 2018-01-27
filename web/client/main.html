@@ -11,12 +11,23 @@
   {{> feed}}
 </body>
 <template name="withoutweb3">
-  <div id="withoutweb3" hidden>
-    <p class="error">Your browser does not support Ethereum. {{> errorHelp}}</p>
-  </div>
-  <div id="withoutaccount" hidden>
-    <p class="error">There is no account associated with your Ethereum client.</p>
-  </div>
+  {{#if hasWeb3}}
+    {{#if unsupportedNetwork}}
+      <div id="withweb3">
+        <p class="error">FinneyVote does not support this network. Please switch to Rinkeby (4).</p>
+      </div>
+    {{else}}
+      {{#unless hasAccount}}
+      <div id="withoutaccount">
+        <p class="error">There is no account associated with your Ethereum client.</p>
+      </div>
+      {{/unless}}
+    {{/if}}
+  {{else}}
+    <div id="withoutweb3">
+      <p class="error">Your browser does not support Ethereum. {{> errorHelp}}</p>
+    </div>
+  {{/if}}
 </template>
 <template name="register">
   {{#if registered}}

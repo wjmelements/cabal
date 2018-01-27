@@ -12,16 +12,10 @@ Web3Loader.onWeb3(function() {
 var onCurrentAccount = [];
 function checkAccount(refreshId) {
     var hasWeb3 = (typeof web3 !== 'undefined') && (typeof web3.currentProvider.host === 'undefined');
+    Accounts.hasWeb3.set(hasWeb3);
     var hasAccount = hasWeb3 && web3 && web3.eth && web3.eth.accounts && (web3.eth.accounts.length > 0); 
+    Accounts.hasAccount.set(hasAccount);
     console.log("hasWeb3:"+hasWeb3+",hasAccount:"+hasAccount);
-    var noweb3 = document.getElementById("withoutweb3");
-    if (noweb3) {
-        noweb3.hidden = hasWeb3;
-    }
-    var withoutaccount = document.getElementById("withoutaccount");
-    if (withoutaccount) {
-        withoutaccount.hidden = !hasWeb3 || hasAccount;
-    }
     if (hasAccount) {
         while (onCurrentAccount.length) {
             onCurrentAccount.pop()();
@@ -34,7 +28,6 @@ function checkAccount(refreshId) {
         }, 500));
     }
 }
-checkAccount();
 
 Accounts = {
     check: checkAccount,
@@ -171,6 +164,9 @@ Accounts = {
         while(Accounts.onRegistrationChange.length) {
             Accounts.onRegistrationChange.pop()();
         }
-    }
+    },
 };
 Accounts.onResize = [];
+Accounts.hasWeb3 = new ReactiveVar(true);
+Accounts.hasAccount = new ReactiveVar(true);
+checkAccount();

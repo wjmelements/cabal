@@ -60,6 +60,7 @@
   background-color:#FCFF8B;
 }
 .error {
+  margin-top:0;
   display:inline-block;
   background-color:#FFDBDB;
   padding:1em;
