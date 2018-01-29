@@ -59,10 +59,12 @@ contract Vote is ERC20 {
         uint256 grant = (now - lastAccess) / 72 minutes;
         if (grant > 40) {
             grant = 40;
+            faucetDate[msg.sender] = now;
+        } else {
+            faucetDate[msg.sender] = lastAccess + grant * 72 minutes;
         }
         balances[msg.sender] += grant;
         supply += grant;
-        faucetDate[msg.sender] = now;
     }
 
     function availableFaucet(address _account)
@@ -83,15 +85,19 @@ contract Vote is ERC20 {
         balances[developerFund] += 5;
         balances[_votee] += 5;
     }
+    event NewOwner(address owner)
     function transferDeveloperFund(address _newDeveloperFund) external {
         require(msg.sender == developerFund);
         balances[_newDeveloperFund] += balances[developerFund];
         balances[developerFund] = 0;
         developerFund = _newDeveloperFund;
+        NewOwner(developerFund);
     }
+    event NewRegistry(address registry);
     function migrateAccountRegistry(AccountRegistry _newAccountRegistry) external {
         require(msg.sender == developerFund);
         accountRegistry = _newAccountRegistry;
+        NewRegistry(registry);
     }
 }
 interface ProposalInterface {
