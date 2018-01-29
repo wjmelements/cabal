@@ -220,10 +220,12 @@ contract Proposal is ProposalInterface {
         return proposal.argumentCount();
     }
     
+    // useful RPC but do not use in contracts
     function arguments(uint256 _index)
     public view
-    returns (ProposalLib.Argument) {
-        return proposal.arguments[_index];
+    returns (address source, ProposalLib.Position position, uint256 count, bytes text) {
+        ProposalLib.Argument storage argument = proposal.arguments[_index];
+        return (argument.source, argument.position, argument.count, argument.text);
     }
 
     function argumentSource(uint256 _index)
