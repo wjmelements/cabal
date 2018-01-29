@@ -50,7 +50,7 @@ Accounts = {
             console.error("No known AccountRegistry on this network:" + Net.id.get());
         case "4":
             console.log("Using Rinkeby");
-            return resultFn("0xbACD997eBbE8A539f7709ffe2709c0Ae8085FB82");
+            return resultFn("0x40f30f054c38ec50e934161db7d40472c51e73cf");
         }
     },
     isRegistered(address, resultFn) {

@@ -1,0 +1,2 @@
+compare: 0xae5a263983616d7f1b9f5f870aaeba07aa105f534977b8601a1c4177f3c46f1e and 0xf3d8895cfac5c1afdbb0681fb921bd3b698a0ebfb9b5c001c8e26983e4551ce8
+libraries do not currently save gas :(
