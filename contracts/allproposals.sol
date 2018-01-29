@@ -102,7 +102,7 @@ interface ProposalInterface {
     function voteCount() public view returns (uint256);
 }
 library ProposalLib {
-    Vote constant voteToken = Vote(0xdead);//FIXME
+    Vote constant voteToken = Vote(0xcb7e2789573ca3ec96547509d612f3a9acd29945);// must redeploy every change
     enum Position {
         SKIP,
         APPROVE,
