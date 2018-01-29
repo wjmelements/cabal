@@ -64,7 +64,6 @@ Proposals = {
                 console.error(err);
                 return;
             }
-            console.log(result);
             if (!proposal[index]) {
                 var pos = result[1].c[0];
                 var voteCount = result[2].c[0];

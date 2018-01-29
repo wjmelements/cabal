@@ -65,6 +65,8 @@ function awaitRegistered(account) {
 }
 Template.register.events({
     "click .submit"(event) {
+        // if we are not registered, canDeregister is still true
+        // because it has been more than 7 days since we last registered
         if (!Template.instance().canDeregister.get()) {
             return;
         }
@@ -87,6 +89,12 @@ Template.register.events({
     },
     "mouseover .submit"(event) {
         if (!accountRegistry) {
+            return;
+        }
+        if (Template.instance().registering.get()) {
+            return;
+        }
+        if (!Template.instance().canDeregister.get()) {
             return;
         }
         Template.instance().showCost.set(true);
