@@ -37,7 +37,7 @@
   {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
 </template>
 <template name="balance">
-<span class="done h100">{{balance}} FV{{#if finney}}, {{finney}} finney{{/if}}</span>
+<span class="done h100">{{balance}} FV</span>
 </template>
 <template name="gas">
 <span class="done h100">Show: <select>
