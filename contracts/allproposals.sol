@@ -85,7 +85,7 @@ contract Vote is ERC20 {
         balances[developerFund] += 5;
         balances[_votee] += 5;
     }
-    event NewOwner(address owner)
+    event NewOwner(address owner);
     function transferDeveloperFund(address _newDeveloperFund) external {
         require(msg.sender == developerFund);
         balances[_newDeveloperFund] += balances[developerFund];
@@ -97,7 +97,7 @@ contract Vote is ERC20 {
     function migrateAccountRegistry(AccountRegistry _newAccountRegistry) external {
         require(msg.sender == developerFund);
         accountRegistry = _newAccountRegistry;
-        NewRegistry(registry);
+        NewRegistry(accountRegistry);
     }
 }
 interface ProposalInterface {
@@ -662,6 +662,13 @@ contract AccountRegistry is AllProposals {
         info.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
+    }
+
+    function deregistrationDate()
+    public view
+    returns (uint256)
+    {
+        return infoMap[msg.sender].deregistrationDate;
     }
 
     function canDeregister(address _voter)
