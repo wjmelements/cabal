@@ -121,42 +121,38 @@ library ProposalLib {
         Argument[] arguments;
     }
     function getPosition(Storage storage self, address _user)
-    public view
+    internal view
     returns (Position) {
         return self.arguments[self.votes[_user]].position;
     }
 
-    function pays(Storage storage self, uint256 _argumentId)
+    function vote(Storage storage self, uint256 _argumentId)
     internal {
         address destination = self.arguments[_argumentId].source;
         voteToken.vote(msg.sender, destination);
-    }
-    function vote(Storage storage self, uint256 _argumentId)
-    internal {
         self.arguments[self.votes[msg.sender]].count--;
         self.arguments[
             self.votes[msg.sender] = _argumentId
         ].count++;
-        pays(self, _argumentId);
     }
 
-    function argumentCount(Storage storage self) public view returns (uint256) {
+    function argumentCount(Storage storage self) internal view returns (uint256) {
         return self.arguments.length;
     }
     function argumentSource(Storage storage self, uint256 _index)
-    public view
+    internal view
     returns (address) {
         return self.arguments[_index].source;
     }
 
     function argumentPosition(Storage storage self, uint256 _index)
-    public view
+    internal view
     returns (Position) {
         return self.arguments[_index].position;
     }
 
     function argumentVoteCount(Storage storage self, uint256 _index)
-    public view
+    internal view
     returns (uint256) {
         return self.arguments[_index].count;
     }
@@ -187,11 +183,12 @@ library ProposalLib {
     function argue(Storage storage self, Position _position, bytes _text)
     internal
     returns (uint256) {
+        address destination = self.arguments[0].source;
+        voteToken.vote(msg.sender, destination);
         uint256 argumentId = self.arguments.length;
         self.arguments.push(Argument(msg.sender, _position, 1, _text));
         self.arguments[self.votes[msg.sender]].count--;
         self.votes[msg.sender] = argumentId;
-        pays(self, 0);
         return argumentId;
     }
 
