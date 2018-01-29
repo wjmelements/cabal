@@ -121,38 +121,28 @@ library ProposalLib {
         Argument[] arguments;
     }
     function getPosition(Storage storage self, address _user)
-    internal view
+    public view
     returns (Position) {
         return self.arguments[self.votes[_user]].position;
     }
 
-    function vote(Storage storage self, uint256 _argumentId)
-    internal {
-        address destination = self.arguments[_argumentId].source;
-        voteToken.vote(msg.sender, destination);
-        self.arguments[self.votes[msg.sender]].count--;
-        self.arguments[
-            self.votes[msg.sender] = _argumentId
-        ].count++;
-    }
-
-    function argumentCount(Storage storage self) internal view returns (uint256) {
+    function argumentCount(Storage storage self) public view returns (uint256) {
         return self.arguments.length;
     }
     function argumentSource(Storage storage self, uint256 _index)
-    internal view
+    public view
     returns (address) {
         return self.arguments[_index].source;
     }
 
     function argumentPosition(Storage storage self, uint256 _index)
-    internal view
+    public view
     returns (Position) {
         return self.arguments[_index].position;
     }
 
     function argumentVoteCount(Storage storage self, uint256 _index)
-    internal view
+    public view
     returns (uint256) {
         return self.arguments[_index].count;
     }
@@ -170,18 +160,28 @@ library ProposalLib {
     }
 
     function voteCount(Storage storage self)
-    internal view
+    public view
     returns (uint256) {
         return -self.arguments[0].count;
     }
     function source(Storage storage self)
-    internal view
+    public view
     returns (address) {
         return self.arguments[0].source;
     }
 
+    function vote(Storage storage self, uint256 _argumentId)
+    public {
+        address destination = self.arguments[_argumentId].source;
+        voteToken.vote(msg.sender, destination);
+        self.arguments[self.votes[msg.sender]].count--;
+        self.arguments[
+            self.votes[msg.sender] = _argumentId
+        ].count++;
+    }
+
     function argue(Storage storage self, Position _position, bytes _text)
-    internal
+    public
     returns (uint256) {
         address destination = self.arguments[0].source;
         voteToken.vote(msg.sender, destination);
@@ -193,7 +193,7 @@ library ProposalLib {
     }
 
     function init(Storage storage self, address _source, bytes _resolution)
-    internal {
+    public {
         self.arguments.push(ProposalLib.Argument(_source, Position.SKIP, 0, _resolution));
     }
 
