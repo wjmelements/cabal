@@ -4,3 +4,7 @@ Cabal/Cabal.xcodeproj/xcuserdata/
 *.swo
 core/.make
 core/.pass
+web/public/*.pdf
+whitepaper.pdf
+*.aux
+*.log

@@ -6,4 +6,4 @@ papers: whitepaper.pdf
 %.pdf: %.tex
 	pdflatex $<
 web/public/%.pdf: %.pdf
-	ln -s ../$< $@
+	cp $< $@
