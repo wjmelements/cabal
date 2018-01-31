@@ -107,6 +107,13 @@ ul.pos,ul.cases {
 h2.prop {
   margin-bottom:0;
 }
+#nux {
+  padding:0.5em;
+}
+.pitch {
+  text-align:center;
+  font-size:larger;
+}
 p.instr {
   margin-top:0.5em;
 }

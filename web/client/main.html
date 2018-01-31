@@ -3,6 +3,7 @@
 </head>
 
 <body>
+  {{> nux}}
   <div class="btmpad dt">
     {{> register}}{{> claim}}{{> balance}}{{> gas}}
   </div>
@@ -28,6 +29,20 @@
       <p class="error">Your browser does not support Ethereum. {{> errorHelp}}</p>
     </div>
   {{/if}}
+</template>
+<template name="nux">
+  {{#unless registered}}
+    <div id="nux">
+      <p class="pitch">
+        FinneyVote is a decentralized forum that rewards persuasive discourse
+      </p>
+      <p class="">
+        Registering an account requires a fully-refundable deposit of 1 finney.
+        The deposit insulates the system from <a href="https://en.wikipedia.org/wiki/Sybil_attack">Sybil attacks</a>.
+        Registered accounts get 2 FinneyVotes per day.
+      </p>
+    </div>
+  {{/unless}}
 </template>
 <template name="register">
   {{#if registered}}
