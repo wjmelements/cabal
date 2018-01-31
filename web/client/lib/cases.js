@@ -4,18 +4,17 @@ Template.cases.onCreated(function() {
     this.choice = this.data.choice;
     this.voted = this.data.voted;
     this.onVote = this.data.refresh;
-    var pos = parseInt(this.position.get().substr(3));
+    this.cases = this.data.cases;
+    var pos = this.position.get() ? parseInt(this.position.get().substr(3)) : undefined;
     this.pos = new ReactiveVar(pos);
+    this.filter = new ReactiveVar(false);
     this.skip = new ReactiveVar(pos == 0);
-    this.cases = new ReactiveVar();
-    this.inv = new ReactiveVar(this.choice.get());
     this.voting = new ReactiveVar(false);
     this.cannotVote = new ReactiveVar(true);
     this.cannotArgue = new ReactiveVar(true);
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.cost = new ReactiveVar();
-    onChoice();
 });
 Template.cases.onRendered(function() {
     this.balanceListener = function () {
@@ -45,11 +44,11 @@ Template.cases.helpers({
     cases() {
         return Template.instance().cases.get();
     },
-    inverse() {
-        return Template.instance().inv.get();
+    filter() {
+        return Template.instance().filter.get();
     },
     hasChoice() {
-        return Template.instance().inv.get();
+        return Template.instance().choice.get();
     },
     hasOptions() {
         var cases = Template.instance().cases.get();
@@ -110,15 +109,6 @@ function onChange(target) {
         this.cannotArgue.set(!target.value || Balance.get() < 1);
     }
 }
-function onChoice() {
-    var cases;
-    if (Template.instance().inv.get()) {
-        cases = Proposals.argumentsOpposing(Template.instance().address.get(), Template.instance().pos.get());
-    } else {
-        cases = Proposals.argumentsSupporting(Template.instance().address.get(), Template.instance().pos.get());
-    }
-    Template.instance().cases.set(cases);
-}
 function checkArgument(address, i, argumentCount, customCase) {
     Proposals.getArgument(address, i, function(argument) {
         if (argument.text == customCase.text) {
@@ -169,20 +159,36 @@ Template.cases.events({
     },
     "click .case pre,.case li,.pos li"(event) {
         var pos = parseInt(event.target.className.substr(3));
-        Template.instance().pos.set(pos);
-        Template.instance().position.set('pos'+pos);
-        Template.instance().skip.set(pos == 0);
+        var instance = Template.instance();
+        instance.pos.set(pos);
+        instance.position.set('pos'+pos);
+        instance.skip.set(pos == 0);
+        if (instance.filter.get()) {
+            console.log('but');
+            instance.cases.set(Proposals.argumentsSupporting(instance.address.get(), pos));
+        }
         var choice = parseInt(event.target.id.substr(3));
-        localStorage.setItem('choice'+Template.instance().address.get(), choice);
+        localStorage.setItem('choice'+instance.address.get(), choice);
         if (!choice) {
-            onChoice();
             return;
         }
-        Template.instance().inv.set(true);
-        Proposals.getArgument(Template.instance().address.get(), choice, function(choice) {
-            Template.instance().choice.set(choice);
-            onChoice();
+        Proposals.getArgument(instance.address.get(), choice, function(choice) {
+            instance.choice.set(choice);
         });
+    },
+    "click .filter"(event) {
+        var instance = Template.instance();
+        var filter = !instance.filter.get();
+        var address = instance.address.get();
+        var pos = instance.pos.get();
+        var cases;
+        if (filter) {
+            cases = Proposals.argumentsSupporting(address, instance.pos.get());
+        } else {
+            cases = Proposals.argumentsOpposing(address, 0);
+        }
+        instance.cases.set(cases);
+        instance.filter.set(filter);
     },
     "mouseover .vote"(event) {
         if (Template.instance().cannotVote.get()) {
@@ -206,14 +212,15 @@ Template.cases.events({
         Template.instance().showCost.set(false);
     },
     "click .vote"(event) {
-        if (Template.instance().cannotVote.get()) {
+        var instance = Template.instance();
+        if (instance.cannotVote.get()) {
             return;
         }
-        if (Template.instance().voting.get()) {
+        if (instance.voting.get()) {
             return;
         }
-        var choice = Template.instance().choice.get();
-        var address = Template.instance().address.get();
+        var choice = instance.choice.get();
+        var address = instance.address.get();
         var choiceIndex = choice.index;
         Proposals.vote(address, choiceIndex, function (error, result) {
             if (error) {
@@ -225,20 +232,21 @@ Template.cases.events({
             Balance.set(Balance.get() - 1);
             Balance.onChange();
             awaitVoted.bind(this)(address, choiceIndex, choice);
-        }.bind(Template.instance()));
+        }.bind(instance));
     },
     "mouseover #custom-arg a.btn"(event) {
-        if (Template.instance().cannotArgue.get()) {
+        var instance = Template.instance();
+        if (instance.cannotArgue.get()) {
             return;
         }
-        Proposals[Template.instance().address.get()].argue.estimateGas(Template.instance().pos.get(), Template.instance().find('#custom-arg textarea').value, function (error, gas) {
+        Proposals[instance.address.get()].argue.estimateGas(instance.pos.get(), instance.find('#custom-arg textarea').value, function (error, gas) {
             if (error) {
                 console.error(error);
                 return;
             }
             this.cost.set(GasRender.toString(gas));
-        }.bind(Template.instance()));
-        Template.instance().showCost.set(true);
+        }.bind(instance));
+        instance.showCost.set(true);
     },
     "mouseout #custom-arg a.btn"(event) {
         Template.instance().showCost.set(false);
@@ -273,7 +281,6 @@ Template.cases.events({
                     this.choice.set(argument);
                     this.txhash.set(txhash);
                     this.voting.set(true);
-                    this.inv.set(true);
                     Balance.set(Balance.get() - 1);
                     awaitArgument.bind(this)(address, argumentCount, argument);
                 }.bind(this)
@@ -283,5 +290,6 @@ Template.cases.events({
     "click .reset"(event) {
         Template.instance().position.set(undefined);
         Template.instance().choice.set(undefined);
+        Template.instance().skip.set(false);
     }
 });

@@ -23,6 +23,8 @@ function refresh() {
         }
         this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
         console.log(this.gradient);
+        var cases = Proposals.argumentsOpposing(this.address.get(), 0);
+        this.cases.set(cases);
         Proposals.getMyVote(address, function(myVote) {
             if (!myVote) {
                 return;
@@ -39,6 +41,7 @@ Template.proposal.onCreated(function() {
     this.positionChoice = new ReactiveVar();
     this.title = new ReactiveVar("Loading...");
     this.voted = new ReactiveVar();
+    this.cases = new ReactiveVar();
     this.index = this.data.index;
     this.address = new ReactiveVar();
     this.argumentChoice = new ReactiveVar();
@@ -48,8 +51,9 @@ Template.proposal.onCreated(function() {
     document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
-        var storedChoice = localStorage.getItem('choice'+this.address.get());
-        if (storedChoice) {
+        // TODO load stored choice again
+        // var storedChoice = localStorage.getItem('choice'+this.address.get());
+        if (false) {
             Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
                 this.argumentChoice.set(argument);
                 this.positionChoice.set('pos'+argument.position);
@@ -71,11 +75,12 @@ Template.proposal.helpers({
     },
     page() {
         var instance = Template.instance();
-        return instance.positionChoice.get()
-            ? instance.voted.get() && (instance.argumentChoice.get() && instance.argumentChoice.get().index) == (instance.voted.get() && instance.voted.get().index)
+        if (!instance.address.get()) {
+            return "loading";
+        }
+        return instance.voted.get() && (instance.argumentChoice.get() && instance.argumentChoice.get().index) == (instance.voted.get() && instance.voted.get().index)
                 ? "voted"
-                : "cases"
-            : "positions";
+                : "cases";
     },
     choice() {
         return Template.instance().positionChoice.get();
@@ -90,6 +95,7 @@ Template.proposal.helpers({
             choice:Template.instance().argumentChoice,
             voted:Template.instance().voted,
             refresh:Template.instance().refresh,
+            cases:Template.instance().cases,
         };
     },
     addressId() {
@@ -104,7 +110,6 @@ Template.proposal.events({
     "click ul.pos li"(event) {
         Template.instance().positionChoice.set(event.target.className);
         if (event.target.className.startsWith("pos0")) {
-            localStorage.setItem('choice'+Template.instance().address.get(), 0);
         }
     }
 });

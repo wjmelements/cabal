@@ -91,6 +91,16 @@ Earn 0.5 FV per case"></textarea>
     {{> feeditem index=lastIndex}}
   {{/unless}}
 </template>
+<template name="loading">
+  <div class="dt bs5">
+    <div class="h100">
+      <div class="loader"></div>
+    </div>
+    <div class="h100">
+      <p>Loading</p>
+    </div>
+  </div>
+</template>
 
 <template name="feeditem">
     {{> proposal index=index}}
@@ -102,9 +112,9 @@ Earn 0.5 FV per case"></textarea>
 <template name="proposal">
   <div class="dt spaced">
     <div id="{{addressId}}" class="h100">
-      <p class="vc">
+      <div class="vc">
         {{voteCount}}
-      </p>
+      </div>
     </div>
     <div class="ib">
       <h2 class="prop inline">{{proposal}}</h2>
@@ -120,11 +130,13 @@ Earn 0.5 FV per case"></textarea>
 </template>
 <template name="positions">
   <ul class="pos">
-    <li class="pos1">Approve</li>
-    <li class="pos2">Amend</li>
-    <li class="pos3">LOL</li>
-    <li class="pos4">Reject</li>
-    <li class="pos0">Skip</li>
+    <div class="ltr">
+      <li class="pos1">Approve</li>
+      <li class="pos2">Amend</li>
+      <li class="pos3">LOL</li>
+      <li class="pos4">Reject</li>
+      <li class="pos0">Skip</li>
+    </div>
   </ul>
   <p class="instr">
     Determine your position on the topic.
@@ -141,51 +153,44 @@ Earn 0.5 FV per case"></textarea>
       <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
-    {{#if hasOptions}}
-      <p class="instr">
-        Please consider the following opposing views.
-      </p>
-    {{/if}}
   {{else}}
-    <div class="pos">
-      You chose
-      <li class="{{position}} inline">
-        {{positionName}}
-      </li>
-      Switch to
-      <ul class="inline pos">
-      {{#each otherPosition in otherPositions}}
-        <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
-      {{/each}}
-      </ul>
-    </div>
+    {{#unless hasOptions}}
+      <p class="instr">
+        Nobody has a case for this {{#if filter}}position{{else}}proposal{{/if}} yet.
+      </p>
+    {{/unless}}
   {{/if}}
   {{#if hasOptions}}
-    <p>
-      <ul class="cases">
+    <ul class="cases">
+      <div class="ltr">
         {{#each case in cases}}
           <li class="case dt bs5">
             <p class="h100">{{case.voteCount}}</p><pre id="arg{{case.index}}" class="pos{{case.position}} h100">{{case.text}}</pre>
           </li>
         {{/each}}
-      </ul>
-    </p>
+      </div>
+    </ul>
   {{/if}}
   {{#unless hasChoice}}
-    {{#if hasOptions}}
-      <p class="instr">
-        Vote with an existing case, or write your own.
-      </p>
-    {{else}}
-      <p class="instr">
-        Nobody has a case for this position yet.
-      </p>
-    {{/if}}
-    <div id="custom-arg" class="dt">
-      <textarea class="{{position}} case h100" placeholder="Write a succinct case
+    {{#if position}}
+      <div id="custom-arg" class="dt">
+        <textarea class="{{position}} case h100" placeholder="Write a succinct case
 Earn 0.5 FV per vote"></textarea>
-      <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">Submit{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
-    </div>
+        <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+      </div>
+      <div class="switch pos">
+        <li class="{{position}} filter">Filter</li>
+        <div class="pc"></div>
+        Switch to
+        <ul class="inline pos">
+        {{#each otherPosition in otherPositions}}
+          <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
+        {{/each}}
+        </ul>
+      </div>
+    {{else}}
+      {{> positions}}
+    {{/if}}
   {{/unless}}
 {{/if}}
 </template>
