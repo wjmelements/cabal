@@ -30,6 +30,10 @@
   width:1.45em;
   background:linear-gradient(to right, #888888 0%, white 100%);
 }
+.inf {
+  width:50%;
+  font-size:large;
+}
 .h100 {
   height:100%;
   display:table-cell;
@@ -37,6 +41,13 @@
 }
 .btn.h100 {
   display:table-cell;
+}
+td.h100 {
+  text-align:center;
+}
+img.ltc {
+  max-width:50%;
+  height:unset;
 }
 .w1 {
   width:2px;

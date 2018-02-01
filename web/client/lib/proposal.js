@@ -27,6 +27,10 @@ function refresh() {
         this.cases.set(cases);
         Proposals.getMyVote(address, function(myVote) {
             if (!myVote) {
+                var choice = this.argumentChoice.get();
+                if (choice) {
+                    this.cases.set(cases.filter(function(a) { return a.index != choice.index;}));
+                }
                 return;
             }
             Proposals.getArgument(address, myVote, function(argument) {

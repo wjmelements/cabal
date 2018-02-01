@@ -34,13 +34,28 @@
   {{#unless registered}}
     <div id="nux">
       <p class="pitch">
-        FinneyVote is a decentralized forum that rewards persuasive discourse
+        <strong>FinneyVote</strong> is a decentralized forum that rewards <b><i>persuasive discourse</i></b>
       </p>
-      <p class="">
-        Registering an account requires a fully-refundable deposit of 1 finney.
-        The deposit insulates the system from <a href="https://en.wikipedia.org/wiki/Sybil_attack">Sybil attacks</a>.
-        Registered accounts get 2 FinneyVotes per day.
-      </p>
+      <table>
+        <td class="h100">
+          <img class="ltc" src="ethereum-1.svg"/>
+        </td>
+        <div class="h100 inf">
+          <p>
+            Spend FV voting on proposals.
+          </p>
+          <p>
+            FV flow from staked finney: one for each account in the voting population.
+          </p>
+          <p>
+            Registered users earn 2 FV per day, plus what they earn from their cases and proposals.
+          </p>
+          <p>
+            After one week, you can deregister and reclaim your finney.
+          </p>
+          {{>register}}
+        </div>
+      </table>
     </div>
   {{/unless}}
 </template>
