@@ -298,6 +298,7 @@ Template.cases.events({
     "click .reset"(event) {
         Template.instance().position.set(undefined);
         Template.instance().choice.set(undefined);
+        localStorage.setItem('choice'+Template.instance().address.get(), "");
         Template.instance().skip.set(false);
     }
 });

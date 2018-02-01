@@ -51,9 +51,8 @@ Template.proposal.onCreated(function() {
     document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
-        // TODO load stored choice again
-        // var storedChoice = localStorage.getItem('choice'+this.address.get());
-        if (false) {
+        var storedChoice = localStorage.getItem('choice'+this.address.get());
+        if (storedChoice) {
             Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
                 this.argumentChoice.set(argument);
                 this.positionChoice.set('pos'+argument.position);

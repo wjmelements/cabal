@@ -12,5 +12,6 @@ Template.voted.events({
     "click .reset"(event) {
         Template.instance().position.set(undefined);
         Template.instance().choice.set(undefined);
+        localStorage.setItem('choice'+Template.instance().address.get(), "");
     },
 });
