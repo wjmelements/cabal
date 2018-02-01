@@ -150,6 +150,22 @@ function awaitVoted(address, choiceIndex, argument) {
         }.bind(this), 5000);
     }.bind(this));
 }
+function updateCases() {
+    var cases;
+    var address = this.address.get();
+    if (this.filter.get()) {
+        cases = Proposals.argumentsSupporting(address, this.pos.get());
+    } else {
+        cases = Proposals.argumentsOpposing(address, 0);
+    }
+    var choice = this.choice.get();
+    if (choice) {
+        cases = cases.filter(function (a) {
+            return a.index != choice.index;
+        });
+    }
+    this.cases.set(cases);
+}
 Template.cases.events({
     "keyup textarea.case"(event) {
         onChange.bind(Template.instance())(event.target);
@@ -164,7 +180,6 @@ Template.cases.events({
         instance.position.set('pos'+pos);
         instance.skip.set(pos == 0);
         if (instance.filter.get()) {
-            console.log('but');
             instance.cases.set(Proposals.argumentsSupporting(instance.address.get(), pos));
         }
         var choice = parseInt(event.target.id.substr(3));
@@ -174,21 +189,14 @@ Template.cases.events({
         }
         Proposals.getArgument(instance.address.get(), choice, function(choice) {
             instance.choice.set(choice);
+            updateCases.bind(instance)()
         });
     },
     "click .filter"(event) {
         var instance = Template.instance();
         var filter = !instance.filter.get();
-        var address = instance.address.get();
-        var pos = instance.pos.get();
-        var cases;
-        if (filter) {
-            cases = Proposals.argumentsSupporting(address, instance.pos.get());
-        } else {
-            cases = Proposals.argumentsOpposing(address, 0);
-        }
-        instance.cases.set(cases);
         instance.filter.set(filter);
+        updateCases.bind(instance)();
     },
     "mouseover .vote"(event) {
         if (Template.instance().cannotVote.get()) {

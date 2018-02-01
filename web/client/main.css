@@ -27,7 +27,7 @@
 .bar {
   height:0.5em;
   background-color:black;
-  width:5%;
+  width:1.45em;
   background:linear-gradient(to right, #888888 0%, white 100%);
 }
 .h100 {
@@ -106,6 +106,9 @@
 }
 .btmpad {
   padding-bottom:0.8em;
+}
+div.case {
+  margin-left:1em;
 }
 li.case {
   list-style: none;
