@@ -188,9 +188,11 @@ Earn 0.5 FV per vote"></textarea>
     </ul>
   {{else}}
     {{#if filter}}
-    <p class="instr">
-      Nobody has a case for this position yet.
-    </p>
+      {{#unless hasChoice}}
+        <p class="instr">
+          Nobody has a case for this position yet.
+        </p>
+      {{/unless}}
     {{/if}}
   {{/if}}
 {{/if}}
