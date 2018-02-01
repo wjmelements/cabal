@@ -153,11 +153,6 @@ Earn 0.5 FV per case"></textarea>
       <a class="btn reset h100">Reset</a>
     </li>
   {{else}}
-    {{#unless hasOptions}}
-      <p class="instr">
-        Nobody has a case for this {{#if filter}}position{{else}}proposal{{/if}} yet.
-      </p>
-    {{/unless}}
     {{#unless hasChoice}}
       {{#if position}}
         <div id="custom-arg" class="dt">
@@ -169,11 +164,11 @@ Earn 0.5 FV per vote"></textarea>
           <li class="{{position}} filter">Filter</li>
           <div class="pc"></div>
           Switch to
-          <ul class="inline pos">
-          {{#each otherPosition in otherPositions}}
-            <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
-          {{/each}}
-          </ul>
+          <span class="inline pos ltr">
+              {{#each otherPosition in otherPositions}}
+                <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
+              {{/each}}
+          </span>
         </div>
       {{else}}
         {{> positions}}
@@ -190,6 +185,12 @@ Earn 0.5 FV per vote"></textarea>
         {{/each}}
       </div>
     </ul>
+  {{else}}
+    {{#if filter}}
+    <p class="instr">
+      Nobody has a case for this position yet.
+    </p>
+    {{/if}}
   {{/if}}
 {{/if}}
 </template>

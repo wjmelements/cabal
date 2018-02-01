@@ -7,7 +7,6 @@
 }
 .ltr {
   direction:ltr;
-  margin-left:0.35em;
 }
 .dt {
   display:table;
@@ -104,6 +103,7 @@
 }
 li.case {
   list-style: none;
+  margin-left:0.35em;
 }
 .case pre {
   border-style: solid;
