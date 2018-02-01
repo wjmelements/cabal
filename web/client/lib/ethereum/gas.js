@@ -23,8 +23,31 @@ GasRender = {
         cost = Math.round(cost * 100) / 100;
         return cost;
     },
+    showFinney() {
+        var method = GasRender.method.get();
+        if (method == "gas") {
+            return 1; // TODO divide by gas cost
+        }
+        if (method == "finney") {
+            return 1;
+        }
+        if (method == "szabo") {
+            return 1000;
+        }
+        if (method == "ether") {
+            return .001;
+        }
+        if (method != "usd") {
+            throw new Error("Unsupported:"+method);
+        }
+        return 1;// TODO divide by usd
+    },
+    update() {
+        GasRender.finney.set(GasRender.showFinney());
+    },
 }
-GasRender.method = new ReactiveVar();
+GasRender.method = new ReactiveVar('ether');
+GasRender.finney = new ReactiveVar(GasRender.showFinney());
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);

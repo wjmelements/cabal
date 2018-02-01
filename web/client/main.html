@@ -4,9 +4,6 @@
 
 <body>
   {{> nux}}
-  <div class="btmpad dt">
-    {{> register}}{{> claim}}{{> balance}}{{> gas}}
-  </div>
   {{> withoutweb3}}
   {{> propose}}
   {{> feed}}
@@ -15,23 +12,27 @@
   {{#if hasWeb3}}
     {{#if unsupportedNetwork}}
       <div id="withweb3">
-        <p class="error">FinneyVote does not support this network. Please switch to Rinkeby (4).</p>
+        <p class="error ib">FinneyVote does not support this network. Please switch to Rinkeby (4).</p>
       </div>
     {{else}}
       {{#unless hasAccount}}
       <div id="withoutaccount">
-        <p class="error">There is no account associated with your Ethereum client.</p>
+        <p class="error ib">There is no account associated with your Ethereum client.</p>
       </div>
       {{/unless}}
     {{/if}}
   {{else}}
-    <div id="withoutweb3">
-      <p class="error">Your browser does not support Ethereum. {{> errorHelp}}</p>
-    </div>
+    <table id="withoutweb3">
+      <p class="error h100">Your browser does not support Ethereum. {{> errorHelp}}</p><td class="h100"><img src="/metamask.png"/></td>
+    </table>
   {{/if}}
 </template>
 <template name="nux">
-  {{#unless registered}}
+  {{#if registered}}
+    <div class="btmpad dt">
+      {{> register}}{{> claim}}{{> balance}}{{> gas}}
+    </div>
+  {{else}}
     <div id="nux">
       <p class="pitch">
         <strong>FinneyVote</strong> is a decentralized forum that rewards <b><i>persuasive discourse</i></b>
@@ -57,10 +58,10 @@
         </div>
       </table>
     </div>
-  {{/unless}}
+  {{/if}}
 </template>
 <template name="register">
-    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div><div class="price">{{price}}</div>{{/if}}</a>
 </template>
 <template name="claim">
   {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
@@ -216,7 +217,7 @@ Earn 0.5 FV per vote"></textarea>
 {{> Template.dynamic template=browserHelp }}
 </template>
 <template name="firefoxHelp">
-Please install the (<a href="https://github.com/MetaMask/">open source</a>) <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/?src=api">Metamask Firefox Plugin</a>.
+Please install the (<a href="https://github.com/MetaMask/">open source</a>) <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/?src=api">Metamask Firefox Plugin</a>>.
 </template>
 
 <template name="chromeHelp">

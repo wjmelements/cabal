@@ -19,6 +19,7 @@ Template.register.onCreated(function() {
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
+    this.price = GasRender.finney;
     refresh.bind(this)();
 });
 Template.register.helpers({
@@ -42,6 +43,9 @@ Template.register.helpers({
     },
     txhash() {
         return Template.instance().txhash.get();
+    },
+    price() {
+        return Template.instance().price.get();
     }
 });
 // TODO compare to checking tx status
