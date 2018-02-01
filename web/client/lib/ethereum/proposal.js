@@ -50,12 +50,12 @@ Proposals = {
             resultFn(argCount);
         });
     },
-    getArgument(address, index, resultFn) {
+    getArgument(address, index, resultFn, refresh) {
         if (!Proposals[address]) {
             Proposals.init(address);
         }
         var proposal = Proposals[address];
-        if (proposal[index]) {
+        if (!refresh && proposal[index]) {
             resultFn(proposal[index]);
             return;
         }
@@ -64,7 +64,7 @@ Proposals = {
                 console.error(err);
                 return;
             }
-            if (!proposal[index]) {
+            if (refresh || !proposal[index]) {
                 var pos = result[1].c[0];
                 var voteCount = result[2].c[0];
                 // FIXME support uint256 for voteCount
@@ -75,19 +75,24 @@ Proposals = {
                     voteCount:voteCount,
                     text:bytesToStr(result[3])
                 };
-                proposal[index] = argument;
                 var casesKey = 'pos'+pos;
                 var voteKey = 'votes'+pos;
-                if (proposal[casesKey]) {
-                    proposal[casesKey].push(argument);
-                } else {
-                    proposal[casesKey] = [argument];
+                if (!proposal[index]) {
+                    if (proposal[casesKey]) {
+                        proposal[casesKey].push(index);
+                    } else {
+                        proposal[casesKey] = [index];
+                    }
                 }
                 if (typeof proposal[voteKey] == "undefined") {
                     proposal[voteKey] = voteCount;
                 } else {
+                    if (proposal[index]) {
+                        voteCount -= proposal[index].voteCount;
+                    }
                     proposal[voteKey] += voteCount;
                 }
+                proposal[index] = argument;
             }
             resultFn(Proposals[address][index]);
         });
@@ -102,14 +107,16 @@ Proposals = {
                 }
             }
             for (var i = 1; i < argumentCount; i++) {
-                Proposals.getArgument(address, i, function(){checkDone(counter);});
+                Proposals.getArgument(address, i, function(){checkDone(counter);}, true);
             }
         });
     },
     argumentsSupporting(address, position) {
         // FIXME these aren't always prefetched
         var arr = Proposals[address]['pos'+position];
-        return arr && arr.sort(function(a,b) {
+        return arr && arr.map(function(index) {
+            return Proposals[address][index];
+        }).sort(function(a,b) {
             return b.voteCount - a.voteCount;
         });
     },
@@ -124,10 +131,11 @@ Proposals = {
                 inverse = inverse.concat(proposal['pos'+pos]);
             }
         }
-        inverse.sort(function (a,b) {
+        return inverse.map(function(index) {
+            return proposal[index];
+        }).sort(function (a,b) {
             return b.voteCount - a.voteCount;
         });
-        return inverse;
     },
     vote(address, argumentIndex, resultFn) {
         Proposals[address].vote(argumentIndex, {gasPrice:parseInt(GasRender.gasPrice.get()*1e12)}, resultFn);
