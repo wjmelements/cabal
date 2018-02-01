@@ -55,7 +55,7 @@ Token = {
         });
     },
 };
-Balance = new ReactiveVar();
+Balance = new ReactiveVar(0);
 Balance.listeners = [];
 Balance.onChange = function() {
     for (var i = 0; i < Balance.listeners.length; i++) {

@@ -61,7 +61,6 @@ function fetchETHPrice() {
             var response = JSON.parse(xmlHttp.responseText);
             console.log(response);
             var etherPriceUSD = response.USD;
-            console.log("Price is " + etherPriceUSD);
             GasRender.etherPriceUSD.set(etherPriceUSD);
             xmlHttp.onreadystatechange = null;
         }

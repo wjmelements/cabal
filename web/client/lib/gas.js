@@ -1,6 +1,6 @@
 Template.gas.onCreated(function() {
     var priorMethod = localStorage.getItem('gasmethod');
-    GasRender.method.set(priorMethod || 'finney');
+    GasRender.method.set(priorMethod || 'usd');
 });
 Template.gas.onRendered(function() {
     this.find('select').value = GasRender.method.get();

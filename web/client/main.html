@@ -45,8 +45,7 @@
   {{/unless}}
 </template>
 <template name="register">
-  {{#if registered}}
-    <span class="done h100">Registered!</span>{{/if}}<a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
 </template>
 <template name="claim">
   {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
@@ -138,9 +137,9 @@ Earn 0.5 FV per case"></textarea>
       <li class="pos0">Skip</li>
     </div>
   </ul>
-  <p class="instr">
+  <div class="instr">
     Determine your position on the topic.
-  </p>
+  </div>
 </template>
 <template name="cases">
 {{#if skip}}
@@ -159,6 +158,27 @@ Earn 0.5 FV per case"></textarea>
         Nobody has a case for this {{#if filter}}position{{else}}proposal{{/if}} yet.
       </p>
     {{/unless}}
+    {{#unless hasChoice}}
+      {{#if position}}
+        <div id="custom-arg" class="dt">
+          <textarea class="{{position}} case h100" placeholder="Write a succinct case
+  Earn 0.5 FV per vote"></textarea>
+          <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+        </div>
+        <div class="switch pos">
+          <li class="{{position}} filter">Filter</li>
+          <div class="pc"></div>
+          Switch to
+          <ul class="inline pos">
+          {{#each otherPosition in otherPositions}}
+            <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
+          {{/each}}
+          </ul>
+        </div>
+      {{else}}
+        {{> positions}}
+      {{/if}}
+    {{/unless}}
   {{/if}}
   {{#if hasOptions}}
     <ul class="cases">
@@ -171,27 +191,6 @@ Earn 0.5 FV per case"></textarea>
       </div>
     </ul>
   {{/if}}
-  {{#unless hasChoice}}
-    {{#if position}}
-      <div id="custom-arg" class="dt">
-        <textarea class="{{position}} case h100" placeholder="Write a succinct case
-Earn 0.5 FV per vote"></textarea>
-        <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
-      </div>
-      <div class="switch pos">
-        <li class="{{position}} filter">Filter</li>
-        <div class="pc"></div>
-        Switch to
-        <ul class="inline pos">
-        {{#each otherPosition in otherPositions}}
-          <li class="{{otherPosition.className}}">{{otherPosition.name}}</li>
-        {{/each}}
-        </ul>
-      </div>
-    {{else}}
-      {{> positions}}
-    {{/if}}
-  {{/unless}}
 {{/if}}
 </template>
 <template name="errorHelp">
