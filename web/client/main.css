@@ -24,6 +24,12 @@
 .spaced {
   margin-bottom:0.5em;
 }
+.bar {
+  height:0.5em;
+  background-color:black;
+  width:5%;
+  background:linear-gradient(to right, #888888 0%, white 100%);
+}
 .h100 {
   height:100%;
   display:table-cell;
