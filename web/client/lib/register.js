@@ -6,6 +6,12 @@ function refresh() {
             if (isRegistered) {
                 Accounts.canDeregister(function (canDeregister) {
                     this.canDeregister.set(canDeregister);
+                    if (!canDeregister) {
+                        Accounts.deregistrationDate(function (date) {
+                            // TODO timer
+                            console.log(date);
+                        });
+                    }
                 }.bind(this));
             }
         }.bind(this));
@@ -20,6 +26,7 @@ Template.register.onCreated(function() {
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.price = GasRender.finney;
+    this.timer = new ReactiveVar();
     refresh.bind(this)();
 });
 Template.register.helpers({
@@ -46,7 +53,10 @@ Template.register.helpers({
     },
     price() {
         return Template.instance().price.get();
-    }
+    },
+    timer() {
+        return Template.instance().timer.get();
+    },
 });
 // TODO compare to checking tx status
 function awaitRegistered(account) {

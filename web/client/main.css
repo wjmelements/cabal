@@ -56,6 +56,12 @@ img.ltc {
 .ap {
   position:relative;
 }
+.timer {
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:xx-small;
+}
 .cost {
   position:absolute;
   bottom:0;
