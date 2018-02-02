@@ -732,6 +732,15 @@ contract AccountRegistry is AllProposals {
         return proposal;
     }
 
+    function sudoPropose(ProposalInterface _proposal)
+    external {
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
+        uint8 membership = infoMap[_proposal].membership;
+        require(membership & ~PROPOSAL == membership);
+        infoMap[proposal].membership |= PROPOSAL;
+        allProposals.push(_proposal);
+    }
+
     // To submit an outside proposal contract, you must:
     // - ensure it conforms to ProposalInterface
     // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
