@@ -87,7 +87,6 @@ Template.cases.helpers({
                 name:positionToName(i),
             });
         }
-        console.log(others);
         return others;
     },
     cannotVote() {
@@ -183,6 +182,9 @@ Template.cases.events({
             instance.cases.set(Proposals.argumentsSupporting(instance.address.get(), pos));
         }
         var choice = parseInt(event.target.id.substr(3));
+        if (isNaN(choice)) {
+            return;
+        }
         localStorage.setItem('choice'+instance.address.get(), choice);
         if (!choice) {
             return;
@@ -296,9 +298,11 @@ Template.cases.events({
         }.bind(Template.instance()));
     },
     "click .reset"(event) {
-        Template.instance().position.set(undefined);
-        Template.instance().choice.set(undefined);
+        var instance = Template.instance();
+        instance.position.set(undefined);
+        instance.choice.set(undefined);
         localStorage.setItem('choice'+Template.instance().address.get(), "");
-        Template.instance().skip.set(false);
+        instance.skip.set(false);
+        instance.data.refresh();
     }
 });

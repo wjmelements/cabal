@@ -56,7 +56,7 @@ Template.proposal.onCreated(function() {
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
         var storedChoice = localStorage.getItem('choice'+this.address.get());
-        if (storedChoice) {
+        if (parseInt(storedChoice)) {
             Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
                 this.argumentChoice.set(argument);
                 this.positionChoice.set('pos'+argument.position);
