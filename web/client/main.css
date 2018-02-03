@@ -97,6 +97,9 @@ img.ltc {
 .disabled.submit.btn {
   border-color:#FDB8B8;
 }
+.filter.on {
+  border-width:thin medium;
+}
 .pos1 {
   background-color:#33FF33;
 }
@@ -192,7 +195,7 @@ a.btn {
 .btn {
   display:inline-block;
   padding:0.8em;
-  border-width:medium;
+  border-width:thin medium medium thin;
   border-style:outset;
   border-radius:1px;
   cursor:pointer;
