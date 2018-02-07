@@ -6,41 +6,37 @@ GasRender = {
         }
         var cost = gas * GasRender.gasPrice.get()
         if (method == "szabo") {
-            return cost;
+            return cost.toPrecision(5);
         }
         cost /= 1000;
         if (method == "finney") {
-            return cost;
+            return cost.toPrecision(5);
         }
         cost /= 1000;
         if (method == "ether") {
-            return cost;
+            return cost.toPrecision(5);
         }
         if (method != "usd") {
             throw new Error("Unsupported:"+method);
         }
         cost *= GasRender.etherPriceUSD.get();
-        cost = Math.round(cost * 100) / 100;
-        return cost;
+        return '$'+cost.toFixed(2);
     },
     showFinney() {
         var method = GasRender.method.get();
-        if (method == "gas") {
-            return 1; // TODO divide by gas cost
-        }
         if (method == "finney") {
             return 1;
         }
         if (method == "szabo") {
             return 1000;
         }
-        if (method == "ether") {
+        if (method == "gas" || method == "ether") {
             return .001;
         }
         if (method != "usd") {
             throw new Error("Unsupported:"+method);
         }
-        return 1;// TODO divide by usd
+        return '$'+(GasRender.etherPriceUSD.get()/1000).toFixed(2);
     },
     update() {
         GasRender.finney.set(GasRender.showFinney());
