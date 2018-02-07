@@ -3,6 +3,7 @@ Template.voted.onCreated(function() {
     this.position = this.data.position;
     this.choice = this.data.choice;
     this.refresh = this.data.refresh;
+    this.address = this.data.address;
 });
 Template.voted.helpers({
     vote() {
@@ -14,6 +15,6 @@ Template.voted.events({
         Template.instance().position.set(undefined);
         Template.instance().choice.set(undefined);
         localStorage.setItem('choice'+Template.instance().address.get(), "");
-        this.refresh();
+        Template.instance().refresh(true);
     },
 });

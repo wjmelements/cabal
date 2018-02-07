@@ -1,4 +1,4 @@
-function refresh() {
+function refresh(ignoreVote) {
     var address = this.address.get();
     Proposals.getArgumentCount(address, function(argumentCount) {
         this.argumentCount.set(argumentCount - 1);
@@ -25,6 +25,9 @@ function refresh() {
         console.log(this.gradient);
         var cases = Proposals.argumentsOpposing(this.address.get(), 0);
         this.cases.set(cases);
+        if (ignoreVote) {
+            return;
+        }
         Proposals.getMyVote(address, function(myVote) {
             if (!myVote) {
                 var choice = this.argumentChoice.get();
@@ -66,7 +69,7 @@ Template.proposal.onCreated(function() {
             this.title.set(proposal.text);
         }.bind(this));
         this.refresh = refresh.bind(this);
-        this.refresh(address);
+        this.refresh();
     }.bind(this));
 });
 Template.proposal.onDestroyed(function() {
