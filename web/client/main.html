@@ -169,7 +169,7 @@ Earn 0.5 FV per case"></textarea>
 {{else}}
   {{#if hasChoice}}
     <li class="case dt bs">
-      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
   {{else}}
@@ -178,7 +178,7 @@ Earn 0.5 FV per case"></textarea>
         <div id="custom-arg" class="dt">
           <textarea class="{{position}} case h100" placeholder="Write a succinct case
 Earn 0.5 FV per vote"></textarea>
-          <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+          <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{/if}}</a>
         </div>
         <div class="switch pos">
           <li class="{{position}} filter {{#if filter}}on{{/if}}">Filter</li>
