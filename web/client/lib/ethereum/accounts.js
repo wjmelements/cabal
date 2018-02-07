@@ -171,6 +171,9 @@ Accounts = {
         Accounts.onRegistrationChange.filter(function(a){ return a != changeFn;});
     },
     reportRegistrationChange() {
+        if (!Accounts.onRegistrationChange) {
+            return;
+        }
         while(Accounts.onRegistrationChange.length) {
             Accounts.onRegistrationChange.pop()();
         }
