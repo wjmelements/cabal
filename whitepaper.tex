@@ -5,29 +5,36 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-FinneyVote is a decentralized forum where registered accounts vote on proposals.
+FinneyVote is a decentralized forum where registered accounts vote on controversial proposals.
 Accounts vote with cases, rewarding casemakers.
-Casemakers in turn pay proposers, incentivizing controversy.
-A decentralized autonomous organization (DAO), supported by vote token sales, governs and supports the system.
-A sufficiently unique voting history can establish unique identity.
-Sybil voting is impaired by the registration staking requirement and the voluntary organization of unique-user groups.
+Casemakers in turn reward proposers, incentivizing controversy.
+A decentralized autonomous organization (DAO) profiting from vote token sales governs and supports the system.
+FinneyVote is the first auditable forum specifically designed to promote controversy.
 \end{abstract}
 \section{Necessity}
 With the upcoming advent of strong artificial intelligence, it is imperative to establish a decentralized and auditable public forum.
+Scalable intelligence must participate in our discussions and confront our ideas, else we may diverge catastrophically.
+\par
+For humans currently alive, decentralized voting offers promising secured political expression.
+Censorship runs rampant in authoritarian regimes.
+China supports a Great Firewall and suppresses anti-regime dialogue.
+Even in western countries, social media websites such as Facebook censor unpopular ideas.
+No centralized service can be trusted with voting because it can manipulate the result.
+Political expression should be trustless and uncensorable.
 \par
 Democracies give political voice to commoners.
-However, commoners may not be sufficiently educated on the matters they decide.
+However, commoners may not be sufficiently educated on, or responsible for, the matters they decide.
 Republics solve this with representation, where commoners choose delegates to vote on their behalf.
 Unfortunatley, representatives are corruptible.
 Special interests lobby them to make unpopular decisions that will not necessarily cost them re-election.
 \par
 Further, delegate selection often disenfranchises minority opinions.
 Geographic representation, implemented as districts, leads to gerrymandering.
-Most representation systems are first-past-the-post, which leads to a two-party system, where two generic parties compete for independent voters.
+Many representation systems are first-past-the-post, which leads to a two-party system, where two generic parties compete for independent voters.
 Since the parties are not based in ideology, voters are often torn between mundane representatives that do not fully represent themselves.
 Proportional representation more-accurately represents political demographics, but still categorizes unrelated positions into ideological parties.
 Opinions lacking adhesion to an electable ideology remain unrepresented.
-Even if the majority support a policy, if it's not endoresed by the majority coalition it cannot take effect.
+Even if the majority support a policy, if it's not endorsed by the majority coalition it cannot take effect.
 \par
 FinneyVote supercedes politicians by replacing them with ideas.
 When taking a position on a proposal, voters choose an argument to represent their viewpoint.
@@ -35,9 +42,10 @@ An uninformed voter can review the discourse and make a reasonable choice aligne
 \section{Accounts, Identities, and Cabals}
 Ethereum provides an incentivized decentralized network simulating a fully programmable computer.
 Accounts are identified by their public key and controlled by their private key.
-Anyone can generate a keypair, so when voting in Ethereum it is necessary to prove an account is a unique individual.
+The ease of creating new accounts obliges Sybil mitigation for open voting systems.
+FinneyVoters are certified by a deposit of one milliether, canonically called one finney, after Hal Finney.
 \par
-Accounts require a deposit of 1 finney and earn an allowance of 2 votes per day.
+Registered accounts earn an allowance of 2 votes per day.
 A registered account can only deregister and reclaim their finney after a week.
 Individuals interested in augmenting proposal vote counts in favor of their ideas will stake many accounts.
 Such power users will amass ``powerbanks'' of accounts to cast more votes per proposal.
@@ -45,6 +53,7 @@ The aggregate voting power of powerbanks is limited by their stake in finney.
 Because of the transaction fees of powerbanking, a system of accounts that vote together is a unique identity.
 The number of votes required to establish your identity is logarithmic in the population size, assuming the proposal system properly incentivizes controversy and variety of topic.
 \par
+Powerbanks profit the DAO; she will never disallow them.
 To overcome powerbank sybil, groups of verified unique identities will organize into ``cabals''.
 Cabals are DAOs of like-minded individuals.
 Cabals can provide their members a subscription of proposals for curation.
@@ -63,12 +72,54 @@ When only half of a vote is awarded, votes can only be used twice.
 The governing DAO collects the difference and profits by selling its excess on an open market, such as EtherDelta.
 Thus, in order to be profitable, the DAO must promote aggregate voting.
 \par
-Third party mining of FinneyVotes for sale is unlikely to be profitable given the comparative advantage of the owner account, who does not have to mine with gas and staked finney.
+Third-party mining of FinneyVotes for sale is unlikely to be profitable given the comparative advantage of the owner account, who does not have to mine with gas and staked finney.
 The ability to mine with gas and staked finney creates an elastic supply curve.
 Critically, the expected value of a FinneyVote should decrease over time with the gas price.
 With an inflationary token, voters are incentivized to use their vote.
 \par
 Currently, the token is governed by William Morriss directly.
-The ownership will be transfered to the DAO pending the release of Aragon.
+Ownership will be transfered to the DAO pending the release of Aragon.
 The DAO will then ICO.
+\section{Upgrades}
+As with CryptoKitties and Proof of Weak Hands, there will be many copycats offering a similar service.
+The ability of FinneyVote to release updates will limit its ability to compete.
+While the user interface can be updated trivially, the smart contracts are more permanent.
+\par
+In the worst case, the token can migrate account registries.
+Users can deregister to move to a new registry.
+Additionally, the utility token can upgrade through an upgrade contract, as allowed by Maker for multi-collateral Dai.
+The legacy token can forward votes from legacy proposals.
+Neither of these approaches is preferred because of the massive amount of gas required of the users.
+\par
+The first account registry allows trusted parties to create proposals.
+Thus, the entire proposal system can be arbitrarily upgraded without migrating account registries.
+\par
+Some features can be implemented as separate contracts, as some front-ends will choose not to render the feature.
+For example, comments can be added as stand-alone contracts without requiring an update to proposals.
+By preferring separate contracts, the system remains modular, and clients can experiment with new features without forking the community.
+\section{Related Work}
+The SomethingAwful Forums require users to pay a one-time registration fee of $\$9.95$.
+This fee mitigates spam while profiting the service.
+FinneyVote does not pocket the registration deposit and instead allows accounts to deregister and reclaim their deposit.
+This maximizes aggregate voting by reducing the perceived cost of account creation to zero.
+In practice, some accounts will never deregister, even after account registry migration.
+\par
+Reddit allows its users to upvote or downvote posts and comments, creating a crowdsourced content curation service, the front-page of the internet.
+Steem operates a similar but decentralized system with built-in tipping.
+Steem boasts a feeless network with more transactions than Ethereum.
+Steem limits self-promotion by delaying receipt of the tips for 7 days.
+Neither are effective opinion polls.
+On Reddit, controversial content is buried and political communities circle-jerk.
+Steem is struggling with automated sybil promotion services, which are weakening the quality of its content.
+\par
+Aragon is developing smart contracts for the governance of DAOs.
+They support a number of voting systems, including voting weighted by share.
+Because members do not have to divide their influence among many accounts, weighted voting is cheaper than finneyvoting in terms of transaction fees.
+Instead, powerbanks pay transaction fees proportional to their deposit.
+Influence must be linear both in deposit and fee, else powerbanks have a cost-advantage over groups of single-account voters.
+\par
+Transferring registration deposits to a DAO would give FinneyVote arms and legs.
+Some proposals could take action with the funds if they have enough votes after a voting period.
+DAOs already provide this functionality more-effectively, and are better-equipped to take action.
+Perhaps Cabals and some DAOs will consider FinneyVotes, but in general action is best governed by responsible stakeholders, or perhaps futures markets.
 \end{document}

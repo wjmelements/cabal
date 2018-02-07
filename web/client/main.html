@@ -17,7 +17,7 @@
     {{else}}
       {{#unless hasAccount}}
       <div id="withoutaccount">
-        <p class="error ib">There is no account associated with your Ethereum client.</p>
+        <p class="error ib">There is no account associated with your Ethereum client. Please unlock Metamask <img class="hem" src="/metamask.png"/> if applicable.</p>
       </div>
       {{/unless}}
     {{/if}}
@@ -46,13 +46,16 @@
             Votes support representative arguments, called cases
           </p>
           <p>
-            Casemakers are rewarded per-vote, and proposers are rewarded per-case
+            FinneyVoters are certified by their fully-refundable 1-finney deposit
           </p>
           <p>
-            Registering to vote requires a refundable deposit of 1 finney
+            FinneyVoters can claim 1 FV every 12 hours, up to 4 total
           </p>
           <p>
-            Register now to claim four FinneyVotes, plus two more every day, and start voting
+            Casemakers earn additional influence per vote
+          </p>
+          <p>
+            Register to start voting
           </p>
           {{>register}}<a target="_blank" class="btn h100" href="/whitepaper.pdf">Whitepaper</a>
         </div>

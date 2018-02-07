@@ -34,6 +34,9 @@
   font-size:large;
   margin-left:1em;
 }
+.hem {
+  height:1em;
+}
 .h100 {
   height:100%;
   display:table-cell;
@@ -164,6 +167,8 @@ h2.prop {
 }
 #nux {
   padding:0.5em;
+  margin:-.5em;
+  background:linear-gradient(to bottom, #befff8 0, #fcff8b .5em, #ffdbdc 4em, transparent 4em);
 }
 .pitch {
   text-align:center;
