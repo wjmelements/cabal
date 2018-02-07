@@ -140,6 +140,9 @@ img.ltc {
 div.case {
   margin-left:1em;
 }
+div.case.voted {
+  margin-left:0;
+}
 li.case {
   list-style: none;
   margin-left:0.35em;

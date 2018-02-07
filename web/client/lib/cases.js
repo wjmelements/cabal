@@ -303,6 +303,6 @@ Template.cases.events({
         instance.choice.set(undefined);
         localStorage.setItem('choice'+Template.instance().address.get(), "");
         instance.skip.set(false);
-        instance.data.refresh();
+        instance.data.refresh(true);
     }
 });
