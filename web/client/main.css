@@ -82,6 +82,7 @@ select {
   border-radius:1px;
   font-weight:bold;
   border-color:#ededed;
+  cursor:pointer;
 }
 .pos li {
   list-style: none;
