@@ -172,6 +172,9 @@ Accounts = {
         Accounts.onRegistrationChange.push(changeFn);
     },
     registrationUnsubscribe(changeFn) {
+        if (!Accounts.onRegistrationChange) {
+            return;;
+        }
         Accounts.onRegistrationChange.filter(function(a){ return a != changeFn;});
     },
     reportRegistrationChange() {

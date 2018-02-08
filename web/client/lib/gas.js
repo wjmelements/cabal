@@ -1,12 +1,6 @@
-Template.gas.onCreated(function() {
-    var priorMethod = localStorage.getItem('gasmethod');
-    GasRender.method.set(priorMethod || 'usd');
-    var priorPolicy = localStorage.getItem('gaspolicy');
-    GasRender.policy.set(priorPolicy || 'safeLow');
-    GasRender.update();
-});
 Template.gas.onRendered(function() {
-    this.find('select').value = GasRender.method.get();
+    this.find('select#method').value = GasRender.method.get();
+    this.find('select#policy').value = GasRender.policy.get();
 });
 Template.gas.events({
     "change select#method"(event) {

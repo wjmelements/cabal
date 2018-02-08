@@ -44,7 +44,6 @@ GasRender = {
     },
 }
 GasRender.method = new ReactiveVar('ether');
-GasRender.finney = new ReactiveVar(GasRender.showFinney());
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);
@@ -53,6 +52,12 @@ GasRender.fast = new ReactiveVar();
 GasRender.standard = new ReactiveVar();
 GasRender.safeLow = new ReactiveVar();
 GasRender.policy = new ReactiveVar('safeLow');
+var priorMethod = localStorage.getItem('gasmethod');
+GasRender.method.set(priorMethod || 'usd');
+var priorPolicy = localStorage.getItem('gaspolicy');
+GasRender.policy.set(priorPolicy || 'standard');
+GasRender.finney = new ReactiveVar(GasRender.showFinney());
+
 function fetchGasPrice() {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open('GET', 'https://ethgasstation.info/json/ethgasAPI.json', true /*asynchronous*/);
@@ -79,8 +84,7 @@ function fetchGasPrice() {
                 cost:gwei(response.fastest),
                 time:minutes(response.fastestWait)
             });
-            GasRender.gasPrice.set(parseFloat((GasRender[GasRender.policy.get()].get()||{cost:1}).cost) / 1000);
-            console.log('Gas Price:'+GasRender.gasPrice.get());
+            GasRender.update();
         }
     };
     xmlHttp.send(null);
@@ -109,6 +113,7 @@ function fetchETHPrice() {
             var etherPriceUSD = response.USD;
             GasRender.etherPriceUSD.set(etherPriceUSD);
             xmlHttp.onreadystatechange = null;
+            GasRender.update();
         }
     }
     xmlHttp.send(null);
