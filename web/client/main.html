@@ -67,7 +67,7 @@
   {{/if}}
 </template>
 <template name="register">
-    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{#if showTimer}}<div class="timer">{{timer}}</div>{{/if}}{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div><div class="price">{{price}}</div>{{/if}}</a>
+    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}Deregister{{#if showTimer}}<div class="timer">{{timer}}</div>{{/if}}{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div><div class="price">{{#if registered}}+{{/if}}{{price}}</div>{{/if}}</a>
 </template>
 <template name="claim">
   {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{else}}<span class="done h100">Claimed!</span>{{/if}}
