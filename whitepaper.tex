@@ -6,6 +6,7 @@
 \maketitle
 \begin{abstract}
 FinneyVote is the first decentralized forum specifically designed to promote controversy.
+Voters are certified by a small refundable deposit.
 Accounts vote with cases, rewarding casemakers.
 Proposers are rewarded per-case, incentivizing controversy.
 A decentralized autonomous organization (DAO) profiting from vote token sales governs and supports the system.
@@ -42,7 +43,7 @@ An uninformed voter can review the discourse and make a reasonable choice aligne
 Ethereum provides an incentivized decentralized network simulating a fully programmable computer.
 Accounts are identified by their public key and controlled by their private key.
 The ease of creating new accounts obliges Sybil mitigation for open voting systems.
-FinneyVoters are certified by a deposit of one milliether, canonically called one finney, after Hal Finney.
+FinneyVoters are certified by a deposit of one milliether, canonically called a finney, after Hal Finney.
 \par
 Registered accounts earn an allowance of 2 votes per day.
 A registered account can only deregister and reclaim their finney after a week.
@@ -85,10 +86,8 @@ The ability of FinneyVote to release updates will limit its ability to compete.
 While the user interface can be updated trivially, the smart contracts are more permanent.
 \par
 In the worst case, the token can migrate account registries.
-Users can deregister to move to a new registry.
-Additionally, the utility token can upgrade through an upgrade contract, as allowed by Maker for multi-collateral Dai.
-The legacy token can forward votes from legacy proposals.
-Neither of these approaches is preferred because of the massive amount of gas required of the users.
+Users can deregister and move to the new registry.
+This approach is not preferrable because of the massive transaction fees required of the users.
 \par
 The first account registry allows trusted parties to create proposals.
 Thus, the entire proposal system can be arbitrarily upgraded without migrating account registries.
