@@ -51,17 +51,12 @@ td.h100 {
 img.ltc {
   height:unset;
 }
-.w1 {
-  width:2px;
-  background-color:red;
-  margin-left:2px;
-}
 .ap {
   position:relative;
 }
 .timer {
   position:absolute;
-  left:0;
+  right:0;
   top:0;
   font-size:xx-small;
 }
@@ -70,6 +65,9 @@ img.ltc {
   bottom:0;
   right:0;
   font-size:xx-small;
+}
+.price.disabled, .timer {
+  color:#FF5F5F;
 }
 .price {
   position:absolute;

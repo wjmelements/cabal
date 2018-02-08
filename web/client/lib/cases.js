@@ -13,6 +13,7 @@ Template.cases.onCreated(function() {
     this.cannotVote = new ReactiveVar(true);
     this.cannotArgue = new ReactiveVar(true);
     this.showCost = new ReactiveVar(false);
+    this.showInsufficient = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.cost = new ReactiveVar();
 });
@@ -71,6 +72,9 @@ Template.cases.helpers({
     },
     showCost() {
         return Template.instance().showCost.get();
+    },
+    showInsufficient() {
+        return Template.instance().showInsufficient.get();
     },
     positionName() {
         return positionToName(Template.instance().pos.get());
@@ -202,6 +206,7 @@ Template.cases.events({
     },
     "mouseover .vote"(event) {
         if (Template.instance().cannotVote.get()) {
+            Template.instance().showInsufficient.set(true);
             return;
         }
         if (Template.instance().voting.get()) {
@@ -220,6 +225,7 @@ Template.cases.events({
     },
     "mouseout .vote"(event) {
         Template.instance().showCost.set(false);
+        Template.instance().showInsufficient.set(false);
     },
     "click .vote"(event) {
         var instance = Template.instance();

@@ -1,16 +1,39 @@
+var timerTimer;
+function timeFormat(secondsRemaining) {
+    secondsRemaining = parseInt(secondsRemaining);
+    var hoursRemaining = parseInt(secondsRemaining / 3600);
+    secondsRemaining -= hoursRemaining * 3600;
+    var minutesRemaining = parseInt(secondsRemaining / 60);
+    secondsRemaining -= minutesRemaining * 60;
+    if (secondsRemaining < 10) {
+        secondsRemaining = '0'+secondsRemaining;
+    }
+    if (minutesRemaining < 10) {
+        minutesRemaining = '0'+minutesRemaining;
+    }
+    return hoursRemaining + ':' + minutesRemaining + ':' + secondsRemaining;
+}
 function refresh() {
     Accounts.current(function(currentAccount) {
         this.account.set(currentAccount);
         Accounts.isRegistered(currentAccount, function(isRegistered) {
-            this.registered.set(isRegistered);
+            Accounts.registered.set(isRegistered);
             if (isRegistered) {
                 Accounts.canDeregister(function (canDeregister) {
                     this.canDeregister.set(canDeregister);
                     if (!canDeregister) {
                         Accounts.deregistrationDate(function (date) {
-                            // TODO timer
-                            console.log(date);
-                        });
+                            // TODO timer once smart contract upgraded
+                            var time = [7350];
+                            this.timer.set(timeFormat(time[0]));
+                            if (timerTimer) {
+                                clearInterval(timerTimer);
+                            }
+                            timerTimer = setInterval(function () {
+                                time[0]--;
+                                this.timer.set(timeFormat(time[0]));
+                            }.bind(this), 1000);
+                        }.bind(this));
                     }
                 }.bind(this));
             }
@@ -18,9 +41,8 @@ function refresh() {
     }.bind(this));
 }
 Template.register.onCreated(function() {
-    this.registered = new ReactiveVar();
     this.account = new ReactiveVar();
-    this.registering = new ReactiveVar(false);
+    this.showTimer = new ReactiveVar(false);
     this.canDeregister = new ReactiveVar(true);
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
@@ -31,10 +53,10 @@ Template.register.onCreated(function() {
 });
 Template.register.helpers({
     registered() {
-        return Template.instance().registered.get();
+        return Accounts.registered.get();
     },
     registering() {
-        return Template.instance().registering.get();
+        return Accounts.registering.get();
     },
     canDeregister() {
         return Template.instance().canDeregister.get();
@@ -54,6 +76,9 @@ Template.register.helpers({
     price() {
         return Template.instance().price.get();
     },
+    showTimer() {
+        return Template.instance().showTimer.get();
+    },
     timer() {
         return Template.instance().timer.get();
     },
@@ -67,8 +92,8 @@ function awaitRegistered(account) {
         }
         Accounts.isRegistered(currentAccount, function(isRegistered) {
             if (isRegistered) {
-                this.registered.set(true);
-                this.registering.set(false);
+                Accounts.registered.set(true);
+                Accounts.registering.set(false);
                 this.canDeregister.set(false);
                 Accounts.reportRegistrationChange();
             } else {
@@ -84,18 +109,18 @@ Template.register.events({
         if (!Template.instance().canDeregister.get()) {
             return;
         }
-        if (Template.instance().registering.get()) {
+        if (Accounts.registering.get()) {
             return;
         }
         var account = Template.instance().account.get();
-        if (Template.instance().registered.get()) {
+        if (Accounts.registered.get()) {
             Accounts.deregister(function(txhash) {
                 console.log(txhash);
             });
         } else {
             Accounts.register(function(txhash) {
                 console.log(txhash);
-                this.registering.set(true);
+                Accounts.registering.set(true);
                 this.txhash.set(txhash);
                 awaitRegistered.bind(this)(account);
             }.bind(Template.instance()));
@@ -105,10 +130,11 @@ Template.register.events({
         if (!accountRegistry) {
             return;
         }
-        if (Template.instance().registering.get()) {
+        if (Accounts.registering.get()) {
             return;
         }
         if (!Template.instance().canDeregister.get()) {
+            Template.instance().showTimer.set(true);
             return;
         }
         Template.instance().showCost.set(true);
@@ -119,7 +145,7 @@ Template.register.events({
             }
             this.cost.set(GasRender.toString(gas));
         }.bind(Template.instance());
-        if (Template.instance().registered.get()) {
+        if (Accounts.registered.get()) {
             if (Template.instance().canDeregister.get()) {
                 accountRegistry.deregister.estimateGas(resultFn);
             }
@@ -129,5 +155,6 @@ Template.register.events({
     },
     "mouseout .submit"(event) {
         Template.instance().showCost.set(false);
+        Template.instance().showTimer.set(false);
     },
 });

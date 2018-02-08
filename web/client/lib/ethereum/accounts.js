@@ -182,4 +182,6 @@ Accounts = {
 Accounts.onResize = [];
 Accounts.hasWeb3 = new ReactiveVar(true);
 Accounts.hasAccount = new ReactiveVar(true);
+Accounts.registered = new ReactiveVar(false);
+Accounts.registering = new ReactiveVar(false);
 checkAccount();
