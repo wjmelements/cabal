@@ -16,6 +16,10 @@ GasRender = {
         if (method == "ether") {
             return cost.toPrecision(5);
         }
+        if (method == "eur") {
+            cost *= GasRender.etherPriceEUR.get();
+            return '€'+cost.toFixed(2);
+        }
         if (method != "usd") {
             throw new Error("Unsupported:"+method);
         }
@@ -33,6 +37,9 @@ GasRender = {
         if (method == "gas" || method == "ether") {
             return .001;
         }
+        if (method == "eur") {
+            return '€'+(GasRender.etherPriceEUR.get()/1000).toFixed(2);
+        }
         if (method != "usd") {
             throw new Error("Unsupported:"+method);
         }
@@ -47,6 +54,7 @@ GasRender.method = new ReactiveVar('ether');
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);
+GasRender.etherPriceEUR = new ReactiveVar(900);
 GasRender.fastest = new ReactiveVar();
 GasRender.fast = new ReactiveVar();
 GasRender.standard = new ReactiveVar();
@@ -105,13 +113,13 @@ Web3Loader.onWeb3(function() {
 */
 function fetchETHPrice() {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open('GET', 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD', true /*asynchronous*/);
+    xmlHttp.open('GET', 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD,EUR', true /*asynchronous*/);
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.responseText) {
             var response = JSON.parse(xmlHttp.responseText);
             console.log(response);
-            var etherPriceUSD = response.USD;
-            GasRender.etherPriceUSD.set(etherPriceUSD);
+            GasRender.etherPriceUSD.set(response.USD);
+            GasRender.etherPriceEUR.set(response.EUR);
             xmlHttp.onreadystatechange = null;
             GasRender.update();
         }
