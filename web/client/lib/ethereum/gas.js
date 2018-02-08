@@ -26,6 +26,9 @@ GasRender = {
         cost *= GasRender.etherPriceUSD.get();
         return '$'+cost.toFixed(2);
     },
+    gasPriceInWei() {
+        return parseInt(GasRender.gasPrice.get()*1e12);
+    },
     showFinney() {
         var method = GasRender.method.get();
         if (method == "finney") {

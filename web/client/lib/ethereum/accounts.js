@@ -86,7 +86,7 @@ Accounts = {
     },
     deregister(resultFn) {
         if (accountRegistry) {
-            return accountRegistry.deregister({ value: 0 }, function(err, result) {
+            return accountRegistry.deregister({ value: 0, gasPrice:GasRender.gasPriceInWei() }, function(err, result) {
                 if (err) {
                     console.error(err);
                     return;
@@ -141,7 +141,7 @@ Accounts = {
     },
     propose(proposal, resultFn) {
         console.log(proposal);
-        accountRegistry.propose(proposal, {gasPrice:parseInt(GasRender.gasPrice.get()*1e12)},resultFn);
+        accountRegistry.propose(proposal, {gasPrice:GasRender.gasPriceInWei()},resultFn);
     },
     canDeregister(resultFn) {
         Accounts.current(function (account) {

@@ -140,10 +140,10 @@ Proposals = {
         });
     },
     vote(address, argumentIndex, resultFn) {
-        Proposals[address].vote(argumentIndex, {gasPrice:parseInt(GasRender.gasPrice.get()*1e12)}, resultFn);
+        Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
     },
     argue(address, position, content, resultFn) {
-        Proposals[address].argue(position, content, resultFn);
+        Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
     },
     getMyVote(address, resultFn) {
         Accounts.current(function(account) {
