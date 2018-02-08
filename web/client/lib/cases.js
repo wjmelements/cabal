@@ -253,6 +253,7 @@ Template.cases.events({
     "mouseover #custom-arg a.btn"(event) {
         var instance = Template.instance();
         if (instance.cannotArgue.get()) {
+            instance.showInsufficient.set(true);
             return;
         }
         Proposals[instance.address.get()].argue.estimateGas(instance.pos.get(), instance.find('#custom-arg textarea').value, function (error, gas) {
@@ -266,6 +267,7 @@ Template.cases.events({
     },
     "mouseout #custom-arg a.btn"(event) {
         Template.instance().showCost.set(false);
+        Template.instance().showInsufficient.set(false);
     },
     "click #custom-arg a.btn"(event) {
         var customCase = Template.instance().find('#custom-arg textarea').value;
