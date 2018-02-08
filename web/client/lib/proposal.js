@@ -110,7 +110,7 @@ Template.proposal.helpers({
     },
     argumentCount() {
         return Template.instance().argumentCount.get();
-    }
+    },
 });
 Template.proposal.events({
     "click ul.pos li"(event) {

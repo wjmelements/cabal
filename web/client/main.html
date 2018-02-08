@@ -76,7 +76,7 @@
 <span class="done h100">{{balance}} FV</span>
 </template>
 <template name="gas">
-<span class="done h100">Show: <select id="method">
+<span class="done h100" title="Powered by CryptoCompare.com">Show: <select id="method">
   <option value="gas">gas</option>
   <option value="ether">ether</option>
   <option value="finney">finney</option>
@@ -84,7 +84,7 @@
   <option value="usd">USD</option>
   <option value="eur">EUR</option>
 </select></span>
-<span class="done h100">Gas Policy: <select id="policy">
+<span class="done h100" title="Powered by ETHGasStation.info">Gas Policy: <select id="policy">
   <option value="safeLow">SafeLow{{#if loaded}} ({{safeLow.cost}}, {{safeLow.time}}{{/if}})</option>
   <option value="standard">Economy{{#if loaded}} ({{standard.cost}}, {{standard.time}}{{/if}})</option>
   <option value="fast">Standard{{#if loaded}} ({{fast.cost}}, {{fast.time}}{{/if}})</option>
@@ -94,6 +94,7 @@
 <template name="propose">
   <div class="dt spaced">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
+{{#unless firefox}}Earn 0.5 FV per case{{/unless}}" title="Propose something controversial
 Earn 0.5 FV per case"></textarea>
     <a class="btn submit h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
   </div>
@@ -187,6 +188,7 @@ Earn 0.5 FV per case"></textarea>
       {{#if position}}
         <div id="custom-arg" class="dt">
           <textarea class="{{position}} case h100" placeholder="Write a succinct case
+{{#unless firefox}}Earn 0.5 FV per vote{{/unless}}" title="Write a succinct case
 Earn 0.5 FV per vote"></textarea>
           <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{else}}{{#if showInsufficient}}<div class="price disabled">FV</div>{{/if}}{{/if}}</a>
         </div>

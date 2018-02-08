@@ -48,6 +48,10 @@ Template.cases.helpers({
     filter() {
         return Template.instance().filter.get();
     },
+    firefox() {
+        console.log(Browser.isFirefox());
+        return Browser.isFirefox();
+    },
     hasChoice() {
         return Template.instance().choice.get();
     },
