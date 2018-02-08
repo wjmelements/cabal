@@ -22,6 +22,7 @@ function checkAccount(refreshId) {
         }
         clearInterval(refreshId);
     } else if (!refreshId) {
+        Accounts.registered.set(false);
         var refreshIndirect = []; 
         refreshIndirect.push(setInterval(function () {
             checkAccount(refreshIndirect[0]);
@@ -182,6 +183,6 @@ Accounts = {
 Accounts.onResize = [];
 Accounts.hasWeb3 = new ReactiveVar(true);
 Accounts.hasAccount = new ReactiveVar(true);
-Accounts.registered = new ReactiveVar(false);
+Accounts.registered = new ReactiveVar(true);
 Accounts.registering = new ReactiveVar(false);
 checkAccount();
