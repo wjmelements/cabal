@@ -53,7 +53,7 @@ GasRender.standard = new ReactiveVar();
 GasRender.safeLow = new ReactiveVar();
 GasRender.policy = new ReactiveVar('safeLow');
 var priorMethod = localStorage.getItem('gasmethod');
-GasRender.method.set(priorMethod || 'usd');
+GasRender.method.set(priorMethod || 'ether');
 var priorPolicy = localStorage.getItem('gaspolicy');
 GasRender.policy.set(priorPolicy || 'standard');
 GasRender.finney = new ReactiveVar(GasRender.showFinney());
