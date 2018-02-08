@@ -23,6 +23,9 @@ Template.gas.events({
     },
 });
 Template.gas.helpers({
+    loaded() {
+        return GasRender.safeLow.get();
+    },
     safeLow() {
         return GasRender.safeLow.get();
     },

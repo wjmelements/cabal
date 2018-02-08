@@ -84,10 +84,10 @@
   <option value="usd">USD</option>
 </select></span>
 <span class="done h100">Gas Policy: <select id="policy">
-  <option value="safeLow">SafeLow ({{safeLow.cost}}, {{safeLow.time}})</option>
-  <option value="standard">Economy ({{standard.cost}}, {{standard.time}})</option>
-  <option value="fast">Standard ({{fast.cost}}, {{fast.time}})</option>
-  <option value="fastest">Premium ({{fastest.cost}}, {{fastest.time}})</option>
+  <option value="safeLow">SafeLow{{#if loaded}} ({{safeLow.cost}}, {{safeLow.time}}){{/if}}</option>
+  <option value="standard">Economy{{#if loaded}} ({{standard.cost}}, {{standard.time}}){{/if}}</option>
+  <option value="fast">Standard{{#if loaded}} ({{fast.cost}}, {{fast.time}}){{/if}}</option>
+  <option value="fastest">Premium{{#if loaded}} ({{fastest.cost}}, {{fastest.time}}){{/if}}</option>
 </select></span>
 </template>
 <template name="propose">
