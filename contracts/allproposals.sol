@@ -16,8 +16,8 @@ contract Vote is ERC20 {
     address public developerFund;
 
     uint8 public constant decimals = 1;
-    string public symbol = "REV";
-    string public name = "Registered Ether Vote";
+    string public symbol = "FV";
+    string public name = "FinneyVote";
 
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) approved;
@@ -26,26 +26,26 @@ contract Vote is ERC20 {
     function Vote() public {
         developerFund = msg.sender;
     }
-    function totalSupply() public constant returns (uint) {
+    function totalSupply() public constant returns (uint256) {
         return supply;
     }
-    function balanceOf(address _owner) public constant returns (uint) {
+    function balanceOf(address _owner) public constant returns (uint256) {
         return balances[_owner];
     }
-    function approve(address _spender, uint _value) public returns (bool) {
+    function approve(address _spender, uint256 _value) public returns (bool) {
         approved[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
     }
-    function allowance(address _owner, address _spender) public constant returns (uint) {
+    function allowance(address _owner, address _spender) public constant returns (uint256) {
         return approved[_owner][_spender];
     }
-    function transfer(address _to, uint _value) public returns (bool) {
+    function transfer(address _to, uint256 _value) public returns (bool) {
         require(balances[msg.sender] <= _value);
         balances[msg.sender] -= _value;
         balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
     }
-    function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
         require(balances[_from] >= _value);
         require(approved[_from][msg.sender] >= _value);
         approved[_from][msg.sender] -= _value;
@@ -84,6 +84,14 @@ contract Vote is ERC20 {
         balances[_voter] -= 10;
         balances[developerFund] += 5;
         balances[_votee] += 5;
+    }
+    function vote9(address _voter, address _votee) public {
+        require(accountRegistry.isProposal(msg.sender));
+        require(accountRegistry.canVote(_voter));
+        require(balances[_voter] >= 10);
+        balances[_voter] -= 10;
+        balances[developerFund] += 1;
+        balances[_votee] += 9;
     }
     event NewOwner(address owner);
     function transferDeveloperFund(address _newDeveloperFund) external {
@@ -564,9 +572,7 @@ contract Cabal is CabalInterface {
 contract AccountRegistry is AllProposals {
     
     uint256 constant public registrationDeposit = 1 finney;
-    uint256 constant public outsideProposalVerificationFee = 50 finney;
-    uint256 constant public outsideProposalRejectionBurn = 25 finney;
-    uint256 constant public outsideProposalRejectionBounty = 25 finney;
+    uint256 constant public proposalCensorshipFee = 50 finney;
 
     address burn = 0xdead;
 
@@ -591,21 +597,27 @@ contract AccountRegistry is AllProposals {
     struct Info {
         uint256 deregistrationDate;
         uint8 membership;
+        address appointer;
+        address denouncer;
     }
     mapping (address => Info) infoMap;
 
     Cabal[] public allCabals;
     ProposalInterface[] public allProposals;
 
-    function AccountRegistry()
+    function AccountRegistry(address _trustee)
     public
     {
         infoMap[msg.sender].membership ^= BOARD;
+        infoMap[_trustee].membership ^= BOARD;
     }
 
     event NewVoter(address voter);
     event Deregistered(address voter);
-    event NewBoard(address board);
+    event NominatedBoard(address board, string explanation);
+    event NewBoard(address board, string endorsement);
+    event DenounceBoard(address board, string reason);
+    event Revoked(address board, string reason);
     event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
     event BannedProposal(ProposalInterface proposal, string reason);
@@ -664,6 +676,13 @@ contract AccountRegistry is AllProposals {
         Deregistered(msg.sender);
     }
 
+    function population()
+    public view
+    returns (uint256)
+    {
+        return this.balance / 1 finney;
+    }
+
     function deregistrationDate()
     public view
     returns (uint256)
@@ -713,12 +732,46 @@ contract AccountRegistry is AllProposals {
         return infoMap[_account].membership & CABAL == CABAL;
     }
 
-    function appoint(address _board)
-    external
-    {
+    function appoint(address _board, string _vouch)
+    external {
         require(infoMap[msg.sender].membership & BOARD == BOARD);
-        infoMap[_board].membership |= BOARD;
-        NewBoard(_board);
+        Info storage candidate = infoMap[_board];
+        if (candidate.membership & BOARD == BOARD) {
+            return;
+        }
+        address appointer = candidate.appointer;
+        Info storage appointer = infoMap[appointer];
+        if (!appointer || appointer.membership & ~BOARD == appointer.membership) {
+            candidate.appointer = msg.sender;
+            NominatedBoard(_board, _vouch);
+            return;
+        }
+        if (appointer == msg.sender) {
+            return;
+        }
+        candidate.membership |= BOARD;
+        NewBoard(_board, _vouch);
+    }
+
+    function denounce(address _board, string _reason)
+    external {
+        require(infoMap[msg.sender].membership & BOARD == BOARD);
+        Info storage board = infoMap[_board];
+        if (board.membership & ~BOARD == board.membership) {
+            return;
+        }
+        address denouncer = board.denouncer;
+        Info storage denouncer = infoMap[denouncer];
+        if (!denouncer || denouncer.membership & ~BOARD == denouncer.membership) {
+            board.denouncer = msg.sender;
+            NominatedBoard(_board, _vouch);
+            return;
+        }
+        if (denouncer == msg.sender) {
+            return;
+        }
+        board.membership &= ~BOARD;
+        Revoked(_board, _vouch);
     }
 
     function propose(bytes _resolution)
@@ -745,11 +798,9 @@ contract AccountRegistry is AllProposals {
     // - ensure it conforms to ProposalInterface
     // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
     // - open-source it using Etherscan or equivalent
-    // - pay a manual verification fee
     function proposeExternal(ProposalInterface _proposal)
     external payable
     {
-        require(msg.value == outsideProposalVerificationFee);
         Info storage info = infoMap[_proposal];
         require(info.membership & ~(PENDING_PROPOSAL | PROPOSAL) == info.membership);
         info.membership |= PENDING_PROPOSAL;
@@ -762,7 +813,6 @@ contract AccountRegistry is AllProposals {
         Info storage info = infoMap[_proposal];
         require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
         info.membership ^= (PROPOSAL | PENDING_PROPOSAL);
-        msg.sender.transfer(outsideProposalVerificationFee);
         allProposals.push(_proposal);
         NewProposal(_proposal);
     }
@@ -773,7 +823,7 @@ contract AccountRegistry is AllProposals {
     function banProposal(ProposalInterface _proposal, string _reason)
     external payable
     {
-        require(msg.value == outsideProposalVerificationFee);
+        require(msg.value == proposalCensorshipFee);
         require(infoMap[msg.sender].membership & BOARD == BOARD);
         Info storage info = infoMap[_proposal];
         require(info.membership & PROPOSAL == PROPOSAL);
@@ -790,8 +840,6 @@ contract AccountRegistry is AllProposals {
         Info storage info = infoMap[_proposal];
         require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
         info.membership ^= (FRAUD | PENDING_PROPOSAL);
-        msg.sender.transfer(outsideProposalRejectionBounty);
-        burn.transfer(outsideProposalRejectionBurn); 
     }
 
 }
