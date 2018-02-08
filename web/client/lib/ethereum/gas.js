@@ -39,6 +39,9 @@ GasRender = {
         return '$'+(GasRender.etherPriceUSD.get()/1000).toFixed(2);
     },
     update() {
+        GasRender.gasPrice.set(parseFloat((GasRender[GasRender.policy.get()].get()||{cost:1}).cost) / 1000);
+        console.log(GasRender.gasPrice.get());
+        console.log(GasRender[GasRender.policy.get()].get());
         GasRender.finney.set(GasRender.showFinney());
     },
 }
@@ -47,19 +50,44 @@ GasRender.finney = new ReactiveVar(GasRender.showFinney());
 GasRender.gasPolicy = new ReactiveVar();
 GasRender.gasPrice = new ReactiveVar(.001);
 GasRender.etherPriceUSD = new ReactiveVar(1000);
+GasRender.fastest = new ReactiveVar();
+GasRender.fast = new ReactiveVar();
+GasRender.standard = new ReactiveVar();
+GasRender.safeLow = new ReactiveVar();
+GasRender.policy = new ReactiveVar('safeLow');
 function fetchGasPrice() {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open('GET', 'https://ethgasstation.info/json/ethgasAPI.json', true /*asynchronous*/);
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.responseText) {
             var response = JSON.parse(xmlHttp.responseText);
+            console.log(response);
             xmlHttp.onreadystatechange = null;
-            GasRender.gasPrice.set(response.safeLow / 10000);
-            console.log(GasRender.gasPrice.get());
+            function gwei(a) {return a/10+' Gwei'};
+            function minutes(a) {return a + ' min'};
+            GasRender.safeLow.set({
+                cost:gwei(response.safeLow),
+                time:minutes(response.safeLowWait)
+            });
+            GasRender.standard.set({
+                cost:gwei(response.average),
+                time:minutes(response.avgWait)
+            });
+            GasRender.fast.set({
+                cost:gwei(response.fast),
+                time:minutes(response.fastWait)
+            });
+            GasRender.fastest.set({
+                cost:gwei(response.fastest),
+                time:minutes(response.fastestWait)
+            });
+            GasRender.gasPrice.set(parseFloat((GasRender[GasRender.policy.get()].get()||{cost:1}).cost) / 1000);
+            console.log('Gas Price:'+GasRender.gasPrice.get());
         }
     };
     xmlHttp.send(null);
 }
+/*
 Web3Loader.onWeb3(function() {
     web3.eth.getGasPrice(function (error, gasPrice) {
         if (error) {
@@ -72,6 +100,7 @@ Web3Loader.onWeb3(function() {
         fetchGasPrice();
     });
 });
+*/
 function fetchETHPrice() {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open('GET', 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD', true /*asynchronous*/);
@@ -87,3 +116,4 @@ function fetchETHPrice() {
     xmlHttp.send(null);
 }
 window.addEventListener('load', fetchETHPrice);
+window.addEventListener('load', fetchGasPrice);

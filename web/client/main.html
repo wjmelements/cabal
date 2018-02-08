@@ -27,10 +27,13 @@
     </table>
   {{/if}}
 </template>
+<template name="whitepaper">
+<a target="_blank" class="btn h100" href="/whitepaper.pdf">Whitepaper</a>
+</template>
 <template name="nux">
   {{#if registered}}
     <div class="btmpad dt">
-      {{> register}}{{> claim}}{{> balance}}{{> gas}}
+      {{> register}}{{> whitepaper}}{{> claim}}{{> balance}}{{> gas}}
     </div>
   {{else}}
     <div id="nux">
@@ -57,7 +60,7 @@
           <p>
             Register to start voting
           </p>
-          {{>register}}<a target="_blank" class="btn h100" href="/whitepaper.pdf">Whitepaper</a>
+          {{>register}}{{>whitepaper}}
         </div>
       </table>
     </div>
@@ -73,12 +76,18 @@
 <span class="done h100">{{balance}} FV</span>
 </template>
 <template name="gas">
-<span class="done h100">Show: <select>
+<span class="done h100">Show: <select id="method">
   <option value="gas">gas</option>
   <option value="ether">ether</option>
   <option value="finney">finney</option>
   <option value="szabo">szabo</option>
   <option value="usd">USD</option>
+</select></span>
+<span class="done h100">Gas Policy: <select id="policy">
+  <option value="safeLow">SafeLow ({{safeLow.cost}}, {{safeLow.time}})</option>
+  <option value="standard">Economy ({{standard.cost}}, {{standard.time}})</option>
+  <option value="fast">Standard ({{fast.cost}}, {{fast.time}})</option>
+  <option value="fastest">Premium ({{fastest.cost}}, {{fastest.time}})</option>
 </select></span>
 </template>
 <template name="propose">
