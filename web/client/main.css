@@ -75,6 +75,14 @@ img.ltc {
   right:0;
   font-size:xx-small;
 }
+select {
+  appearance:none;
+  -webkit-appearance:none;
+  font-size:small;
+  border-radius:1px;
+  font-weight:bold;
+  border-color:#ededed;
+}
 .pos li {
   list-style: none;
   border-style: solid;

@@ -40,8 +40,6 @@ GasRender = {
     },
     update() {
         GasRender.gasPrice.set(parseFloat((GasRender[GasRender.policy.get()].get()||{cost:1}).cost) / 1000);
-        console.log(GasRender.gasPrice.get());
-        console.log(GasRender[GasRender.policy.get()].get());
         GasRender.finney.set(GasRender.showFinney());
     },
 }
