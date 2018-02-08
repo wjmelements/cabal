@@ -18,7 +18,6 @@ function checkAccount(refreshId) {
     var hasAccount = hasWeb3 && web3 && web3.eth && web3.eth.accounts && (web3.eth.accounts.length > 0); 
     Accounts.hasAccount.set(hasAccount);
     console.log("hasWeb3:"+hasWeb3+",hasAccount:"+hasAccount);
-    console.log(web3.eth.coinbase);
     if (hasAccount) {
         while (onCurrentAccount.length) {
             onCurrentAccount.pop()();
