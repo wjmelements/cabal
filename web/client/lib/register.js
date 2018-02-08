@@ -83,23 +83,22 @@ Template.register.helpers({
         return Template.instance().timer.get();
     },
 });
-// TODO compare to checking tx status
-function awaitRegistered(account) {
-    Accounts.current(function(currentAccount) {
-        if (currentAccount != account) {
-            refresh.bind(this)();
+function awaitRegistered() {
+    web3.eth.getTransaction(this.txhash.get(), function (error, result) {
+        if (error) {
+            console.error(error);
             return;
         }
-        Accounts.isRegistered(currentAccount, function(isRegistered) {
-            if (isRegistered) {
-                Accounts.registered.set(true);
-                Accounts.registering.set(false);
-                this.canDeregister.set(false);
-                Accounts.reportRegistrationChange();
-            } else {
-                window.setTimeout(function(){awaitRegistered.bind(this)(account)}.bind(this), 5000);
-            }
-        }.bind(this));
+        console.log(result.blockNumber);
+        if (result.blockNumber) {
+            var registered = !Accounts.registered.get();
+            Accounts.registered.set(registered);
+            Accounts.registering.set(false);
+            this.canDeregister.set(!registered);
+            Accounts.reportRegistrationChange();
+        } else {
+            window.setTimeout(awaitRegistered.bind(this), 5000);
+        }
     }.bind(this));
 }
 Template.register.events({
@@ -116,13 +115,16 @@ Template.register.events({
         if (Accounts.registered.get()) {
             Accounts.deregister(function(txhash) {
                 console.log(txhash);
-            });
+                this.txhash.set(txhash);
+                Accounts.registering.set(true);
+                awaitRegistered.bind(this)();
+            }.bind(Template.instance()));
         } else {
             Accounts.register(function(txhash) {
                 console.log(txhash);
                 Accounts.registering.set(true);
                 this.txhash.set(txhash);
-                awaitRegistered.bind(this)(account);
+                awaitRegistered.bind(this)();
             }.bind(Template.instance()));
         }
     },
