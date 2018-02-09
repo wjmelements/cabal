@@ -49,7 +49,6 @@ Template.cases.helpers({
         return Template.instance().filter.get();
     },
     firefox() {
-        console.log(Browser.isFirefox());
         return Browser.isFirefox();
     },
     hasChoice() {

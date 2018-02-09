@@ -58,7 +58,7 @@ Template.propose.events({
             return;
         }
         instance.showGas.set(true);
-        if (instance.lastValue != proposal || GasRender.method.get() != instance.lastMethod) {
+        if (instance.lastValue != proposal) {
             instance.lastValue = proposal;
             Web3Loader.onWeb3(function() {
                 accountRegistry.propose.estimateGas(this.lastValue, function(error, estimatedGas) {
@@ -66,10 +66,16 @@ Template.propose.events({
                         console.error(error);
                         return;
                     }
+                    this.lastGas = estimatedGas;
                     this.gasCost.set(GasRender.toString(estimatedGas));
                     this.lastMethod = GasRender.method.get();
+                    this.lastPolicy = GasRender.policy.get();
                 }.bind(this));
             }.bind(instance));
+        } else if (instance.lastMethod != GasRender.method.get() || instance.lastPolicy != GasRender.policy.get()) {
+            instance.gasCost.set(GasRender.toString(instance.lastGas));
+            instance.lastMethod = GasRender.method.get();
+            instance.lastPolicy = GasRender.policy.get();
         }
     },
     "mouseout .submit"(event) {
