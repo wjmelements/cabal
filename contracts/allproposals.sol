@@ -65,6 +65,7 @@ contract Vote is ERC20 {
         }
         balances[msg.sender] += grant;
         supply += grant;
+        Transfer(address(0), msg.sender, grant);
     }
 
     function availableFaucet(address _account)
@@ -84,6 +85,15 @@ contract Vote is ERC20 {
         balances[_voter] -= 10;
         balances[developerFund] += 5;
         balances[_votee] += 5;
+    }
+    // vote1 and vote9 are available for future use
+    function vote1(address _voter, address _votee) public {
+        require(accountRegistry.isProposal(msg.sender));
+        require(accountRegistry.canVote(_voter));
+        require(balances[_voter] >= 10);
+        balances[_voter] -= 10;
+        balances[developerFund] += 9;
+        balances[_votee] += 1;
     }
     function vote9(address _voter, address _votee) public {
         require(accountRegistry.isProposal(msg.sender));
@@ -116,7 +126,7 @@ interface ProposalInterface {
     function voteCount() public view returns (uint256);
 }
 library ProposalLib {
-    Vote constant voteToken = Vote(0xcb7e2789573ca3ec96547509d612f3a9acd29945);// must redeploy every change
+    Vote constant voteToken = Vote(0x89e9844b11bb1d680963f0e4787f69be3d7ec77d);// must redeploy every change
     enum Position {
         SKIP,
         APPROVE,
@@ -614,9 +624,9 @@ contract AccountRegistry is AllProposals {
 
     event NewVoter(address voter);
     event Deregistered(address voter);
-    event NominatedBoard(address board, string explanation);
-    event NewBoard(address board, string endorsement);
-    event DenounceBoard(address board, string reason);
+    event Nominated(address board, string endorsement);
+    event Board(address board, string endorsement);
+    event Denounced(address board, string reason);
     event Revoked(address board, string reason);
     event NewProposal(ProposalInterface proposal);
     event NewCabal(Cabal cabal);
@@ -739,18 +749,18 @@ contract AccountRegistry is AllProposals {
         if (candidate.membership & BOARD == BOARD) {
             return;
         }
-        address appointer = candidate.appointer;
-        Info storage appointer = infoMap[appointer];
-        if (!appointer || appointer.membership & ~BOARD == appointer.membership) {
+        address appt = candidate.appointer;
+        Info storage appointer = infoMap[appt];
+        if (appt == 0 || appointer.membership & ~BOARD == appointer.membership) {
             candidate.appointer = msg.sender;
-            NominatedBoard(_board, _vouch);
+            Nominated(_board, _vouch);
             return;
         }
-        if (appointer == msg.sender) {
+        if (appt == msg.sender) {
             return;
         }
         candidate.membership |= BOARD;
-        NewBoard(_board, _vouch);
+        Board(_board, _vouch);
     }
 
     function denounce(address _board, string _reason)
@@ -760,18 +770,18 @@ contract AccountRegistry is AllProposals {
         if (board.membership & ~BOARD == board.membership) {
             return;
         }
-        address denouncer = board.denouncer;
-        Info storage denouncer = infoMap[denouncer];
-        if (!denouncer || denouncer.membership & ~BOARD == denouncer.membership) {
+        address dncr = board.denouncer;
+        Info storage denouncer = infoMap[dncr];
+        if (dncr == 0 || denouncer.membership & ~BOARD == denouncer.membership) {
             board.denouncer = msg.sender;
-            NominatedBoard(_board, _vouch);
+            Denounced(_board, _reason);
             return;
         }
-        if (denouncer == msg.sender) {
+        if (dncr == msg.sender) {
             return;
         }
         board.membership &= ~BOARD;
-        Revoked(_board, _vouch);
+        Revoked(_board, _reason);
     }
 
     function propose(bytes _resolution)
@@ -790,7 +800,7 @@ contract AccountRegistry is AllProposals {
         require(infoMap[msg.sender].membership & BOARD == BOARD);
         uint8 membership = infoMap[_proposal].membership;
         require(membership & ~PROPOSAL == membership);
-        infoMap[proposal].membership |= PROPOSAL;
+        infoMap[_proposal].membership |= PROPOSAL;
         allProposals.push(_proposal);
     }
 
