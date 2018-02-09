@@ -90,7 +90,6 @@ Template.propose.helpers({
         return Template.instance().gasCost.get();
     },
     firefox() {
-        console.log(Browser.isFirefox());
         return Browser.isFirefox();
     },
     showGas() {
