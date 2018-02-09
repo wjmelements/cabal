@@ -85,6 +85,8 @@ contract Vote is ERC20 {
         balances[_voter] -= 10;
         balances[developerFund] += 5;
         balances[_votee] += 5;
+        Transfer(_voter, developerFund, 5);
+        Transfer(_voter, _votee, 5);
     }
     // vote1 and vote9 are available for future use
     function vote1(address _voter, address _votee) public {
@@ -94,6 +96,8 @@ contract Vote is ERC20 {
         balances[_voter] -= 10;
         balances[developerFund] += 9;
         balances[_votee] += 1;
+        Transfer(_voter, developerFund, 9);
+        Transfer(_voter, _votee, 1);
     }
     function vote9(address _voter, address _votee) public {
         require(accountRegistry.isProposal(msg.sender));
@@ -102,6 +106,8 @@ contract Vote is ERC20 {
         balances[_voter] -= 10;
         balances[developerFund] += 1;
         balances[_votee] += 9;
+        Transfer(_voter, developerFund, 1);
+        Transfer(_voter, _votee, 9);
     }
     event NewOwner(address owner);
     function transferDeveloperFund(address _newDeveloperFund) external {
