@@ -1,6 +1,8 @@
 var timerTimer;
 function timeFormat(secondsRemaining) {
     secondsRemaining = parseInt(secondsRemaining);
+    var daysRemaining = parseInt(secondsRemaining / 86400);
+    secondsRemaining -= daysRemaining * 86400;
     var hoursRemaining = parseInt(secondsRemaining / 3600);
     secondsRemaining -= hoursRemaining * 3600;
     var minutesRemaining = parseInt(secondsRemaining / 60);
@@ -8,10 +10,13 @@ function timeFormat(secondsRemaining) {
     if (secondsRemaining < 10) {
         secondsRemaining = '0'+secondsRemaining;
     }
-    if (minutesRemaining < 10) {
+    if (minutesRemaining < 10 && (daysRemaining || hoursRemaining)) {
         minutesRemaining = '0'+minutesRemaining;
     }
-    return hoursRemaining + ':' + minutesRemaining + ':' + secondsRemaining;
+    if (hoursRemaining < 10 && daysRemaining) {
+        hoursRemaining = '0'+hoursRemaining;
+    }
+    return (daysRemaining ? daysRemaining + ':' : '') + (daysRemaining || hoursRemaining ? hoursRemaining + ':' : '') + minutesRemaining + ':' + secondsRemaining;
 }
 function refresh() {
     Accounts.current(function(currentAccount) {
@@ -24,7 +29,10 @@ function refresh() {
                     if (!canDeregister) {
                         Accounts.deregistrationDate(function (date) {
                             // TODO timer once smart contract upgraded
-                            var time = [7350];
+                            console.log(date);
+                            var secs = date - Date.now()/1000;
+                            var time = [secs];
+                            time = [86420];//XXX
                             this.timer.set(timeFormat(time[0]));
                             if (timerTimer) {
                                 clearInterval(timerTimer);
