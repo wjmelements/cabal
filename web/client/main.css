@@ -204,6 +204,9 @@ textarea.case {
 a.btn {
   text-decoration:none;
 }
+.fl {
+  float:left;
+}
 .btn {
   display:inline-block;
   padding:0.8em;

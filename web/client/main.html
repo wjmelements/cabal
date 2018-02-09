@@ -33,8 +33,13 @@
 </template>
 <template name="nux">
   {{#if registered}}
-    <div class="spaced dt">
-      {{> balance}}{{> claim}}{{> register}}{{> whitepaper}}{{> gas}}
+    <div>
+      <div class="dt fl">
+        {{> balance}}{{> claim}}{{> register}}{{> whitepaper}}
+      </div>
+      <div class="spaced dt fl">
+          {{> gas}}
+      </div>
     </div>
   {{else}}
     <div id="nux">
