@@ -5,6 +5,9 @@
   display:inline-block;
   margin-left:1em;
 }
+.cb {
+  clear:both;
+}
 .ltr {
   direction:ltr;
 }
