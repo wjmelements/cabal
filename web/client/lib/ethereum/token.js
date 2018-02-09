@@ -6,7 +6,7 @@ Token = {
             default:
                 console.log("Unsupported network: "+Net.id.get());
             case "4":
-                return "0xcb7e2789573ca3ec96547509d612f3a9acd29945";
+                return "0x89e9844b11bb1d680963f0e4787f69be3d7ec77d";
         }
     },
     claim(resultFn) {
