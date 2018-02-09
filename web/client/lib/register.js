@@ -32,7 +32,6 @@ function refresh() {
                             console.log(date);
                             var secs = date - Date.now()/1000;
                             var time = [secs];
-                            time = [86420];//XXX
                             this.timer.set(timeFormat(time[0]));
                             if (timerTimer) {
                                 clearInterval(timerTimer);

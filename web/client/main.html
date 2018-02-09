@@ -34,7 +34,7 @@
 <template name="nux">
   {{#if registered}}
     <div class="spaced dt">
-      {{> register}}{{> whitepaper}}{{> claim}}{{> balance}}{{> gas}}
+      {{> balance}}{{> claim}}{{> register}}{{> whitepaper}}{{> gas}}
     </div>
   {{else}}
     <div id="nux">
@@ -53,9 +53,6 @@
             FinneyVoters are certified by their fully-refundable 1-finney deposit
           </p>
           <p>
-            FinneyVoters can claim 1 FV every 12 hours, up to 4 total
-          </p>
-          <p>
             Casemakers earn additional influence per vote
           </p>
           <p>
@@ -71,7 +68,7 @@
     <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap submit h100{{#unless canDeregister}} disabled{{/unless}}">{{#if registered}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Deregistering</p></div>{{else}}Deregister{{/if}}{{#if showTimer}}<div class="timer">{{timer}}</div>{{/if}}{{else}}{{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Registering</p></div>{{else}}Register{{/if}}{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div><div class="price">{{#if registered}}+{{/if}}{{price}}</div>{{/if}}</a>
 </template>
 <template name="claim">
-  {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}Claim {{available}} FinneyVotes!{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{/if}}
+  {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" title="Every FinneyVoter can claim 2 votes per day, up to 4" class="btn h100 ap {{#if shouldClaim}} submit{{/if}}{{#if cannotClaim}} disabled{{/if}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}+{{available}} FV{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{/if}}
 </template>
 <template name="balance">
 <span class="done h100">{{balance}} FV</span>
