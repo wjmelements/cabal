@@ -170,7 +170,7 @@ ul.pos,ul.cases {
   margin-top:0.35em;
   margin-bottom:0.35em;
   max-height:21em;
-  overflow-y:scroll;
+  overflow-y:auto;
 }
 h2.prop {
   margin-bottom:0;
