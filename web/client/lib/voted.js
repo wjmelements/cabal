@@ -9,6 +9,9 @@ Template.voted.helpers({
     vote() {
         return Template.instance().vote.get();
     },
+    proposal() {
+        return Template.instance().data.proposal.get();
+    },
 });
 Template.voted.events({
     "click .reset"(event) {

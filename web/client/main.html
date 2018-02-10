@@ -128,9 +128,6 @@ Earn 0.5 FV per case"></textarea>
     <div class="h100">
       <div class="loader"></div>
     </div>
-    <div class="h100">
-      <p>Loading</p>
-    </div>
   </div>
 </template>
 
@@ -149,16 +146,16 @@ Earn 0.5 FV per case"></textarea>
         {{voteCount}}
       </div>
     </div>
-    <div class="ib">
-      <h2 class="prop inline">{{proposal}}</h2>
-      {{> Template.dynamic template=page data=data}}
-    </div>
+    {{> Template.dynamic template=page data=data}}
   </div>
 </template>
 <template name="voted">
-  <div class="case dt bs5 voted">
-    <p class="h100">{{vote.voteCount}}</p><pre id="arg{{vote.index}}" class="pos{{vote.position}} h100">{{vote.text}}</pre>
-      <a class="btn reset h100">Change</a>
+  <div class="ib">
+    <h2 class="prop inline">{{proposal}}</h2>
+    <div class="case dt bs5 voted">
+      <p class="h100">{{vote.voteCount}}</p><pre id="arg{{vote.index}}" class="pos{{vote.position}} h100">{{vote.text}}</pre>
+        <a class="btn reset h100">Change</a>
+    </div>
   </div>
 </template>
 <template name="positions">
@@ -168,7 +165,7 @@ Earn 0.5 FV per case"></textarea>
       <li class="pos2">Amend</li>
       <li class="pos3">LOL</li>
       <li class="pos4">Reject</li>
-      <li class="pos0">Skip</li>
+      <li id="pos0" class="pos0">Skip</li>
     </div>
   </ul>
   <div class="instr">
@@ -178,9 +175,12 @@ Earn 0.5 FV per case"></textarea>
 <template name="cases">
 {{#if skip}}
   <div class="pos">
-    Skipped! <a class="btn reset">Reset</a>
+    <a class="btn reset">+</a>
+    <h2 class="prop inline">{{proposal}}</h2>
   </div>
 {{else}}
+  <div class="ib">
+  <h2 class="prop inline">{{proposal}}</h2>
   {{#if hasChoice}}
     <li class="case dt bs">
       <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{else}}{{#if showInsufficient}}<div class="price disabled">FV</div>{{/if}}{{/if}}</a>
@@ -229,6 +229,7 @@ Earn 0.5 FV per vote"></textarea>
       {{/unless}}
     {{/if}}
   {{/if}}
+  </div>
 {{/if}}
 </template>
 <template name="errorHelp">

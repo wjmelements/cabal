@@ -61,6 +61,9 @@ Template.cases.helpers({
     choice() {
         return Template.instance().choice.get();
     },
+    proposal() {
+        return Template.instance().data.proposal.get();
+    },
     position() {
         return Template.instance().position.get();
     },
@@ -247,6 +250,7 @@ Template.cases.events({
                 return;
             }
             this.txhash.set(result);
+            this.showCost.set(false);
             this.voting.set(true);
             Balance.set(Balance.get() - 1);
             Balance.onChange();
@@ -302,6 +306,7 @@ Template.cases.events({
                     this.choice.set(argument);
                     this.txhash.set(txhash);
                     this.voting.set(true);
+                    this.showCost.set(false);
                     Balance.set(Balance.get() - 1);
                     awaitArgument.bind(this)(address, argumentCount, argument);
                 }.bind(this)

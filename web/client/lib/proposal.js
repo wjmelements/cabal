@@ -59,11 +59,16 @@ Template.proposal.onCreated(function() {
     Accounts.getProposal(this.index, function(address) {
         this.address.set(address);
         var storedChoice = localStorage.getItem('choice'+this.address.get());
-        if (parseInt(storedChoice)) {
+        console.log(storedChoice);
+        var storedChoiceInt = parseInt(storedChoice);
+        if (storedChoiceInt) {
             Proposals.getArgument(address, parseInt(storedChoice), function(argument) {
                 this.argumentChoice.set(argument);
                 this.positionChoice.set('pos'+argument.position);
             }.bind(this));
+        } else if (storedChoiceInt == 0) {
+            var pos = 0;
+            this.positionChoice.set('pos'+pos);
         }
         Proposals.getArgument(address, 0, function(proposal) {
             this.title.set(proposal.text);
@@ -102,6 +107,7 @@ Template.proposal.helpers({
             voted:Template.instance().voted,
             refresh:Template.instance().refresh,
             cases:Template.instance().cases,
+            proposal:Template.instance().title,
         };
     },
     addressId() {
