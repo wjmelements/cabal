@@ -196,7 +196,6 @@ Accounts.current(function(address) {
         Accounts.registered.set(isRegistered);
     });
     Accounts.fetchCanDeregister(function(canDeregister) {
-        console.log(canDeregister);
         Accounts.canDeregister.set(canDeregister);
     });
 });

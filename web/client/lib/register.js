@@ -1,4 +1,5 @@
 var timerTimer;
+var timer = new ReactiveVar();
 function timeFormat(secondsRemaining) {
     secondsRemaining = parseInt(secondsRemaining);
     var daysRemaining = parseInt(secondsRemaining / 86400);
@@ -18,20 +19,52 @@ function timeFormat(secondsRemaining) {
     }
     return (daysRemaining ? daysRemaining + ':' : '') + (daysRemaining || hoursRemaining ? hoursRemaining + ':' : '') + minutesRemaining + ':' + secondsRemaining;
 }
+function fetchTimer() {
+    Accounts.deregistrationDate(function (date) {
+        console.log(date);
+        var secs = date - Date.now()/1000;
+        var time = [secs];
+        timer.set(timeFormat(time[0]));
+        if (timerTimer) {
+            clearInterval(timerTimer);
+        }
+        timerTimer = setInterval(function () {
+            if (!time[0]) {
+                Accounts.canDeregister.set(true);
+                clearInterval(timerTimer);
+                return;
+            }
+            time[0]--;
+            timer.set(timeFormat(time[0]));
+        }.bind(this), 1000);
+    }.bind(this));
+}
 function init() {
     Accounts.current(function(account) {
-        Accounts.deregistrationDate(function (date) {
-            var secs = date - Date.now()/1000;
-            var time = [secs];
-            this.timer.set(timeFormat(time[0]));
-            if (timerTimer) {
-                clearInterval(timerTimer);
-            }
-            timerTimer = setInterval(function () {
-                time[0]--;
-                this.timer.set(timeFormat(time[0]));
-            }.bind(this), 1000);
-        }.bind(this));
+        var txhash = localStorage.getItem('reg'+account);
+        if (txhash) {
+            console.log(txhash);
+            web3.eth.getTransaction(txhash, function(error, result) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                if (!result.blockNumber) {
+                    this.txhash.set(txhash);
+                    if (!Accounts.registering.get()) {
+                        Accounts.registering.set(true);
+                        var registered = !Accounts.registered.get();
+                        Accounts.registered.set(registered);
+                        Accounts.canDeregister.set(!registered);
+                        Accounts.reportRegistrationChange();
+                    }
+                    Transactions.awaitPendingTransaction(txhash, 0, onRegistered.bind(this));
+                } else {
+                    localStorage.setItem('reg'+account, '');
+                }
+            }.bind(this));
+        }
+        fetchTimer.bind(this)();
     }.bind(this));
 }
 Template.register.onCreated(function() {
@@ -40,7 +73,6 @@ Template.register.onCreated(function() {
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.price = GasRender.finney;
-    this.timer = new ReactiveVar();
     init.bind(this)();
 });
 Template.register.helpers({
@@ -72,7 +104,7 @@ Template.register.helpers({
         return Template.instance().showTimer.get();
     },
     timer() {
-        return Template.instance().timer.get();
+        return timer.get();
     },
 });
 function onRegistered() {
@@ -80,6 +112,8 @@ function onRegistered() {
     if (Accounts.registered.get()) {
         Accounts.canDeregister.set(false);
     }
+    localStorage.setItem('reg'+web3.eth.coinbase, '');
+    fetchTimer.bind(this)();
 }
 Template.register.events({
     "click .submit"(event) {
@@ -95,6 +129,7 @@ Template.register.events({
             console.log(txhash);
             Accounts.registering.set(true);
             this.txhash.set(txhash);
+            localStorage.setItem('reg'+web3.eth.coinbase, txhash);
             var registered = !Accounts.registered.get();
             Accounts.registered.set(registered);
             Accounts.canDeregister.set(!registered);
