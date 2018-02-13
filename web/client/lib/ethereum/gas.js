@@ -66,7 +66,9 @@ GasRender.policy = new ReactiveVar('safeLow');
 var priorMethod = localStorage.getItem('gasmethod');
 GasRender.method.set(priorMethod || 'ether');
 var priorPolicy = localStorage.getItem('gaspolicy');
-GasRender.policy.set(priorPolicy || 'standard');
+if (priorPolicy) {
+    GasRender.policy.set(priorPolicy);
+}
 GasRender.finney = new ReactiveVar(GasRender.showFinney());
 
 function fetchGasPrice() {

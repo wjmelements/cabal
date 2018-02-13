@@ -75,3 +75,7 @@ Balance.removeListener = function(listener) {
         return a != listener;
     });
 }
+Token.balance(function(balance) {
+    Balance.set(balance.c[0] / 10);
+    Balance.onChange();
+}.bind(this));

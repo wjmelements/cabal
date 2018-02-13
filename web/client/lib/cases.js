@@ -143,22 +143,6 @@ function awaitArgument(address, lastArgumentCount, argument) {
         }.bind(this), 4000);
     }.bind(this));
 }
-function awaitVoted(address, choiceIndex, argument) {
-    Proposals.getMyVote(address, function(myVote) {
-        if (this.address.get() != address) {
-            return;
-        }
-        if (myVote == choiceIndex) {
-            this.voting.set(false);
-            this.voted.set(argument);
-            this.onVote();
-            return;
-        }
-        window.setTimeout(function () {
-            awaitVoted.bind(this)(address, choiceIndex, argument);
-        }.bind(this), 5000);
-    }.bind(this));
-}
 function updateCases() {
     var cases;
     var address = this.address.get();
@@ -211,23 +195,24 @@ Template.cases.events({
         updateCases.bind(instance)();
     },
     "mouseover .vote"(event) {
-        if (Template.instance().cannotVote.get()) {
-            Template.instance().showInsufficient.set(true);
+        var inst = Template.instance();
+        if (inst.cannotVote.get()) {
+            inst.showInsufficient.set(true);
             return;
         }
-        if (Template.instance().voting.get()) {
+        if (inst.voting.get()) {
             return;
         }
-        Template.instance().showCost.set(true);
-        Proposals[Template.instance().address.get()].vote.estimateGas(
-            Template.instance().choice.get().index,
+        inst.showCost.set(true);
+        Proposals[inst.address.get()].vote.estimateGas(
+            inst.choice.get().index,
             function (error, gas) {
                 if (error) {
                     console.error(error);
                     return;
                 }
                 this.cost.set(GasRender.toString(gas));
-        }.bind(Template.instance()));
+        }.bind(inst));
     },
     "mouseout .vote"(event) {
         Template.instance().showCost.set(false);
@@ -244,17 +229,19 @@ Template.cases.events({
         var choice = instance.choice.get();
         var address = instance.address.get();
         var choiceIndex = choice.index;
-        Proposals.vote(address, choiceIndex, function (error, result) {
+        Proposals.vote(address, choiceIndex, function (error, txhash) {
             if (error) {
                 console.error(error);
                 return;
             }
-            this.txhash.set(result);
+            this.txhash.set(txhash);
             this.showCost.set(false);
             this.voting.set(true);
-            Balance.set(Balance.get() - 1);
-            Balance.onChange();
-            awaitVoted.bind(this)(address, choiceIndex, choice);
+            Transactions.awaitPendingTransaction(txhash, -1, function() {
+                this.voting.set(false);
+                this.voted.set(choice);
+                this.onVote();
+            }.bind(this));
         }.bind(instance));
     },
     "mouseover #custom-arg a.btn"(event) {
@@ -263,7 +250,11 @@ Template.cases.events({
             instance.showInsufficient.set(true);
             return;
         }
-        Proposals[instance.address.get()].argue.estimateGas(instance.pos.get(), instance.find('#custom-arg textarea').value, function (error, gas) {
+        var cases = instance.cases.get();
+        var content = instance.find('#custom-arg textarea').value;
+        var hasCases = cases && cases.length > 0 || 0;
+        instance.cost.set(GasRender.toString(Proposals.estimateArgGas(content.length, hasCases)));
+        Proposals[instance.address.get()].argue.estimateGas(instance.pos.get(), content, function (error, gas) {
             if (error) {
                 console.error(error);
                 return;

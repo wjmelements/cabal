@@ -18,45 +18,30 @@ function timeFormat(secondsRemaining) {
     }
     return (daysRemaining ? daysRemaining + ':' : '') + (daysRemaining || hoursRemaining ? hoursRemaining + ':' : '') + minutesRemaining + ':' + secondsRemaining;
 }
-function refresh() {
-    Accounts.current(function(currentAccount) {
-        this.account.set(currentAccount);
-        Accounts.isRegistered(currentAccount, function(isRegistered) {
-            Accounts.registered.set(isRegistered);
-            if (isRegistered) {
-                Accounts.canDeregister(function (canDeregister) {
-                    this.canDeregister.set(canDeregister);
-                    if (!canDeregister) {
-                        Accounts.deregistrationDate(function (date) {
-                            // TODO timer once smart contract upgraded
-                            console.log(date);
-                            var secs = date - Date.now()/1000;
-                            var time = [secs];
-                            this.timer.set(timeFormat(time[0]));
-                            if (timerTimer) {
-                                clearInterval(timerTimer);
-                            }
-                            timerTimer = setInterval(function () {
-                                time[0]--;
-                                this.timer.set(timeFormat(time[0]));
-                            }.bind(this), 1000);
-                        }.bind(this));
-                    }
-                }.bind(this));
+function init() {
+    Accounts.current(function(account) {
+        Accounts.deregistrationDate(function (date) {
+            var secs = date - Date.now()/1000;
+            var time = [secs];
+            this.timer.set(timeFormat(time[0]));
+            if (timerTimer) {
+                clearInterval(timerTimer);
             }
+            timerTimer = setInterval(function () {
+                time[0]--;
+                this.timer.set(timeFormat(time[0]));
+            }.bind(this), 1000);
         }.bind(this));
     }.bind(this));
 }
 Template.register.onCreated(function() {
-    this.account = new ReactiveVar();
     this.showTimer = new ReactiveVar(false);
-    this.canDeregister = new ReactiveVar(true);
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.price = GasRender.finney;
     this.timer = new ReactiveVar();
-    refresh.bind(this)();
+    init.bind(this)();
 });
 Template.register.helpers({
     registered() {
@@ -66,7 +51,7 @@ Template.register.helpers({
         return Accounts.registering.get();
     },
     canDeregister() {
-        return Template.instance().canDeregister.get();
+        return Accounts.canDeregister.get();
     },
     showCost() {
         return Template.instance().showCost.get();
@@ -90,49 +75,36 @@ Template.register.helpers({
         return Template.instance().timer.get();
     },
 });
-function awaitRegistered() {
-    web3.eth.getTransaction(this.txhash.get(), function (error, result) {
-        if (error) {
-            console.error(error);
-            return;
-        }
-        console.log(result.blockNumber);
-        if (result.blockNumber) {
-            var registered = !Accounts.registered.get();
-            Accounts.registered.set(registered);
-            Accounts.registering.set(false);
-            this.canDeregister.set(!registered);
-            Accounts.reportRegistrationChange();
-        } else {
-            window.setTimeout(awaitRegistered.bind(this), 5000);
-        }
-    }.bind(this));
+function onRegistered() {
+    Accounts.registering.set(false);
+    if (Accounts.registered.get()) {
+        Accounts.canDeregister.set(false);
+    }
 }
 Template.register.events({
     "click .submit"(event) {
         // if we are not registered, canDeregister is still true
         // because it has been more than 7 days since we last registered
-        if (!Template.instance().canDeregister.get()) {
+        if (!Accounts.canDeregister.get()) {
             return;
         }
         if (Accounts.registering.get()) {
             return;
         }
-        var account = Template.instance().account.get();
+        var onPendingTx = function(txhash) {
+            console.log(txhash);
+            Accounts.registering.set(true);
+            this.txhash.set(txhash);
+            var registered = !Accounts.registered.get();
+            Accounts.registered.set(registered);
+            Accounts.canDeregister.set(!registered);
+            Accounts.reportRegistrationChange();
+            Transactions.awaitPendingTransaction(txhash, 0, onRegistered.bind(this));
+        }.bind(Template.instance());
         if (Accounts.registered.get()) {
-            Accounts.deregister(function(txhash) {
-                console.log(txhash);
-                this.txhash.set(txhash);
-                Accounts.registering.set(true);
-                awaitRegistered.bind(this)();
-            }.bind(Template.instance()));
+            Accounts.deregister(onPendingTx);
         } else {
-            Accounts.register(function(txhash) {
-                console.log(txhash);
-                Accounts.registering.set(true);
-                this.txhash.set(txhash);
-                awaitRegistered.bind(this)();
-            }.bind(Template.instance()));
+            Accounts.register(onPendingTx);
         }
     },
     "mouseover .submit"(event) {
@@ -142,23 +114,25 @@ Template.register.events({
         if (Accounts.registering.get()) {
             return;
         }
-        if (!Template.instance().canDeregister.get()) {
-            Template.instance().showTimer.set(true);
+        var inst = Template.instance();
+        if (!Accounts.canDeregister.get()) {
+            inst.showTimer.set(true);
             return;
         }
-        Template.instance().showCost.set(true);
+        inst.showCost.set(true);
         var resultFn = function(error, gas) {
             if (error) {
                 console.error(error);
                 return;
             }
             this.cost.set(GasRender.toString(gas));
-        }.bind(Template.instance());
+        }.bind(inst);
         if (Accounts.registered.get()) {
-            if (Template.instance().canDeregister.get()) {
+            if (Accounts.canDeregister.get()) {
                 accountRegistry.deregister.estimateGas(resultFn);
             }
         } else {
+            inst.cost.set(GasRender.toString(63205));
             accountRegistry.register.estimateGas({value: 1E15}, resultFn);
         }
     },

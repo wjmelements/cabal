@@ -27,6 +27,12 @@ function bytesToStr(bytes) {
     }
     return str;
 }
+// currently accurate, but must be updated with each deployment of the contract
+function estimateArgumentGas(len, hasCases) {
+    var gas = 144495 + len * 64 + + 20526 * Math.ceil(len/32) + 20421 * (len >= 32) + 3 * Math.ceil((len - 28)/32) + hasCases * -15238;
+    console.log('Estimating('+len+')> '+ gas);
+    return gas;
+}
 window.addEventListener('load', function() {
     Web3Loader.onWeb3(function() {
         var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"},{"name":"text","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"resolution","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_resolution","type":"bytes"},{"name":"_source","type":"address"},{"name":"_voteToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
@@ -140,10 +146,11 @@ Proposals = {
         });
     },
     vote(address, argumentIndex, resultFn) {
-        Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
+        Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei(), gas:105000}, resultFn);
     },
     argue(address, position, content, resultFn) {
-        Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
+        var gas = estimateArgumentGas(content.length, Proposals[address].argCount > 1 || 0);
+        Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei(), gas:gas}, resultFn);
     },
     getMyVote(address, resultFn) {
         Accounts.current(function(account) {
@@ -164,5 +171,8 @@ Proposals = {
             }
             resultFn(result.c[0]);
         });
+    },
+    estimateArgGas(len, hasCases) {
+        return estimateArgumentGas(len, hasCases);
     },
 };

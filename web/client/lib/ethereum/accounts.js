@@ -143,7 +143,7 @@ Accounts = {
         console.log(proposal);
         accountRegistry.propose(proposal, {gasPrice:GasRender.gasPriceInWei()},resultFn);
     },
-    canDeregister(resultFn) {
+    fetchCanDeregister(resultFn) {
         Accounts.current(function (account) {
             accountRegistry.canDeregister(account, function(error, result) {
                 if (error) {
@@ -189,4 +189,14 @@ Accounts.hasWeb3 = new ReactiveVar(true);
 Accounts.hasAccount = new ReactiveVar(true);
 Accounts.registered = new ReactiveVar(true);
 Accounts.registering = new ReactiveVar(false);
+Accounts.canDeregister = new ReactiveVar(true);
 checkAccount();
+Accounts.current(function(address) {
+    Accounts.isRegistered(address, function(isRegistered) {
+        Accounts.registered.set(isRegistered);
+    });
+    Accounts.fetchCanDeregister(function(canDeregister) {
+        console.log(canDeregister);
+        Accounts.canDeregister.set(canDeregister);
+    });
+});
