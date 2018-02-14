@@ -75,7 +75,10 @@ Proposals = {
             if (refresh || !proposal[index]) {
                 var pos = result[1].c[0];
                 var voteCount = result[2].c[0];
-                // FIXME support uint256 for voteCount
+                if (result[2].c[5]) {
+                    // FIXME support uint256
+                    voteCount = 7913129639936 - result[2].c[5];
+                }
                 var argument = {
                     index:index,
                     source:result[0],
@@ -161,15 +164,6 @@ Proposals = {
                 }
                 resultFn(result.c[0]);
             });
-        });
-    },
-    voteCount(address, resultFn) {
-        Proposals[address].voteCount(function(error, result) {
-            if (error) {
-                console.error(error);
-                return;
-            }
-            resultFn(result.c[0]);
         });
     },
     estimateArgGas(len, hasCases) {

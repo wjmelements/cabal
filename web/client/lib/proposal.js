@@ -3,9 +3,6 @@ function refresh(ignoreVote) {
     Proposals.getArgumentCount(address, function(argumentCount) {
         this.argumentCount.set(argumentCount - 1);
     }.bind(this));
-    Proposals.voteCount(address, function(voteCount) {
-        this.voteCount.set(voteCount);
-    }.bind(this));
     Proposals.prefetchArguments(address, function() {
         var proposal = Proposals[address];
         var total = 0;
@@ -71,6 +68,7 @@ Template.proposal.onCreated(function() {
         }
         Proposals.getArgument(address, 0, function(proposal) {
             this.title.set(proposal.text);
+            this.voteCount.set(proposal.voteCount);
         }.bind(this));
         this.refresh = refresh.bind(this);
         this.refresh();
