@@ -66,12 +66,15 @@ Voters give half their vote to casemakers.
 Casemakers give half their vote to proposers.
 Proposals are incentivized to attract many cases.
 Cases are incentivized to attract many votes.
-The continuous faucet encourages users to return daily and check new proposals, which compete for their attention.
+Creating a new case is gassier than voting with an existing one, and similar cases compete for similar voters, so cases differ to represent portions of the anticipated voting population.
+The continuous faucet encourages voters to return daily and check new proposals, which compete for their attention.
 \par
 If the entire vote was transfered as incentive, powerbanks would be able to vote for their own arguments to exercise influence quadratic in their stake.
 When only half of a vote is awarded, votes can only be used twice.
 The governing DAO collects the difference and profits by selling its excess on an open market, such as EtherDelta.
 Thus, in order to be profitable, the DAO must promote aggregate voting.
+\par
+If accounts were free to vote on every proposal, 
 \par
 Third-party mining of FinneyVotes for sale is unlikely to be profitable given the comparative advantage of the owner account, who does not have to mine with gas and staked finney.
 The ability to mine with gas and staked finney creates an elastic supply curve.
@@ -82,7 +85,7 @@ Currently, the token is governed by William Morriss directly.
 Ownership will be transfered to the DAO pending the release of Aragon.
 The DAO will then ICO.
 \section{Upgrades}
-As with CryptoKitties and Proof of Weak Hands, there will be many copycats offering a similar service.
+As with CryptoKitties and Proof of Weak Hands, there may be many copycats offering a similar service.
 The ability of FinneyVote to release updates will limit its ability to compete.
 While the user interface can be updated trivially, the smart contracts are more permanent.
 \par
@@ -96,6 +99,13 @@ Thus, the entire proposal system can be arbitrarily upgraded without migrating a
 Some features can be implemented as separate contracts, as some front-ends will choose not to render the feature.
 For example, comments can be added as stand-alone contracts without requiring an update to proposals.
 By preferring separate contracts, the system remains modular, and clients can experiment with new features without forking the community.
+\section{FinneyVoters as a Service}
+Until verified unique identity can be cheaply established, many services will also use time-staked deposits for anti-Sybil.
+The account registry can be used to validate FinneyVoters in such contexts.
+Third-party polls, for example, can mitigate spam by verifying their participants are registered FinneyVoters.
+It is much better for users to have one deposit for all services than for each to require their own.
+The account registry can also approve outside proposals to use the FinneyVote token.
+Such proposals could raise funds, take action, or determine goals democratically.
 \section{Related Work}
 The SomethingAwful Forums require users to pay a one-time registration fee of $\$9.95$.
 This fee mitigates spam while profiting the service.
@@ -104,12 +114,16 @@ This maximizes aggregate voting by reducing the perceived cost of account creati
 In practice, some accounts will never deregister, even after account registry migration.
 \par
 Reddit allows its users to upvote or downvote posts and comments, creating a crowdsourced content curation service, the front-page of the internet.
-Steem operates a similar but decentralized system with built-in tipping.
+Steem operates a similar but decentralized system that rewards content providers with cryptocurrency.
+Payouts are slowed by a vesting schedule.
 Steem boasts a feeless network with more transactions than Ethereum.
-Steem limits self-promotion by delaying receipt of the tips for 7 days.
-Neither are effective opinion polls.
-On Reddit, controversial content is buried and political communities circle-jerk.
-Steem is struggling with automated sybil promotion services, which are weakening the quality of its content.
+Similar to FinneyVote, Steem requires a minimum balance of STEEM to participate and rewards its contributors.
+While both are effective content curation systems, neither are effective forums for controversy.
+Unpopular content is buried and political communities circle-jerk.
+Because Steem is feeless and rewards voters, Steemit struggles with sybil promotion services, which are weakening the quality of its content.
+The most powerful Steemit accounts exert tens of thousands times more power than the least.
+Steem wants to keep upvoting feeless so that users do not hesitate to upvote.
+Instead, FinneyVote wraps political voting with opportunity costs, to perturb powerbanking and promote representative discussion.
 \par
 Aragon is developing smart contracts for the governance of DAOs.
 They support a number of voting systems, including voting weighted by share.
@@ -119,6 +133,16 @@ Influence must be linear both in deposit and fee, else powerbanks have a cost-ad
 \par
 Transferring registration deposits to a DAO would give FinneyVote arms and legs.
 Some proposals could take action with the funds if they have enough votes after a voting period.
+Dissenters opposed to such actions would not want their funds to support it, and the community could fracture.
 DAOs already provide this functionality more-effectively, and are better-equipped to take action.
-Perhaps Cabals and some DAOs will consider FinneyVotes, but in general action is best governed by responsible stakeholders, or perhaps futures markets.
+In general, action is best governed by responsible stakeholders, or perhaps futures markets.
+\par
+Liquid democracy is a proposed democratic system that would allow voters to recursively delegate their votes to others.
+FinneyVote allows this through the creation of smart-contract voters, who allow their owners to delegate their votes on specified proposals to trusted delegates.
+More likely though, voters would simply vote with arguments written by authoritative casemakers.
+Cases are immutable, while delegates can be fickle.
+FinneyVote provides liquid democracy implicitly when voters choose existing cases.
+\par
+Futarchy is a proposed system of government that elects leaders to choose community goals, but uses futures markets to decide how to achieve them.
+FinneyVote can supplant elected representatives for determining value-priorities.
 \end{document}
