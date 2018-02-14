@@ -91,7 +91,7 @@ contract REVBank is FinneyVoteDoppel {
             // FML pop not implemented yet
             doppels.pop().refund();
         }
-        msg.sender.transfer(this.balance);
+        msg.sender.transfer(this.balance());
     }
     function refund()
     external
