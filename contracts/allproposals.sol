@@ -472,6 +472,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
         return infoMap[_account].membership & FRAUD == FRAUD;
     }
 
+    function isPendingCabal(address _account)
+    public view
+    returns (bool)
+    {
+        return infoMap[_account].membership & PENDING_CABAL == PENDING_CABAL;
+    }
+
     function isCabal(address _account)
     public view
     returns (bool)
