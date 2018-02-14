@@ -37,7 +37,7 @@ contract Vote is ERC20,TokenRescue {
     mapping (address => uint256) faucetDate;
 
     function Vote() public {
-        developerFund = msg.sender;
+        developerFund = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
     }
     function totalSupply() public constant returns (uint256) {
         return supply;
@@ -138,11 +138,9 @@ interface ProposalInterface {
     function getPosition(address _user) public view returns (ProposalLib.Position);
     function argumentCount() public view returns (uint256);
     function vote(uint256 _argumentId) external;
-    function resolution() public view returns (bytes);
-    function voteCount() public view returns (uint256);
 }
 library ProposalLib {
-    Vote constant voteToken = Vote(0x0000001bf0cda9c6f6c4644cb97174c427723894);
+    Vote constant voteToken = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
     enum Position {
         SKIP,
         APPROVE,
@@ -260,14 +258,6 @@ contract Proposal is ProposalInterface {
         return proposal.argumentCount();
     }
     
-    // useful RPC but do not use in contracts
-    function arguments(uint256 _index)
-    public view
-    returns (address source, ProposalLib.Position position, uint256 count, bytes text) {
-        ProposalLib.Argument storage argument = proposal.arguments[_index];
-        return (argument.source, argument.position, argument.count, argument.text);
-    }
-
     function argumentSource(uint256 _index)
     public view
     returns (address) {
@@ -295,24 +285,6 @@ contract Proposal is ProposalInterface {
     function Proposal(address _source, bytes _resolution)
     public {
         proposal.init(_source, _resolution);
-    }
-
-    function resolution()
-    public view
-    returns (bytes) {
-        return proposal.resolution();
-    }
-
-    function voteCount()
-    public view
-    returns (uint256) {
-        return proposal.voteCount();
-    }
-
-    function source()
-    public view
-    returns (address) {
-        return proposal.source();
     }
 
     function argue(ProposalLib.Position _position, bytes _text)
@@ -371,11 +343,12 @@ contract AccountRegistry is AllProposals,TokenRescue {
     CabalInterface[] public allCabals;
     ProposalInterface[] public allProposals;
 
-    function AccountRegistry(address _trustee)
+    function AccountRegistry()
     public
     {
-        infoMap[msg.sender].membership ^= BOARD;
-        infoMap[_trustee].membership ^= BOARD;
+        infoMap[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership ^= BOARD;
+        infoMap[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership ^= BOARD;
+        infoMap[0x424a6e871E8cea93791253B47291193637D6966a].membership ^= BOARD;
     }
 
     event NewVoter(address voter);
