@@ -10,7 +10,20 @@ interface ERC20 {
     event Transfer(address indexed _from, address indexed _to, uint _value);
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
-contract Vote is ERC20 {
+contract TokenRescue {
+    // this contract holds no tokens
+    // use this method to rescue your tokens if you sent them by mistake but be quick or someone else will get them
+    function rescueToken(ERC20 _token)
+    external
+    {
+        _token.transfer(msg.sender, _token.balanceOf(this));
+    }
+    // require data for transactions
+    function() external payable {
+        revert();
+    }
+}
+contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
     AccountRegistry public accountRegistry;
     address public developerFund;
@@ -78,10 +91,9 @@ contract Vote is ERC20 {
         return grant;
     }
 
-    function vote(address _voter, address _votee) public {
-        require(accountRegistry.isProposal(msg.sender));
-        require(accountRegistry.canVote(_voter));
+    function vote5(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
+        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[developerFund] += 5;
         balances[_votee] += 5;
@@ -90,9 +102,8 @@ contract Vote is ERC20 {
     }
     // vote1 and vote9 are available for future use
     function vote1(address _voter, address _votee) public {
-        require(accountRegistry.isProposal(msg.sender));
-        require(accountRegistry.canVote(_voter));
         require(balances[_voter] >= 10);
+        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[developerFund] += 9;
         balances[_votee] += 1;
@@ -100,9 +111,8 @@ contract Vote is ERC20 {
         Transfer(_voter, _votee, 1);
     }
     function vote9(address _voter, address _votee) public {
-        require(accountRegistry.isProposal(msg.sender));
-        require(accountRegistry.canVote(_voter));
         require(balances[_voter] >= 10);
+        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[developerFund] += 1;
         balances[_votee] += 9;
@@ -203,7 +213,7 @@ library ProposalLib {
     function vote(Storage storage self, uint256 _argumentId)
     public {
         address destination = self.arguments[_argumentId].source;
-        voteToken.vote(msg.sender, destination);
+        voteToken.vote9(msg.sender, destination);
         self.arguments[self.votes[msg.sender]].count--;
         self.arguments[
             self.votes[msg.sender] = _argumentId
@@ -214,7 +224,7 @@ library ProposalLib {
     public
     returns (uint256) {
         address destination = self.arguments[0].source;
-        voteToken.vote(msg.sender, destination);
+        voteToken.vote9(msg.sender, destination);
         uint256 argumentId = self.arguments.length;
         self.arguments.push(Argument(msg.sender, _position, 1, _text));
         self.arguments[self.votes[msg.sender]].count--;
@@ -325,7 +335,7 @@ interface AllProposals {
     function isProposal(address _proposal) public view returns (bool);
 }
 
-contract AccountRegistry is AllProposals {
+contract AccountRegistry is AllProposals,TokenRescue {
     
     uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public proposalCensorshipFee = 50 finney;
@@ -453,6 +463,14 @@ contract AccountRegistry is AllProposals {
         return infoMap[_voter].deregistrationDate < now;
     }
 
+    function canVoteAndIsProposal(address _voter, address _proposal)
+    public view
+    returns (bool)
+    {
+        return infoMap[_voter].membership & VOTER == VOTER
+            && infoMap[_proposal].membership & PROPOSAL == PROPOSAL;
+    }
+
     function canVote(address _voter)
     public view
     returns (bool)
@@ -555,7 +573,7 @@ contract AccountRegistry is AllProposals {
     // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
     // - open-source it using Etherscan or equivalent
     function proposeExternal(ProposalInterface _proposal)
-    external payable
+    external
     {
         Info storage info = infoMap[_proposal];
         require(info.membership & ~(PENDING_PROPOSAL | PROPOSAL) == info.membership);
@@ -597,5 +615,4 @@ contract AccountRegistry is AllProposals {
         require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
         info.membership ^= (FRAUD | PENDING_PROPOSAL);
     }
-
 }
