@@ -155,6 +155,12 @@ Accounts = {
         });
     },
     deregistrationDate(resultFn) {
+        if (!accountRegistry) {
+            onAccountRegistry.push(function() {
+                Accounts.deregistrationDate(resultFn);
+            });
+            return;
+        }
         accountRegistry.deregistrationDate(function (error, date) {
             if (error) {
                 console.error(error);
