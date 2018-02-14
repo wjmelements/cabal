@@ -26,7 +26,7 @@ contract TokenRescue {
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
     AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
-    address public developerFund;
+    address public developerFund = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
     string public symbol = "FV";
@@ -36,9 +36,6 @@ contract Vote is ERC20,TokenRescue {
     mapping (address => mapping (address => uint256)) approved;
     mapping (address => uint256) faucetDate;
 
-    function Vote() public {
-        developerFund = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
-    }
     function totalSupply() public constant returns (uint256) {
         return supply;
     }
@@ -91,6 +88,7 @@ contract Vote is ERC20,TokenRescue {
         return grant;
     }
 
+    // vote5 and vote1 are available for future use
     function vote5(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
         require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
@@ -100,7 +98,6 @@ contract Vote is ERC20,TokenRescue {
         Transfer(_voter, developerFund, 5);
         Transfer(_voter, _votee, 5);
     }
-    // vote1 and vote9 are available for future use
     function vote1(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
         require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
