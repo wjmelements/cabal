@@ -35,7 +35,7 @@ function estimateArgumentGas(len, hasCases) {
 }
 window.addEventListener('load', function() {
     Web3Loader.onWeb3(function() {
-        var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"},{"name":"text","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"resolution","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_resolution","type":"bytes"},{"name":"_source","type":"address"},{"name":"_voteToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
+        var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"},{"name":"text","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentText","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"resolution","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_resolution","type":"bytes"},{"name":"_source","type":"address"},{"name":"_voteToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
         // TODO see if web3.eth.contract(proposalABI) localvar is better
         Proposals.init = function(address) {
             Proposals[address] = web3.eth.contract(proposalABI).at(address);
@@ -67,27 +67,14 @@ Proposals = {
             resultFn(proposal[index]);
             return;
         }
-        proposal.arguments(index, function(err, result) {
-            if (err) {
-                console.error(err);
+        var argument = {index:index};
+        var done = function() {
+            if (!argument.source || !argument.position || typeof(argument.voteCount) == 'undefined' || !argument.text) {
                 return;
             }
             if (refresh || !proposal[index]) {
-                var pos = result[1].c[0];
-                var voteCount = result[2].c[0];
-                if (result[2].c[5]) {
-                    // FIXME support uint256
-                    voteCount = 7913129639936 - result[2].c[5];
-                }
-                var argument = {
-                    index:index,
-                    source:result[0],
-                    position:pos,
-                    voteCount:voteCount,
-                    text:bytesToStr(result[3])
-                };
-                var casesKey = 'pos'+pos;
-                var voteKey = 'votes'+pos;
+                var casesKey = 'pos'+argument.position;
+                var voteKey = 'votes'+argument.position;
                 if (!proposal[index]) {
                     if (proposal[casesKey]) {
                         proposal[casesKey].push(index);
@@ -96,16 +83,53 @@ Proposals = {
                     }
                 }
                 if (typeof proposal[voteKey] == "undefined") {
-                    proposal[voteKey] = voteCount;
+                    proposal[voteKey] = argument.voteCount;
                 } else {
                     if (proposal[index]) {
-                        voteCount -= proposal[index].voteCount;
+                        proposal[voteKey] -= proposal[index].voteCount;
                     }
-                    proposal[voteKey] += voteCount;
+                    proposal[voteKey] += argument.voteCount;
                 }
                 proposal[index] = argument;
             }
-            resultFn(Proposals[address][index]);
+            resultFn(argument);
+        };
+        proposal.argumentText(index, function(err, result) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            argument.text = bytesToStr(result);
+            done();
+        });
+        proposal.argumentPosition(index, function(err, result) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            argument.position = result;
+            done();
+        });
+        proposal.argumentVoteCount(index, function(err, result) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            var voteCount = result.c[0];
+            if (result.c[5]) {
+                // FIXME support uint256
+                voteCount = 7913129639936 - result.c[5];
+            }
+            argument.voteCount = voteCount;
+            done();
+        });
+        proposal.argumentSource(index, function(err, result) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            argument.source = result;
+            done();
         });
     },
     prefetchArguments(address, onComplete) {
