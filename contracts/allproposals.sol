@@ -25,7 +25,7 @@ contract TokenRescue {
 }
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
-    AccountRegistry public accountRegistry;
+    AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
     address public developerFund;
 
     uint8 public constant decimals = 1;
@@ -142,7 +142,7 @@ interface ProposalInterface {
     function voteCount() public view returns (uint256);
 }
 library ProposalLib {
-    Vote constant voteToken = Vote(0x89e9844b11bb1d680963f0e4787f69be3d7ec77d);// must redeploy every change
+    Vote constant voteToken = Vote(0x0000001bf0cda9c6f6c4644cb97174c427723894);
     enum Position {
         SKIP,
         APPROVE,
