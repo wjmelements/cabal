@@ -45,23 +45,31 @@ contract Vote is ERC20,TokenRescue {
     function approve(address _spender, uint256 _value) public returns (bool) {
         approved[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
+        return true;
     }
     function allowance(address _owner, address _spender) public constant returns (uint256) {
         return approved[_owner][_spender];
     }
     function transfer(address _to, uint256 _value) public returns (bool) {
-        require(balances[msg.sender] >= _value);
+        if (balances[msg.sender] < _value) {
+            return false;
+        }
         balances[msg.sender] -= _value;
         balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
+        return true;
     }
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-        require(balances[_from] >= _value);
-        require(approved[_from][msg.sender] >= _value);
+        if (balances[_from] < _value
+         || approved[_from][msg.sender] < _value
+         || _value == 0) {
+            return false;
+        }
         approved[_from][msg.sender] -= _value;
         balances[_from] -= _value;
         balances[_to] += _value;
         Transfer(_from, _to, _value);
+        return true;
     }
     function faucet() external {
         require(accountRegistry.canVote(msg.sender));
@@ -126,8 +134,8 @@ contract Vote is ERC20,TokenRescue {
     external onlyOwner {
         uint256 balance = balances[owner];
         balances[_newOwner] += balance;
-        Transfer(owner, _newOwner, balance);
         balances[owner] = 0;
+        Transfer(owner, _newOwner, balance);
         owner = _newOwner;
         NewOwner(owner);
     }
@@ -315,7 +323,8 @@ contract AccountRegistry is AllProposals,TokenRescue {
     uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public proposalCensorshipFee = 50 finney;
 
-    address burn = 0xdead;
+    // this is the first deterministic contract address for 0x315017F58EAaFC696bcF286928E08cbf15C00fDc
+    address burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
 
     /* uint8 membership bitmap:
      * 0 - fraud
@@ -356,13 +365,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
 
     event NewVoter(address voter);
     event Deregistered(address voter);
-    event Nominated(address board, string endorsement);
-    event Board(address board, string endorsement);
-    event Denounced(address board, string reason);
-    event Revoked(address board, string reason);
-    event NewProposal(ProposalInterface proposal);
-    event NewCabal(CabalInterface cabal);
-    event BannedProposal(ProposalInterface proposal, string reason);
+    event Nominated(address indexed board, string endorsement);
+    event Board(address indexed board, string endorsement);
+    event Denounced(address indexed board, string reason);
+    event Revoked(address indexed board, string reason);
+    event NewProposal(ProposalInterface indexed proposal);
+    event NewCabal(CabalInterface indexed cabal);
+    event BannedProposal(ProposalInterface indexed proposal, string reason);
 
     function cabalCount()
     public view
@@ -382,7 +391,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     function registerCabal(CabalInterface _cabal)
     external {
         Account storage account = accounts[_cabal];
-        require((account.membership & ~(PENDING_CABAL | CABAL)) == account.membership);
+        require(account.membership & (PENDING_CABAL | CABAL) == 0);
         account.membership |= PENDING_CABAL;
         NewCabal(_cabal);
     }
@@ -401,7 +410,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     {
         require(msg.value == registrationDeposit);
         Account storage account = accounts[msg.sender];
-        require(account.membership & ~VOTER == account.membership);
+        require(account.membership & VOTER == 0);
         account.deregistrationDate = now + 7 days;
         account.membership |= VOTER;
         NewVoter(msg.sender);
@@ -489,6 +498,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         return accounts[_account].membership & CABAL == CABAL;
     }
 
+    // under no condition should you let anyone control two BOARD accounts
     function appoint(address _board, string _vouch)
     external {
         require(accounts[msg.sender].membership & BOARD == BOARD);
@@ -497,8 +507,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
             return;
         }
         address appt = candidate.appointer;
-        Account storage appointer = accounts[appt];
-        if (appt == 0 || appointer.membership & ~BOARD == appointer.membership) {
+        if (appt == 0 || accounts[appt].membership & BOARD == 0) {
             candidate.appointer = msg.sender;
             Nominated(_board, _vouch);
             return;
@@ -514,12 +523,11 @@ contract AccountRegistry is AllProposals,TokenRescue {
     external {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         Account storage board = accounts[_board];
-        if (board.membership & ~BOARD == board.membership) {
+        if (board.membership & BOARD == 0) {
             return;
         }
         address dncr = board.denouncer;
-        Account storage denouncer = accounts[dncr];
-        if (dncr == 0 || denouncer.membership & ~BOARD == denouncer.membership) {
+        if (dncr == 0 || accounts[dncr].membership & BOARD == 0) {
             board.denouncer = msg.sender;
             Denounced(_board, _reason);
             return;
@@ -546,7 +554,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     external {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         uint8 membership = accounts[_proposal].membership;
-        require(membership & ~PROPOSAL == membership);
+        require(membership & PROPOSAL == 0);
         accounts[_proposal].membership |= PROPOSAL;
         allProposals.push(_proposal);
     }
@@ -559,7 +567,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     external
     {
         Account storage account = accounts[_proposal];
-        require(account.membership & ~(PENDING_PROPOSAL | PROPOSAL) == account.membership);
+        require(account.membership & (PENDING_PROPOSAL | PROPOSAL) == 0);
         account.membership |= PENDING_PROPOSAL;
     }
 
