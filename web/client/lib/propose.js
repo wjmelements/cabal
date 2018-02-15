@@ -15,6 +15,14 @@ function awaitProposal(txhash) {
                 return proposal.txhash != txhash;
             });
             this.pendingProposals.set(pendingProposals);
+            var priorProposals = localStorage.getItem('pendingProposals');
+            if (priorProposals) {
+                var pendingProposals = JSON.parse(priorProposals);
+                if (pendingProposals) {
+                    pendingProposals = pendingProposals.filter(function(a){return a.txhash != txhash;});
+                    localStorage.setItem('pendingProposals', pendingProposals);
+                }
+            }
             Accounts.resize();
             return;
         }
@@ -28,7 +36,6 @@ Template.propose.onCreated(function() {
     var pendingProposals = localStorage.getItem('pendingProposals');
     if (pendingProposals) {
         pendingProposals = JSON.parse(pendingProposals);
-        console.log(pendingProposals);
         for (index in pendingProposals) {
             var pendingProposal = pendingProposals[index];
             console.log(pendingProposal);
@@ -37,7 +44,16 @@ Template.propose.onCreated(function() {
                     console.error(error);
                     return;
                 }
-                if (!result.blockNumber) {
+                if (result.blockNumber) {
+                    var priorProposals = localStorage.getItem('pendingProposals');
+                    if (priorProposals) {
+                        var pendingProposals = JSON.parse(priorProposals);
+                        if (pendingProposals) {
+                            pendingProposals = pendingProposals.filter(function(a){return a.txhash != pendingProposal.txhash;});
+                            localStorage.setItem('pendingProposals', pendingProposals);
+                        }
+                    }
+                } else {
                     var pendingProposals = this.pendingProposals.get().slice(0);
                     pendingProposals.push({
                         txhash:pendingProposal.txhash,
