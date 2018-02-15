@@ -25,6 +25,30 @@ Template.propose.onCreated(function() {
     this.gasCost = new ReactiveVar();
     this.showGas = new ReactiveVar(false);
     this.pendingProposals = new ReactiveVar([]);
+    var pendingProposals = localStorage.getItem('pendingProposals');
+    if (pendingProposals) {
+        pendingProposals = JSON.parse(pendingProposals);
+        console.log(pendingProposals);
+        for (index in pendingProposals) {
+            var pendingProposal = pendingProposals[index];
+            console.log(pendingProposal);
+            web3.eth.getTransaction(pendingProposal.txhash, function(error, result) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                if (!result.blockNumber) {
+                    var pendingProposals = this.pendingProposals.get().slice(0);
+                    pendingProposals.push({
+                        txhash:pendingProposal.txhash,
+                        title:pendingProposal.title,
+                    });
+                    this.pendingProposals.set(pendingProposals);
+                    awaitProposal.bind(this)(pendingProposal.txhash);
+                }
+            }.bind(this));
+        }
+    }
     this.cannotPropose = new ReactiveVar(true);
     this.lastValue = undefined;
 });
@@ -46,9 +70,9 @@ Template.propose.events({
                 txhash:txhash,
                 title:proposal,
             });
-            console.log(pendingProposals);
             awaitProposal.bind(this)(txhash);
             this.pendingProposals.set(pendingProposals);
+            localStorage.setItem('pendingProposals', JSON.stringify(pendingProposals))
         }.bind(Template.instance()));
     },
     "mouseover .submit"(event) {
