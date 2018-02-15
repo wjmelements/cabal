@@ -41,6 +41,7 @@ function fetchTimer() {
 }
 function init() {
     Accounts.current(function(account) {
+        // FIXME if refreshing during registering I see the NUX with 'Deregistering' which is undesirable
         var txhash = localStorage.getItem('reg'+account);
         if (txhash) {
             console.log(txhash);

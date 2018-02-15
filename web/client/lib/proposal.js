@@ -25,6 +25,17 @@ function refresh(ignoreVote) {
         if (ignoreVote) {
             return;
         }
+        var priorVoting = localStorage.getItem('pvote'+address);
+        if (priorVoting) {
+            priorVoting = JSON.parse(priorVoting);
+            web3.eth.getTransaction(priorVoting.a, function (error, result) {
+                if (result.blockNumber) {
+                    localStorage.setItem('pvote'+address, '');
+                } else {
+                    this.voted.set();
+                }
+            }.bind(this));
+        }
         Proposals.getMyVote(address, function(myVote) {
             if (!myVote) {
                 var choice = this.argumentChoice.get();

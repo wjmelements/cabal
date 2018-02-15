@@ -1,3 +1,14 @@
+function onPendingVote(txhash, choice) {
+    this.txhash.set(txhash);
+    this.showCost.set(false);
+    this.voting.set(true);
+    Transactions.awaitPendingTransaction(txhash, -1, function() {
+        localStorage.setItem('pvote'+this.address.get(), '');
+        this.voting.set(false);
+        this.voted.set(choice);
+        this.onVote();
+    }.bind(this));
+}
 Template.cases.onCreated(function() {
     this.position = this.data.position;
     this.address = this.data.address;
@@ -16,6 +27,23 @@ Template.cases.onCreated(function() {
     this.showInsufficient = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
     this.cost = new ReactiveVar();
+    var priorVoting = localStorage.getItem('pvote'+this.address.get());
+    if (priorVoting) {
+        priorVoting = JSON.parse(priorVoting);
+        this.choice.set(priorVoting.b);
+        web3.eth.getTransaction(priorVoting.a, function(error, result) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            if (result.blockNumber) {
+                this.voted.set(priorVoting.b);
+                this.onVote();
+            } else {
+                onPendingVote.bind(this)(priorVoting.a, priorVoting.b);
+            }
+        }.bind(this));
+    }
 });
 Template.cases.onRendered(function() {
     this.balanceListener = function () {
@@ -234,14 +262,8 @@ Template.cases.events({
                 console.error(error);
                 return;
             }
-            this.txhash.set(txhash);
-            this.showCost.set(false);
-            this.voting.set(true);
-            Transactions.awaitPendingTransaction(txhash, -1, function() {
-                this.voting.set(false);
-                this.voted.set(choice);
-                this.onVote();
-            }.bind(this));
+            localStorage.setItem('pvote'+address, JSON.stringify({a:txhash,b:choice}));
+            onPendingVote.bind(this)(txhash, choice);
         }.bind(instance));
     },
     "mouseover #custom-arg a.btn"(event) {
@@ -294,6 +316,7 @@ Template.cases.events({
                         index:argumentCount,
                         text:customCase
                     };
+                    localStorage.setItem('pvote'+address, JSON.stringify({a:txhash,b:argument}));
                     this.choice.set(argument);
                     this.txhash.set(txhash);
                     this.voting.set(true);
@@ -306,8 +329,8 @@ Template.cases.events({
     },
     "click .reset"(event) {
         var instance = Template.instance();
-        instance.position.set(undefined);
-        instance.choice.set(undefined);
+        instance.position.set();
+        instance.choice.set();
         localStorage.setItem('choice'+Template.instance().address.get(), "");
         instance.skip.set(false);
         instance.data.refresh(true);
