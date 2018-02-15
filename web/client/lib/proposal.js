@@ -13,6 +13,7 @@ function refresh(ignoreVote) {
         var positionPcts = []
         var runningTotal = total;
         total /= 100;
+        this.voteCount.set(proposal['votes0']);
         for (var i = 4; i > 0; i--) {
             var contribution = proposal['votes'+i];
             runningTotal -= contribution ? contribution : 0;
