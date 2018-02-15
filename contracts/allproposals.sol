@@ -26,7 +26,7 @@ contract TokenRescue {
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
     AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
-    address public developerFund = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
+    address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
     string public symbol = "FV";
@@ -93,40 +93,46 @@ contract Vote is ERC20,TokenRescue {
         require(balances[_voter] >= 10);
         require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
-        balances[developerFund] += 5;
+        balances[owner] += 5;
         balances[_votee] += 5;
-        Transfer(_voter, developerFund, 5);
+        Transfer(_voter, owner, 5);
         Transfer(_voter, _votee, 5);
     }
     function vote1(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
         require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
-        balances[developerFund] += 9;
+        balances[owner] += 9;
         balances[_votee] += 1;
-        Transfer(_voter, developerFund, 9);
+        Transfer(_voter, owner, 9);
         Transfer(_voter, _votee, 1);
     }
     function vote9(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
         require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
         balances[_voter] -= 10;
-        balances[developerFund] += 1;
+        balances[owner] += 1;
         balances[_votee] += 9;
-        Transfer(_voter, developerFund, 1);
+        Transfer(_voter, owner, 1);
         Transfer(_voter, _votee, 9);
     }
-    event NewOwner(address owner);
-    function transferDeveloperFund(address _newDeveloperFund) external {
-        require(msg.sender == developerFund);
-        balances[_newDeveloperFund] += balances[developerFund];
-        balances[developerFund] = 0;
-        developerFund = _newDeveloperFund;
-        NewOwner(developerFund);
+    modifier onlyOwner () {
+        require(msg.sender == owner);
+        _;
     }
-    event NewRegistry(address registry);
-    function migrateAccountRegistry(AccountRegistry _newAccountRegistry) external {
-        require(msg.sender == developerFund);
+    event NewOwner(address indexed owner);
+    event NewRegistry(address indexed registry);
+    function transferOwnership(address _newOwner)
+    external onlyOwner {
+        uint256 balance = balances[owner];
+        balances[_newOwner] += balance;
+        Transfer(owner, _newOwner, balance);
+        balances[owner] = 0;
+        owner = _newOwner;
+        NewOwner(owner);
+    }
+    function migrateAccountRegistry(AccountRegistry _newAccountRegistry)
+    external onlyOwner {
         accountRegistry = _newAccountRegistry;
         NewRegistry(accountRegistry);
     }
@@ -329,13 +335,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
     uint8 constant PENDING_CABAL = 16;
     uint8 constant CABAL = 32;
     uint8 constant BOARD = 64;
-    struct Info {
+    struct Account {
         uint256 deregistrationDate;
         uint8 membership;
         address appointer;
         address denouncer;
     }
-    mapping (address => Info) infoMap;
+    mapping (address => Account) accounts;
 
     CabalInterface[] public allCabals;
     ProposalInterface[] public allProposals;
@@ -343,9 +349,9 @@ contract AccountRegistry is AllProposals,TokenRescue {
     function AccountRegistry()
     public
     {
-        infoMap[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership ^= BOARD;
-        infoMap[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership ^= BOARD;
-        infoMap[0x424a6e871E8cea93791253B47291193637D6966a].membership ^= BOARD;
+        accounts[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership = BOARD;
+        accounts[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership = BOARD;
+        accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
     }
 
     event NewVoter(address voter);
@@ -375,18 +381,18 @@ contract AccountRegistry is AllProposals,TokenRescue {
     // - open-source your Cabal on Etherscan or equivalent
     function registerCabal(CabalInterface _cabal)
     external {
-        Info storage info = infoMap[_cabal];
-        require((info.membership & ~(PENDING_CABAL | CABAL)) == info.membership);
-        info.membership |= PENDING_CABAL;
+        Account storage account = accounts[_cabal];
+        require((account.membership & ~(PENDING_CABAL | CABAL)) == account.membership);
+        account.membership |= PENDING_CABAL;
         NewCabal(_cabal);
     }
 
     function confirmCabal(CabalInterface _cabal)
     external {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage info = infoMap[_cabal];
-        require(info.membership & PENDING_CABAL == PENDING_CABAL);
-        info.membership ^= (CABAL | PENDING_CABAL);
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage account = accounts[_cabal];
+        require(account.membership & PENDING_CABAL == PENDING_CABAL);
+        account.membership ^= (CABAL | PENDING_CABAL);
         allCabals.push(_cabal);
     }
 
@@ -394,20 +400,20 @@ contract AccountRegistry is AllProposals,TokenRescue {
     external payable
     {
         require(msg.value == registrationDeposit);
-        Info storage info = infoMap[msg.sender];
-        require(info.membership & ~VOTER == info.membership);
-        info.deregistrationDate = now + 7 days;
-        info.membership |= VOTER;
+        Account storage account = accounts[msg.sender];
+        require(account.membership & ~VOTER == account.membership);
+        account.deregistrationDate = now + 7 days;
+        account.membership |= VOTER;
         NewVoter(msg.sender);
     }
 
     function deregister()
     external
     {
-        Info storage info = infoMap[msg.sender];
-        require(info.membership & VOTER == VOTER);
-        require(info.deregistrationDate < now);
-        info.membership &= ~VOTER;
+        Account storage account = accounts[msg.sender];
+        require(account.membership & VOTER == VOTER);
+        require(account.deregistrationDate < now);
+        account.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
     }
@@ -423,75 +429,75 @@ contract AccountRegistry is AllProposals,TokenRescue {
     public view
     returns (uint256)
     {
-        return infoMap[msg.sender].deregistrationDate;
+        return accounts[msg.sender].deregistrationDate;
     }
 
     function canDeregister(address _voter)
     public view
     returns (bool)
     {
-        return infoMap[_voter].deregistrationDate < now;
+        return accounts[_voter].deregistrationDate < now;
     }
 
     function canVoteAndIsProposal(address _voter, address _proposal)
     public view
     returns (bool)
     {
-        return infoMap[_voter].membership & VOTER == VOTER
-            && infoMap[_proposal].membership & PROPOSAL == PROPOSAL;
+        return accounts[_voter].membership & VOTER == VOTER
+            && accounts[_proposal].membership & PROPOSAL == PROPOSAL;
     }
 
     function canVote(address _voter)
     public view
     returns (bool)
     {
-        return infoMap[_voter].membership & VOTER == VOTER;
+        return accounts[_voter].membership & VOTER == VOTER;
     }
 
     function isProposal(address _proposal)
     public view
     returns (bool)
     {
-        return infoMap[_proposal].membership & PROPOSAL == PROPOSAL;
+        return accounts[_proposal].membership & PROPOSAL == PROPOSAL;
     }
 
     function isPendingProposal(address _proposal)
     public view
     returns (bool)
     {
-        return infoMap[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
+        return accounts[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
     }
 
     function isFraud(address _account)
     public view
     returns (bool)
     {
-        return infoMap[_account].membership & FRAUD == FRAUD;
+        return accounts[_account].membership & FRAUD == FRAUD;
     }
 
     function isPendingCabal(address _account)
     public view
     returns (bool)
     {
-        return infoMap[_account].membership & PENDING_CABAL == PENDING_CABAL;
+        return accounts[_account].membership & PENDING_CABAL == PENDING_CABAL;
     }
 
     function isCabal(address _account)
     public view
     returns (bool)
     {
-        return infoMap[_account].membership & CABAL == CABAL;
+        return accounts[_account].membership & CABAL == CABAL;
     }
 
     function appoint(address _board, string _vouch)
     external {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage candidate = infoMap[_board];
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage candidate = accounts[_board];
         if (candidate.membership & BOARD == BOARD) {
             return;
         }
         address appt = candidate.appointer;
-        Info storage appointer = infoMap[appt];
+        Account storage appointer = accounts[appt];
         if (appt == 0 || appointer.membership & ~BOARD == appointer.membership) {
             candidate.appointer = msg.sender;
             Nominated(_board, _vouch);
@@ -506,13 +512,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
 
     function denounce(address _board, string _reason)
     external {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage board = infoMap[_board];
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage board = accounts[_board];
         if (board.membership & ~BOARD == board.membership) {
             return;
         }
         address dncr = board.denouncer;
-        Info storage denouncer = infoMap[dncr];
+        Account storage denouncer = accounts[dncr];
         if (dncr == 0 || denouncer.membership & ~BOARD == denouncer.membership) {
             board.denouncer = msg.sender;
             Denounced(_board, _reason);
@@ -530,7 +536,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     returns (Proposal)
     {
         Proposal proposal = new Proposal(msg.sender, _resolution);
-        infoMap[proposal].membership |= PROPOSAL;
+        accounts[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
         return proposal;
@@ -538,10 +544,10 @@ contract AccountRegistry is AllProposals,TokenRescue {
 
     function sudoPropose(ProposalInterface _proposal)
     external {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        uint8 membership = infoMap[_proposal].membership;
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        uint8 membership = accounts[_proposal].membership;
         require(membership & ~PROPOSAL == membership);
-        infoMap[_proposal].membership |= PROPOSAL;
+        accounts[_proposal].membership |= PROPOSAL;
         allProposals.push(_proposal);
     }
 
@@ -552,18 +558,18 @@ contract AccountRegistry is AllProposals,TokenRescue {
     function proposeExternal(ProposalInterface _proposal)
     external
     {
-        Info storage info = infoMap[_proposal];
-        require(info.membership & ~(PENDING_PROPOSAL | PROPOSAL) == info.membership);
-        info.membership |= PENDING_PROPOSAL;
+        Account storage account = accounts[_proposal];
+        require(account.membership & ~(PENDING_PROPOSAL | PROPOSAL) == account.membership);
+        account.membership |= PENDING_PROPOSAL;
     }
 
     function confirmProposal(ProposalInterface _proposal)
     external
     {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage info = infoMap[_proposal];
-        require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
-        info.membership ^= (PROPOSAL | PENDING_PROPOSAL);
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage account = accounts[_proposal];
+        require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        account.membership ^= (PROPOSAL | PENDING_PROPOSAL);
         allProposals.push(_proposal);
         NewProposal(_proposal);
     }
@@ -575,10 +581,10 @@ contract AccountRegistry is AllProposals,TokenRescue {
     external payable
     {
         require(msg.value == proposalCensorshipFee);
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage info = infoMap[_proposal];
-        require(info.membership & PROPOSAL == PROPOSAL);
-        info.membership ^= (FRAUD | PROPOSAL);
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage account = accounts[_proposal];
+        require(account.membership & PROPOSAL == PROPOSAL);
+        account.membership ^= (FRAUD | PROPOSAL);
         burn.transfer(msg.value);
         BannedProposal(_proposal, _reason);
     }
@@ -587,9 +593,9 @@ contract AccountRegistry is AllProposals,TokenRescue {
     function rejectProposal(ProposalInterface _proposal)
     external
     {
-        require(infoMap[msg.sender].membership & BOARD == BOARD);
-        Info storage info = infoMap[_proposal];
-        require(info.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
-        info.membership ^= (FRAUD | PENDING_PROPOSAL);
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage account = accounts[_proposal];
+        require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        account.membership ^= (FRAUD | PENDING_PROPOSAL);
     }
 }
