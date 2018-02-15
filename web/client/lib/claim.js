@@ -1,11 +1,26 @@
 function onClaimed() {
+    localStorage.setItem('claim'+web3.eth.coinbase, '');
     this.claiming.set(false);
     this.available.set(0);
+}
+function onPendingClaim(txhash) {
+    this.txhash.set(txhash);
+    this.claiming.set(true);
+    var estimate = this.available.get();
+    Transactions.awaitPendingTransaction(txhash, estimate, onClaimed.bind(this));
 }
 Template.claim.onCreated(function() {
     this.available = new ReactiveVar();
     Token.availableFaucet(function(amount) {
         this.available.set(amount / 10);
+        if (amount) {
+            Accounts.current(function(address) {
+                var txhash = localStorage.getItem('claim'+address);
+                if (txhash) {
+                    onPendingClaim.bind(this)(txhash);
+                }
+            }.bind(this));
+        }
     }.bind(this));
     this.claiming = new ReactiveVar(false);
     this.cost = new ReactiveVar();
@@ -53,10 +68,8 @@ Template.claim.events({
         }
         Token.claim(function(txhash) {
             console.log(txhash);
-            this.txhash.set(txhash);
-            this.claiming.set(true);
-            var estimate = this.available.get();
-            Transactions.awaitPendingTransaction(txhash, estimate, onClaimed.bind(this));
+            localStorage.setItem('claim'+web3.eth.coinbase, txhash);
+            onPendingClaim.bind(this)(txhash);
         }.bind(Template.instance()));
     },
     "mouseover .btn"(event) {
