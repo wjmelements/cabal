@@ -26,7 +26,7 @@ contract TokenRescue {
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
     AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
-    address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
+    address public owner;//= 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
     string public symbol = "FV";
@@ -35,6 +35,10 @@ contract Vote is ERC20,TokenRescue {
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) approved;
     mapping (address => uint256) faucetDate;
+
+    function Vote() public {
+        owner = msg.sender;
+    }
 
     function totalSupply() public constant returns (uint256) {
         return supply;
@@ -151,7 +155,6 @@ interface ProposalInterface {
     function vote(uint256 _argumentId) external;
 }
 library ProposalLib {
-    Vote constant voteToken = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
     enum Position {
         SKIP,
         APPROVE,
@@ -166,6 +169,7 @@ library ProposalLib {
         bytes text;
     }
     struct Storage {
+        Vote voteToken;
         mapping (address => uint256) votes;
         Argument[] arguments;
     }
@@ -222,7 +226,7 @@ library ProposalLib {
     function vote(Storage storage self, uint256 _argumentId)
     public {
         address destination = self.arguments[_argumentId].source;
-        voteToken.vote9(msg.sender, destination);
+        self.voteToken.vote9(msg.sender, destination);
         self.arguments[self.votes[msg.sender]].count--;
         self.arguments[
             self.votes[msg.sender] = _argumentId
@@ -233,7 +237,7 @@ library ProposalLib {
     public
     returns (uint256) {
         address destination = self.arguments[0].source;
-        voteToken.vote9(msg.sender, destination);
+        self.voteToken.vote9(msg.sender, destination);
         uint256 argumentId = self.arguments.length;
         self.arguments.push(Argument(msg.sender, _position, 1, _text));
         self.arguments[self.votes[msg.sender]].count--;
@@ -293,8 +297,9 @@ contract Proposal is ProposalInterface {
         return proposal.argumentText(_index);
     }
 
-    function Proposal(address _source, bytes _resolution)
+    function Proposal(Vote _vote, address _source, bytes _resolution)
     public {
+        proposal.voteToken = _vote;
         proposal.init(_source, _resolution);
     }
 
@@ -539,11 +544,11 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Revoked(_board, _reason);
     }
 
-    function propose(bytes _resolution)
+    function propose(Vote voteToken, bytes _resolution)
     external
     returns (Proposal)
     {
-        Proposal proposal = new Proposal(msg.sender, _resolution);
+        Proposal proposal = new Proposal(voteToken, msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
