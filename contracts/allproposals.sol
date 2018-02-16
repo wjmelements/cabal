@@ -1,5 +1,7 @@
 pragma solidity ^0.4.18;
 
+import "ds-warp/warp.sol";
+
 interface ERC20 {
     function totalSupply() public constant returns (uint supply);
     function balanceOf(address _owner) public constant returns (uint balance);
@@ -75,13 +77,13 @@ contract Vote is ERC20,TokenRescue {
         Transfer(_from, _to, _value);
         return true;
     }
-    function faucet() external {
+    function faucet(DSWarp warp) external {
         require(accountRegistry.canVote(msg.sender));
         uint256 lastAccess = faucetDate[msg.sender];
-        uint256 grant = (now - lastAccess) / 72 minutes;
+        uint256 grant = (warp.era() - lastAccess) / 72 minutes;
         if (grant > 40) {
             grant = 40;
-            faucetDate[msg.sender] = now;
+            faucetDate[msg.sender] = warp.era();
         } else {
             faucetDate[msg.sender] = lastAccess + grant * 72 minutes;
         }
@@ -90,10 +92,10 @@ contract Vote is ERC20,TokenRescue {
         Transfer(address(0), msg.sender, grant);
     }
 
-    function availableFaucet(address _account)
+    function availableFaucet(address _account, DSWarp warp)
     public view
     returns (uint256) {
-        uint256 grant = (now - faucetDate[_account]) / 72 minutes;
+        uint256 grant = (warp.era() - faucetDate[_account]) / 72 minutes;
         if (grant > 40) {
             grant = 40;
         }
@@ -410,23 +412,23 @@ contract AccountRegistry is AllProposals,TokenRescue {
         allCabals.push(_cabal);
     }
 
-    function register()
+    function register(DSWarp warp)
     external payable
     {
         require(msg.value == registrationDeposit);
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == 0);
-        account.deregistrationDate = now + 7 days;
+        account.deregistrationDate = warp.era() + 7 days;
         account.membership |= VOTER;
         NewVoter(msg.sender);
     }
 
-    function deregister()
+    function deregister(DSWarp warp)
     external
     {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
-        require(account.deregistrationDate < now);
+        require(account.deregistrationDate < warp.era());
         account.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
@@ -446,11 +448,11 @@ contract AccountRegistry is AllProposals,TokenRescue {
         return accounts[msg.sender].deregistrationDate;
     }
 
-    function canDeregister(address _voter)
+    function canDeregister(address _voter, DSWarp warp)
     public view
     returns (bool)
     {
-        return accounts[_voter].deregistrationDate < now;
+        return accounts[_voter].deregistrationDate < warp.era();
     }
 
     function canVoteAndIsProposal(address _voter, address _proposal)
