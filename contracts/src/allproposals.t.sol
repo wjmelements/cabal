@@ -30,5 +30,13 @@ contract TokenTest is DSTest {
         assertEq(token.balanceOf(token), 15);
         token.rescueToken(token);
         assertEq(token.balanceOf(this), 40);
+        accountRegistry.propose(token,"Ayy");
+        Proposal proposal = Proposal(accountRegistry.allProposals(0));
+        assertEq(uint(proposal.argumentPosition(0)), uint(ProposalLib.Position.SKIP));
+        //assertEq(proposal.argumentCount(), 0);
+        assertEq(proposal.argumentSource(0), this);
+        assertEq(1,proposal.argue(ProposalLib.Position.APPROVE, "LOL"));
+        //assertEq(proposal.argumentCount(), 1);
+        assertEq(uint(proposal.argumentPosition(1)), uint(ProposalLib.Position.APPROVE));
     }
 }
