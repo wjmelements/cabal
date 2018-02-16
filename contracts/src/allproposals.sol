@@ -1,0 +1,1 @@
+../allproposals.sol
