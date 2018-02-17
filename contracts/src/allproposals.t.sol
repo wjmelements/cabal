@@ -54,7 +54,9 @@ contract TokenTest is DSTest {
         token.transferOwnership(owner);
     }
     function test_transfer() public {
+        assertEq(accountRegistry.population(), 0);
         accountRegistry.register.value(1 finney)();
+        assertEq(accountRegistry.population(), 1);
         assertEq(token.balanceOf(this), 40);
         assertEq(accountRegistry.availableFaucet(this), 0);
         assertEq(accountRegistry.cabalCount(), 0);
@@ -94,6 +96,7 @@ contract TokenTest is DSTest {
         Voter v1 = new Voter();
         v1.transfer(1 finney);
         v1.register(accountRegistry);
+        assertEq(accountRegistry.population(), 2);
         assertEq(token.balanceOf(v1), 40);
         v1.vote(proposal, 1);
         assertEq(proposal.votes(v1), 1);
@@ -105,7 +108,9 @@ contract TokenTest is DSTest {
 
         Voter v2 = new Voter();
         v2.transfer(1 finney);
+        assertEq(accountRegistry.population(), 2);
         v2.register(accountRegistry);
+        assertEq(accountRegistry.population(), 3);
         assert(token.approve(v2, 10));
         assert(v2.transferFrom(token, this, v2, 10));
         assertEq(token.balanceOf(v2), 50);
@@ -118,21 +123,45 @@ contract TokenTest is DSTest {
         assertEq(proposal.argumentVoteCount(2), 1);
         assertEq(token.balanceOf(v2), 40);
 
+        tryFaucets(v1, v2);
+
+        assertEq(token.totalSupply(), token.balanceOf(owner)
+            + token.balanceOf(this)
+            + token.balanceOf(v1)
+            + token.balanceOf(v2)
+        );
+    }
+
+    function tryFaucets(Voter v1, Voter v2) {
         accountRegistry.warp(1 days);
         assertEq(accountRegistry.availableFaucet(v2), 20);
         assertEq(accountRegistry.availableFaucet(v1), 20);
         assertEq(accountRegistry.availableFaucet(this), 20);
 
-        accountRegistry.warp(1 days);
-        assertEq(accountRegistry.availableFaucet(v2), 40);
+        uint prior = token.balanceOf(v1);
+        v1.faucet(accountRegistry);
+        assertEq(token.balanceOf(v1), prior + 20);
+        assertEq(accountRegistry.availableFaucet(v1), 0);
+
+        accountRegistry.warp(11 hours);
+        assertEq(accountRegistry.availableFaucet(v2), 29);
+        assertEq(accountRegistry.availableFaucet(v1), 9);
+        assertEq(accountRegistry.availableFaucet(this), 29);
+
+        prior = token.balanceOf(v2);
+        v2.faucet(accountRegistry);
+        assertEq(token.balanceOf(v2), prior + 29);
+        assertEq(accountRegistry.availableFaucet(v2), 0);
+
+        accountRegistry.warp(37 hours);
+        assertEq(accountRegistry.availableFaucet(v2), 31);
         assertEq(accountRegistry.availableFaucet(v1), 40);
         assertEq(accountRegistry.availableFaucet(this), 40);
 
-        accountRegistry.warp(1 days);
-        assertEq(accountRegistry.availableFaucet(v2), 40);
-        assertEq(accountRegistry.availableFaucet(v1), 40);
-        assertEq(accountRegistry.availableFaucet(this), 40);
-        assertEq(accountRegistry.population(), 3);
+        prior = token.balanceOf(this);
+        accountRegistry.faucet();
+        assertEq(token.balanceOf(this), prior + 40);
+        assertEq(accountRegistry.availableFaucet(this), 0);
     }
 
     function testFail_claimNoRegister() public {
