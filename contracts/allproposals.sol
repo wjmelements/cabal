@@ -1,7 +1,5 @@
 pragma solidity ^0.4.18;
 
-import "ds-warp/warp.sol";
-
 interface ERC20 {
     function totalSupply() public constant returns (uint supply);
     function balanceOf(address _owner) public constant returns (uint balance);
@@ -36,7 +34,6 @@ contract Vote is ERC20,TokenRescue {
 
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) approved;
-    mapping (address => uint256) faucetDate;
 
     function Vote() public {
         owner = msg.sender;
@@ -77,31 +74,12 @@ contract Vote is ERC20,TokenRescue {
         Transfer(_from, _to, _value);
         return true;
     }
-    function faucet(DSWarp warp) external {
-        require(accountRegistry.canVote(msg.sender));
-        uint256 lastAccess = faucetDate[msg.sender];
-        uint256 grant = (warp.era() - lastAccess) / 72 minutes;
-        if (grant > 40) {
-            grant = 40;
-            faucetDate[msg.sender] = warp.era();
-        } else {
-            faucetDate[msg.sender] = lastAccess + grant * 72 minutes;
-        }
-        balances[msg.sender] += grant;
-        supply += grant;
-        Transfer(address(0), msg.sender, grant);
+    function grant(address _to, uint256 _grant) external {
+        require(msg.sender == address(accountRegistry));
+        balances[_to] += _grant;
+        supply += _grant;
+        Transfer(address(0), _to, _grant);
     }
-
-    function availableFaucet(address _account, DSWarp warp)
-    public view
-    returns (uint256) {
-        uint256 grant = (warp.era() - faucetDate[_account]) / 72 minutes;
-        if (grant > 40) {
-            grant = 40;
-        }
-        return grant;
-    }
-
     // vote5 and vote1 are available for future use
     function vote5(address _voter, address _votee) public {
         require(balances[_voter] >= 10);
@@ -333,6 +311,8 @@ contract AccountRegistry is AllProposals,TokenRescue {
     // this is the first deterministic contract address for 0x315017F58EAaFC696bcF286928E08cbf15C00fDc
     address burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
 
+    Vote public token = Vote(0x0000001bf0cda9c6f6c4644cb97174c427723894);
+
     /* uint8 membership bitmap:
      * 0 - fraud
      * 1 - registered to vote
@@ -352,7 +332,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     uint8 constant CABAL = 32;
     uint8 constant BOARD = 64;
     struct Account {
-        uint256 deregistrationDate;
+        uint256 lastAccess;
         uint8 membership;
         address appointer;
         address denouncer;
@@ -362,9 +342,11 @@ contract AccountRegistry is AllProposals,TokenRescue {
     CabalInterface[] public allCabals;
     ProposalInterface[] public allProposals;
 
-    function AccountRegistry()
+    // TODO rm param
+    function AccountRegistry(Vote _token)
     public
     {
+        token = _token;
         accounts[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership = BOARD;
         accounts[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership = BOARD;
         accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
@@ -400,7 +382,6 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Account storage account = accounts[_cabal];
         require(account.membership & (PENDING_CABAL | CABAL) == 0);
         account.membership |= PENDING_CABAL;
-        NewCabal(_cabal);
     }
 
     function confirmCabal(CabalInterface _cabal)
@@ -410,25 +391,33 @@ contract AccountRegistry is AllProposals,TokenRescue {
         require(account.membership & PENDING_CABAL == PENDING_CABAL);
         account.membership ^= (CABAL | PENDING_CABAL);
         allCabals.push(_cabal);
+        NewCabal(_cabal);
     }
 
-    function register(DSWarp warp)
+    // TODO remove before launching
+    function era()
+    internal view returns (uint256) {
+        return now;
+    }
+
+    function register()
     external payable
     {
         require(msg.value == registrationDeposit);
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == 0);
-        account.deregistrationDate = warp.era() + 7 days;
+        account.lastAccess = era();
         account.membership |= VOTER;
+        token.grant(msg.sender, 40);
         NewVoter(msg.sender);
     }
 
-    function deregister(DSWarp warp)
+    function deregister()
     external
     {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
-        require(account.deregistrationDate < warp.era());
+        require(account.lastAccess + 7 days < era());
         account.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
@@ -445,14 +434,14 @@ contract AccountRegistry is AllProposals,TokenRescue {
     public view
     returns (uint256)
     {
-        return accounts[msg.sender].deregistrationDate;
+        return accounts[msg.sender].lastAccess + 7 days;
     }
 
-    function canDeregister(address _voter, DSWarp warp)
+    function canDeregister(address _voter)
     public view
     returns (bool)
     {
-        return accounts[_voter].deregistrationDate < warp.era();
+        return accounts[_voter].lastAccess + 7 days < era();
     }
 
     function canVoteAndIsProposal(address _voter, address _proposal)
@@ -612,5 +601,29 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Account storage account = accounts[_proposal];
         require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
         account.membership ^= (FRAUD | PENDING_PROPOSAL);
+    }
+
+    function faucet()
+    external {
+        require(canVote(msg.sender));
+        uint256 lastAccess = accounts[msg.sender].lastAccess;
+        uint256 grant = (era() - lastAccess) / 72 minutes;
+        if (grant > 40) {
+            grant = 40;
+            accounts[msg.sender].lastAccess = era();
+        } else {
+            accounts[msg.sender].lastAccess = lastAccess + grant * 72 minutes;
+        }
+        token.grant(msg.sender, grant);
+    }
+
+    function availableFaucet(address _account)
+    public view
+    returns (uint256) {
+        uint256 grant = (era() - accounts[_account].lastAccess) / 72 minutes;
+        if (grant > 40) {
+            grant = 40;
+        }
+        return grant;
     }
 }
