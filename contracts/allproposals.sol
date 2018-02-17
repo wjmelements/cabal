@@ -311,7 +311,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     // this is the first deterministic contract address for 0x315017F58EAaFC696bcF286928E08cbf15C00fDc
     address burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
 
-    Vote public token = Vote(0x0000001bf0cda9c6f6c4644cb97174c427723894);
+    Vote public token = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
 
     /* uint8 membership bitmap:
      * 0 - fraud

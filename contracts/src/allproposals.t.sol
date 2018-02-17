@@ -132,7 +132,7 @@ contract TokenTest is DSTest {
         );
     }
 
-    function tryFaucets(Voter v1, Voter v2) {
+    function tryFaucets(Voter v1, Voter v2) internal {
         accountRegistry.warp(1 days);
         assertEq(accountRegistry.availableFaucet(v2), 20);
         assertEq(accountRegistry.availableFaucet(v1), 20);
