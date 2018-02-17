@@ -15,6 +15,12 @@ contract Voter {
     function vote(Proposal _proposal, uint256 _id) public {
         _proposal.vote(_id);
     }
+    function transferFrom(Vote token, address from, address to, uint value) public returns (bool) {
+        return token.transferFrom(from, to, value);
+    }
+    function argue(Proposal proposal, ProposalLib.Position position, bytes value) public returns (uint) {
+        return proposal.argue(position, value);
+    }
     function () public payable {}
 }
 
@@ -54,11 +60,11 @@ contract TokenTest is DSTest {
         accountRegistry.propose(token,"Ayy");
         Proposal proposal = Proposal(accountRegistry.allProposals(0));
         assertEq(uint(proposal.argumentPosition(0)), uint(ProposalLib.Position.SKIP));
-        //assertEq(proposal.argumentCount(), 0);
+        assertEq(proposal.argumentCount(), 1);
         assertEq(proposal.argumentSource(0), this);
 
         assertEq(1,proposal.argue(ProposalLib.Position.APPROVE, "LOL"));
-        //assertEq(proposal.argumentCount(), 1);
+        assertEq(proposal.argumentCount(), 2);
         assertEq(uint(proposal.argumentPosition(1)), uint(ProposalLib.Position.APPROVE));
         assertEq(proposal.votes(this), 1);
         assertEq(proposal.argumentSource(1), this);
@@ -83,6 +89,40 @@ contract TokenTest is DSTest {
         assertEq(token.balanceOf(v1), 30);
         assertEq(proposal.argumentVoteCount(0), uint(-2));
         assertEq(proposal.argumentVoteCount(1), 2);
-        //assertEq(token.balanceOf(this), 48);
+        assertEq(token.balanceOf(this), 47);
+        assertEq(token.balanceOf(owner), 3);
+
+        Voter v2 = new Voter();
+        v2.transfer(1 finney);
+        v2.register(warp, accountRegistry);
+        assert(token.approve(v2, 10));
+        assert(v2.transferFrom(token, this, v2, 10));
+        assertEq(token.balanceOf(v2), 10);
+        assertEq(token.balanceOf(this), 37);
+
+        assertEq(v2.argue(proposal, ProposalLib.Position.REJECT, "NOTHX"), 2);
+        assertEq(proposal.argumentCount(), 3);
+        assertEq(uint(proposal.argumentPosition(2)), uint(ProposalLib.Position.REJECT));
+        assertEq(proposal.argumentVoteCount(0), uint(-3));
+        assertEq(proposal.argumentVoteCount(2), 1);
+        assertEq(token.balanceOf(v2), 0);
+
+        v2.faucet(warp, token);
+        assertEq(token.balanceOf(v2), 40);
+
+        warp.warp(1 days);
+        assertEq(token.availableFaucet(v2, warp), 20);
+        assertEq(token.availableFaucet(v1, warp), 20);
+        assertEq(token.availableFaucet(this, warp), 20);
+
+        warp.warp(1 days);
+        assertEq(token.availableFaucet(v2, warp), 40);
+        assertEq(token.availableFaucet(v1, warp), 40);
+        assertEq(token.availableFaucet(this, warp), 40);
+
+        warp.warp(1 days);
+        assertEq(token.availableFaucet(v2, warp), 40);
+        assertEq(token.availableFaucet(v1, warp), 40);
+        assertEq(token.availableFaucet(this, warp), 40);
     }
 }
