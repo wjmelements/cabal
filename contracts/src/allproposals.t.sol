@@ -98,8 +98,12 @@ contract TokenTest is DSTest {
         assertEq(proposal.argumentVoteCount(0), uint(-1));
 
         Voter v1 = new Voter();
+        assert(!accountRegistry.canVote(v1));
+        assert(!accountRegistry.canVoteAndIsProposal(v1, proposal));
         v1.transfer(1 finney);
         v1.register(accountRegistry);
+        assert(accountRegistry.canVote(v1));
+        assert(accountRegistry.canVoteAndIsProposal(v1, proposal));
         assertEq(accountRegistry.population(), 2);
         assertEq(token.balanceOf(v1), 40);
         v1.vote(proposal, 1);
@@ -135,6 +139,8 @@ contract TokenTest is DSTest {
             + token.balanceOf(v1)
             + token.balanceOf(v2)
         );
+
+        tryDeregistration(v1, v2);
     }
 
     function tryDeregistration(Voter v1, Voter v2) internal {
@@ -152,6 +158,8 @@ contract TokenTest is DSTest {
         assertEq(accountRegistry.population(), 1);
         accountRegistry.deregister();
         assertEq(accountRegistry.population(), 0);
+        assert(accountRegistry.canDeregister(this));
+        assert(accountRegistry.canDeregister(v1));
     }
 
     function tryFaucets(Voter v1, Voter v2) internal {
@@ -214,5 +222,6 @@ contract TokenTest is DSTest {
         accountRegistry.appoint(this, "ayy");
     }
 
+    // without this we cannot deregister
     function () public payable { }
 }
