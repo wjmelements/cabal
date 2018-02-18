@@ -417,7 +417,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
-        require(account.lastAccess + 7 days < era());
+        require(account.lastAccess + 7 days <= era());
         account.membership &= ~VOTER;
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
@@ -441,7 +441,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     public view
     returns (bool)
     {
-        return accounts[_voter].lastAccess + 7 days < era();
+        return accounts[_voter].lastAccess + 7 days <= era();
     }
 
     function canVoteAndIsProposal(address _voter, address _proposal)
