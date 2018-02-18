@@ -412,6 +412,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         NewVoter(msg.sender);
     }
 
+    // smart contracts must implement the fallback function in order to deregister
     function deregister()
     external
     {
@@ -419,6 +420,8 @@ contract AccountRegistry is AllProposals,TokenRescue {
         require(account.membership & VOTER == VOTER);
         require(account.lastAccess + 7 days <= era());
         account.membership &= ~VOTER;
+        account.lastAccess = 0;
+        // the MANDATORY transfer keeps population() meaningful
         msg.sender.transfer(registrationDeposit);
         Deregistered(msg.sender);
     }
@@ -437,6 +440,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         return accounts[msg.sender].lastAccess + 7 days;
     }
 
+    // always true for deregistered accounts
     function canDeregister(address _voter)
     public view
     returns (bool)
@@ -603,6 +607,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         account.membership ^= (FRAUD | PENDING_PROPOSAL);
     }
 
+    // this code lives here instead of in the token so that it can be upgraded with account registry migration
     function faucet()
     external {
         require(canVote(msg.sender));
