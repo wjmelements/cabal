@@ -8,6 +8,9 @@ contract Voter {
     function register(AccountRegistry _registry) public {
         _registry.register.value(1 finney)();
     }
+    function deregister(AccountRegistry _registry) public {
+        _registry.deregister();
+    }
     function faucet(AccountRegistry _registry) public {
         _registry.faucet();
     }
@@ -56,6 +59,7 @@ contract TokenTest is DSTest {
     function test_transfer() public {
         assertEq(accountRegistry.population(), 0);
         accountRegistry.register.value(1 finney)();
+        assert(accountRegistry.canVote(this));
         assertEq(accountRegistry.population(), 1);
         assertEq(token.balanceOf(this), 40);
         assertEq(accountRegistry.availableFaucet(this), 0);
@@ -105,6 +109,7 @@ contract TokenTest is DSTest {
         assertEq(proposal.argumentVoteCount(1), 2);
         assertEq(token.balanceOf(this), 47);
         assertEq(token.balanceOf(owner), 3);
+        assert(!accountRegistry.canDeregister(v1));
 
         Voter v2 = new Voter();
         v2.transfer(1 finney);
@@ -130,6 +135,23 @@ contract TokenTest is DSTest {
             + token.balanceOf(v1)
             + token.balanceOf(v2)
         );
+    }
+
+    function tryDeregistration(Voter v1, Voter v2) internal {
+        assert(!accountRegistry.canDeregister(v1));
+        assert(!accountRegistry.canDeregister(v2));
+        assert(!accountRegistry.canDeregister(this));
+
+        accountRegistry.warp(7 days);
+        assert(accountRegistry.canDeregister(v1));
+        assert(accountRegistry.canDeregister(v2));
+        assert(accountRegistry.canDeregister(this));
+
+        v1.deregister(accountRegistry);
+        v2.deregister(accountRegistry);
+        assertEq(accountRegistry.population(), 1);
+        accountRegistry.deregister();
+        assertEq(accountRegistry.population(), 0);
     }
 
     function tryFaucets(Voter v1, Voter v2) internal {
@@ -191,4 +213,6 @@ contract TokenTest is DSTest {
     function testFail_appoint() public {
         accountRegistry.appoint(this, "ayy");
     }
+
+    function () public payable { }
 }
