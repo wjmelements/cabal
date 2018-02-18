@@ -53,6 +53,9 @@ contract FinneyVoteDoppel {
         accountRegistry.deregister();
         selfdestruct(msg.sender);
     }
+
+    // required to deregister
+    function () public payable {}
 }
 
 // the least efficient bank ever
