@@ -133,6 +133,7 @@ interface ProposalInterface {
     function getPosition(address _user) public view returns (ProposalLib.Position);
     function argumentCount() public view returns (uint256);
     function vote(uint256 _argumentId) external;
+    event Case(bytes content);
 }
 library ProposalLib {
     enum Position {
@@ -338,6 +339,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
     event Board(address indexed board, string endorsement);
     event Denounced(address indexed board, string reason);
     event Revoked(address indexed board, string reason);
+    // TODO using NewProposal, I can remove allProposals
     event NewProposal(ProposalInterface indexed proposal);
     event NewCabal(CabalInterface indexed cabal);
     event BannedProposal(ProposalInterface indexed proposal, string reason);
