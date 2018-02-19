@@ -282,6 +282,90 @@ contract Proposal is ProposalInterface {
         proposal.vote(_argumentId);
     }
 }
+contract ProperProposal is ProposalInterface {
+    ProposalLib.Storage self;
+
+    function getPosition(address _user)
+    public view
+    returns (ProposalLib.Position) {
+        return self.arguments[self.votes[_user]].position;
+    }
+
+    function argumentCount() public view returns (uint256) {
+        return self.arguments.length;
+    }
+    function argumentSource(uint256 _index)
+    public view
+    returns (address) {
+        return self.arguments[_index].source;
+    }
+
+    function argumentPosition(uint256 _index)
+    public view
+    returns (ProposalLib.Position) {
+        return self.arguments[_index].position;
+    }
+
+    function argumentVoteCount(uint256 _index)
+    public view
+    returns (uint256) {
+        return self.arguments[_index].count;
+    }
+
+    function source()
+    public view
+    returns (address) {
+        return self.arguments[0].source;
+    }
+
+    function vote(uint256 _argumentId)
+    external {
+        address destination = self.arguments[_argumentId].source;
+        self.voteToken.vote9(msg.sender, destination);
+        self.arguments[self.votes[msg.sender]].count--;
+        self.arguments[
+            self.votes[msg.sender] = _argumentId
+        ].count++;
+    }
+
+    event Case(bytes content);
+
+    function argue(ProposalLib.Position _position, bytes _text)
+    external
+    returns (uint256) {
+        address destination = self.arguments[0].source;
+        self.voteToken.vote9(msg.sender, destination);
+        uint256 argumentId = self.arguments.length;
+        self.arguments.push(ProposalLib.Argument(msg.sender, _position, 1));
+        Case(_text);
+        self.arguments[self.votes[msg.sender]].count--;
+        self.votes[msg.sender] = argumentId;
+        return argumentId;
+    }
+
+    function init(Vote _token, address _source, bytes _resolution)
+    public {
+        assert(self.arguments.length == 0);
+        self.voteToken = _token;
+        self.arguments.push(ProposalLib.Argument(_source, ProposalLib.Position.SKIP, 0));
+        Case(_resolution);
+    }
+}
+contract ProxyProposal {
+    ProposalLib.Storage self;
+    ProperProposal lib;
+    function ProxyProposal(ProperProposal _lib) public {
+        lib = _lib;
+    }
+    function () public {
+        //lib.delegatecall(msg.data);
+        assembly {
+            calldatacopy(0xff, 0, calldatasize)
+            let _retVal := delegatecall(gas, lib_slot, 0xff, calldatasize, 0, 32)
+            switch _retVal case 0 { revert(0,0) } default { return(0, 32) }
+        }
+    }
+}
 interface CabalInterface {
     function memberCount() public view returns (uint256);
     function canonCount() public view returns (uint256);
@@ -533,6 +617,30 @@ contract AccountRegistry is AllProposals,TokenRescue {
     returns (Proposal)
     {
         Proposal proposal = new Proposal(voteToken, msg.sender, _resolution);
+        accounts[proposal].membership |= PROPOSAL;
+        allProposals.push(proposal);
+        NewProposal(proposal);
+        return proposal;
+    }
+
+    function proposeProper(Vote voteToken, bytes _resolution)
+    external
+    returns (ProposalInterface)
+    {
+        ProperProposal proposal = new ProperProposal();
+        proposal.init(voteToken, msg.sender, _resolution);
+        accounts[proposal].membership |= PROPOSAL;
+        allProposals.push(proposal);
+        NewProposal(proposal);
+        return proposal;
+    }
+
+    function proposeProxy(Vote voteToken, ProperProposal _properProposal, bytes _resolution)
+    external
+    returns (ProposalInterface)
+    {
+        ProperProposal proposal = ProperProposal(new ProxyProposal(_properProposal));
+        proposal.init(voteToken, msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);

@@ -222,6 +222,14 @@ contract TokenTest is DSTest {
         accountRegistry.appoint(this, "ayy");
     }
 
+    function test_proxy() public {
+        accountRegistry.proposeProper(token, "k");
+        ProperProposal proposal = ProperProposal(accountRegistry.allProposals(0));
+        accountRegistry.proposeProxy(token, proposal, "j");
+        ProperProposal fake = ProperProposal(accountRegistry.allProposals(1));
+        assertEq(fake.argumentVoteCount(0), 0);
+    }
+
     // without this we cannot deregister
     function () public payable { }
 }
