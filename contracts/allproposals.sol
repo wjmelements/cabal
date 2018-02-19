@@ -146,7 +146,6 @@ library ProposalLib {
         address source;
         Position position;
         uint256 count;
-        bytes text;
     }
     struct Storage {
         Vote voteToken;
@@ -180,23 +179,6 @@ library ProposalLib {
         return self.arguments[_index].count;
     }
 
-    function argumentText(Storage storage self, uint256 _index)
-    internal view
-    returns (bytes storage) {
-        return self.arguments[_index].text;
-    }
-
-    function resolution(Storage storage self)
-    internal view
-    returns (bytes storage) {
-        return self.arguments[0].text;
-    }
-
-    function voteCount(Storage storage self)
-    public view
-    returns (uint256) {
-        return -self.arguments[0].count;
-    }
     function source(Storage storage self)
     public view
     returns (address) {
@@ -213,13 +195,16 @@ library ProposalLib {
         ].count++;
     }
 
+    event Case(bytes content);
+
     function argue(Storage storage self, Position _position, bytes _text)
     public
     returns (uint256) {
         address destination = self.arguments[0].source;
         self.voteToken.vote9(msg.sender, destination);
         uint256 argumentId = self.arguments.length;
-        self.arguments.push(Argument(msg.sender, _position, 1, _text));
+        self.arguments.push(Argument(msg.sender, _position, 1));
+        Case(_text);
         self.arguments[self.votes[msg.sender]].count--;
         self.votes[msg.sender] = argumentId;
         return argumentId;
@@ -227,7 +212,8 @@ library ProposalLib {
 
     function init(Storage storage self, address _source, bytes _resolution)
     public {
-        self.arguments.push(ProposalLib.Argument(_source, Position.SKIP, 0, _resolution));
+        self.arguments.push(ProposalLib.Argument(_source, Position.SKIP, 0));
+        Case(_resolution);
     }
 
 }
@@ -269,12 +255,6 @@ contract Proposal is ProposalInterface {
     public view
     returns (uint256) {
         return proposal.argumentVoteCount(_index);
-    }
-
-    function argumentText(uint256 _index)
-    public view
-    returns (bytes) {
-        return proposal.argumentText(_index);
     }
 
     function Proposal(Vote _vote, address _source, bytes _resolution)
