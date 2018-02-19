@@ -222,6 +222,13 @@ contract Proposal is ProposalInterface {
     using ProposalLib for ProposalLib.Storage;
     ProposalLib.Storage proposal;
 
+    /* perhaps something like this can reduce propose() cost even further
+     * would need to assert(self.arguments.length == 0); in init()
+    function () public {
+        proposalLib.delegatecall(msg.data);
+    }
+    */
+
     function getPosition(address _user)
     public view
     returns (ProposalLib.Position) {
