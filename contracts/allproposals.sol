@@ -23,9 +23,12 @@ contract TokenRescue {
         revert();
     }
 }
+interface AccountRegistryInterface {
+    function canVoteOnProposal(address _voter, address _proposal) external view returns (bool);
+}
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
-    AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
+    AccountRegistryInterface public accountRegistry = AccountRegistryInterface(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
     address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
@@ -119,7 +122,7 @@ contract Vote is ERC20,TokenRescue {
         owner = _newOwner;
         NewOwner(owner);
     }
-    function migrateAccountRegistry(AccountRegistry _newAccountRegistry)
+    function migrateAccountRegistry(AccountRegistryInterface _newAccountRegistry)
     external onlyOwner {
         accountRegistry = _newAccountRegistry;
         NewRegistry(accountRegistry);
@@ -237,19 +240,15 @@ interface CabalInterface {
     function canonCount() external view returns (uint256);
     function proposalCount() external view returns (uint256);
 }
-interface AllProposals {
-    function isProposal(address _proposal) external view returns (bool);
-}
-
-contract AccountRegistry is AllProposals,TokenRescue {
+contract AccountRegistry is AccountRegistryInterface,TokenRescue {
     
     uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public proposalCensorshipFee = 50 finney;
 
     // this is the first deterministic contract address for 0x315017F58EAaFC696bcF286928E08cbf15C00fDc
-    address burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
+    address constant public burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
 
-    Vote public token = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
+    Vote public constant token = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
 
     /* uint8 membership bitmap:
      * 0 - fraud
@@ -277,8 +276,6 @@ contract AccountRegistry is AllProposals,TokenRescue {
     }
     mapping (address => Account) accounts;
 
-    CabalInterface[] public allCabals;
-    ProposalInterface[] public allProposals;
 
     function AccountRegistry()
     public
@@ -288,28 +285,15 @@ contract AccountRegistry is AllProposals,TokenRescue {
         accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
     }
 
-    event NewVoter(address voter);
-    event Deregistered(address voter);
+    event Voter(address indexed voter);
+    event Deregistered(address indexed voter);
     event Nominated(address indexed board, string endorsement);
     event Board(address indexed board, string endorsement);
     event Denounced(address indexed board, string reason);
     event Revoked(address indexed board, string reason);
-    // TODO using NewProposal, I can remove allProposals
-    event NewProposal(ProposalInterface indexed proposal);
-    event NewCabal(CabalInterface indexed cabal);
+    event Proposal(ProposalInterface indexed proposal);
+    event Cabal(CabalInterface indexed cabal);
     event BannedProposal(ProposalInterface indexed proposal, string reason);
-
-    function cabalCount()
-    external view
-    returns (uint256) {
-        return allCabals.length;
-    }
-
-    function proposalCount()
-    external view
-    returns (uint256) {
-        return allProposals.length;
-    }
 
     // To register a Cabal, you must
     // - implement CabalInterface
@@ -327,8 +311,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Account storage account = accounts[_cabal];
         require(account.membership & PENDING_CABAL == PENDING_CABAL);
         account.membership ^= (CABAL | PENDING_CABAL);
-        allCabals.push(_cabal);
-        NewCabal(_cabal);
+        Cabal(_cabal);
     }
 
     // TODO remove before launching
@@ -346,7 +329,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         account.lastAccess = era();
         account.membership |= VOTER;
         token.grant(msg.sender, 40);
-        NewVoter(msg.sender);
+        Voter(msg.sender);
     }
 
     // smart contracts must implement the fallback function in order to deregister
@@ -472,7 +455,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         if (dncr == msg.sender) {
             return;
         }
-        board.membership &= ~BOARD;
+        board.membership ^= (BOARD | FRAUD);
         Revoked(_board, _reason);
     }
 
@@ -483,8 +466,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         ProperProposal proposal = new ProperProposal();
         proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
-        allProposals.push(proposal);
-        NewProposal(proposal);
+        Proposal(proposal);
         return proposal;
     }
 
@@ -495,8 +477,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         ProperProposal proposal = ProperProposal(new ProxyProposal());
         proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
-        allProposals.push(proposal);
-        NewProposal(proposal);
+        Proposal(proposal);
         return proposal;
     }
 
@@ -505,13 +486,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         uint8 membership = accounts[_proposal].membership;
         require(membership & PROPOSAL == 0);
+        Proposal(_proposal);
         accounts[_proposal].membership |= PROPOSAL;
-        allProposals.push(_proposal);
     }
 
     // To submit an outside proposal contract, you must:
     // - ensure it conforms to ProposalInterface
-    // - ensure it properly transfers the VOTE token, calling Vote.vote inside Proposal.vote
+    // - ensure it properly transfers the VOTE token, calling Vote.voteX
     // - open-source it using Etherscan or equivalent
     function proposeExternal(ProposalInterface _proposal)
     external
@@ -528,8 +509,7 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Account storage account = accounts[_proposal];
         require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
         account.membership ^= (PROPOSAL | PENDING_PROPOSAL);
-        allProposals.push(_proposal);
-        NewProposal(_proposal);
+        Proposal(_proposal);
     }
 
     // bans prevent accounts from voting through this proposal
