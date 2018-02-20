@@ -99,11 +99,11 @@ contract TokenTest is DSTest {
 
         Voter v1 = new Voter();
         assert(!accountRegistry.canVote(v1));
-        assert(!accountRegistry.canVoteAndIsProposal(v1, proposal));
+        assert(!accountRegistry.canVoteOnProposal(v1, proposal));
         v1.transfer(1 finney);
         v1.register(accountRegistry);
         assert(accountRegistry.canVote(v1));
-        assert(accountRegistry.canVoteAndIsProposal(v1, proposal));
+        assert(accountRegistry.canVoteOnProposal(v1, proposal));
         assertEq(accountRegistry.population(), 2);
         assertEq(token.balanceOf(v1), 40);
         v1.vote(proposal, 1);
@@ -222,12 +222,27 @@ contract TokenTest is DSTest {
         accountRegistry.appoint(this, "ayy");
     }
 
+    function test_proper() public {
+        accountRegistry.proposeProper(token, "k");
+        ProperProposal proposal = ProperProposal(accountRegistry.allProposals(0));
+        assertEq(proposal.argumentVoteCount(0), 0);
+        accountRegistry.register.value(1 finney)();
+        proposal.argue(ProposalLib.Position.APPROVE, "awesome");
+        assertEq(proposal.argumentCount(), 2);
+        assertEq(proposal.argumentVoteCount(1), 1);
+    }
+
     function test_proxy() public {
         accountRegistry.proposeProper(token, "k");
         ProperProposal proposal = ProperProposal(accountRegistry.allProposals(0));
         accountRegistry.proposeProxy(token, proposal, "j");
         ProperProposal fake = ProperProposal(accountRegistry.allProposals(1));
         assertEq(fake.argumentVoteCount(0), 0);
+        accountRegistry.register.value(1 finney)();
+        uint256 argumentId = fake.argue(ProposalLib.Position.APPROVE, "awesome");
+        assertEq(argumentId, 1);
+        assertEq(fake.argumentCount(), 2);
+        assertEq(fake.argumentVoteCount(1), 1);
     }
 
     // without this we cannot deregister
