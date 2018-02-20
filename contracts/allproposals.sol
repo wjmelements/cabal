@@ -11,7 +11,10 @@ interface ERC20 {
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
 contract TokenRescue {
-    // this contract holds no tokens
+    // gas paid, and now i am immortal
+    // i shall not end until heat death
+    // i shall gain no ether, hold no tokens, pity no fool
+
     // use this method to rescue your tokens if you sent them by mistake but be quick or someone else will get them
     function rescueToken(ERC20 _token)
     external
@@ -144,7 +147,7 @@ interface ProposalInterface {
     function vote(uint256 _argumentId) external;
     event Case(bytes content);
 }
-contract ProperProposal is ProposalInterface {
+contract ProperProposal is ProposalInterface, TokenRescue {
     struct Argument {
         address source;
         uint8 position;
