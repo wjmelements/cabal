@@ -314,19 +314,13 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
         Cabal(_cabal);
     }
 
-    // TODO remove before launching
-    function era()
-    internal view returns (uint256) {
-        return now;
-    }
-
     function register()
     external payable
     {
         require(msg.value == registrationDeposit);
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == 0);
-        account.lastAccess = era();
+        account.lastAccess = now;
         account.membership |= VOTER;
         token.grant(msg.sender, 40);
         Voter(msg.sender);
@@ -338,7 +332,7 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
     {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
-        require(account.lastAccess + 7 days <= era());
+        require(account.lastAccess + 7 days <= now);
         account.membership ^= VOTER;
         account.lastAccess = 0;
         // the MANDATORY transfer keeps population() meaningful
@@ -365,7 +359,7 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
     external view
     returns (bool)
     {
-        return accounts[_voter].lastAccess + 7 days <= era();
+        return accounts[_voter].lastAccess + 7 days <= now;
     }
 
     function canVoteOnProposal(address _voter, address _proposal)
@@ -543,10 +537,10 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
         uint256 lastAccess = account.lastAccess;
-        uint256 grant = (era() - lastAccess) / 72 minutes;
+        uint256 grant = (now - lastAccess) / 72 minutes;
         if (grant > 40) {
             grant = 40;
-            account.lastAccess = era();
+            account.lastAccess = now;
         } else {
             account.lastAccess = lastAccess + grant * 72 minutes;
         }
@@ -556,7 +550,7 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
     function availableFaucet(address _account)
     external view
     returns (uint256) {
-        uint256 grant = (era() - accounts[_account].lastAccess) / 72 minutes;
+        uint256 grant = (now - accounts[_account].lastAccess) / 72 minutes;
         if (grant > 40) {
             grant = 40;
         }
