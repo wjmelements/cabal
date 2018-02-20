@@ -111,8 +111,8 @@ contract Vote is ERC20,TokenRescue {
         require(msg.sender == owner);
         _;
     }
-    event NewOwner(address indexed owner);
-    event NewRegistry(address indexed registry);
+    event Owner(address indexed owner);
+    event Registry(address indexed registry);
     function transferOwnership(address _newOwner)
     external onlyOwner {
         uint256 balance = balances[owner];
@@ -120,12 +120,12 @@ contract Vote is ERC20,TokenRescue {
         balances[owner] = 0;
         Transfer(owner, _newOwner, balance);
         owner = _newOwner;
-        NewOwner(owner);
+        Owner(owner);
     }
     function migrateAccountRegistry(AccountRegistryInterface _newAccountRegistry)
     external onlyOwner {
         accountRegistry = _newAccountRegistry;
-        NewRegistry(accountRegistry);
+        Registry(accountRegistry);
     }
 }
 interface ProposalInterface {
