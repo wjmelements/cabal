@@ -1,12 +1,12 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 interface ERC20 {
-    function totalSupply() public constant returns (uint supply);
-    function balanceOf(address _owner) public constant returns (uint balance);
-    function transfer(address _to, uint _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint _value) public returns (bool success);
-    function approve(address _spender, uint _value) public returns (bool success);
-    function allowance(address _owner, address _spender) public constant returns (uint remaining);
+    function totalSupply() external constant returns (uint supply);
+    function balanceOf(address _owner) external constant returns (uint balance);
+    function transfer(address _to, uint _value) external returns (bool success);
+    function transferFrom(address _from, address _to, uint _value) external returns (bool success);
+    function approve(address _spender, uint _value) external returns (bool success);
+    function allowance(address _owner, address _spender) external constant returns (uint remaining);
     event Transfer(address indexed _from, address indexed _to, uint _value);
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
@@ -26,7 +26,7 @@ contract TokenRescue {
 contract Vote is ERC20,TokenRescue {
     uint256 supply = 0;
     AccountRegistry public accountRegistry = AccountRegistry(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
-    address public owner;//= 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
+    address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
     string public symbol = "FV";
@@ -35,25 +35,21 @@ contract Vote is ERC20,TokenRescue {
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) approved;
 
-    function Vote() public {
-        owner = msg.sender;
-    }
-
-    function totalSupply() public constant returns (uint256) {
+    function totalSupply() external constant returns (uint256) {
         return supply;
     }
-    function balanceOf(address _owner) public constant returns (uint256) {
+    function balanceOf(address _owner) external constant returns (uint256) {
         return balances[_owner];
     }
-    function approve(address _spender, uint256 _value) public returns (bool) {
+    function approve(address _spender, uint256 _value) external returns (bool) {
         approved[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;
     }
-    function allowance(address _owner, address _spender) public constant returns (uint256) {
+    function allowance(address _owner, address _spender) external constant returns (uint256) {
         return approved[_owner][_spender];
     }
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value) external returns (bool) {
         if (balances[msg.sender] < _value) {
             return false;
         }
@@ -62,7 +58,7 @@ contract Vote is ERC20,TokenRescue {
         Transfer(msg.sender, _to, _value);
         return true;
     }
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
         if (balances[_from] < _value
          || approved[_from][msg.sender] < _value
          || _value == 0) {
@@ -81,27 +77,27 @@ contract Vote is ERC20,TokenRescue {
         Transfer(address(0), _to, _grant);
     }
     // vote5 and vote1 are available for future use
-    function vote5(address _voter, address _votee) public {
+    function vote5(address _voter, address _votee) external {
         require(balances[_voter] >= 10);
-        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
+        require(accountRegistry.canVoteOnProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[owner] += 5;
         balances[_votee] += 5;
         Transfer(_voter, owner, 5);
         Transfer(_voter, _votee, 5);
     }
-    function vote1(address _voter, address _votee) public {
+    function vote1(address _voter, address _votee) external {
         require(balances[_voter] >= 10);
-        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
+        require(accountRegistry.canVoteOnProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[owner] += 9;
         balances[_votee] += 1;
         Transfer(_voter, owner, 9);
         Transfer(_voter, _votee, 1);
     }
-    function vote9(address _voter, address _votee) public {
+    function vote9(address _voter, address _votee) external {
         require(balances[_voter] >= 10);
-        require(accountRegistry.canVoteAndIsProposal(_voter, msg.sender));
+        require(accountRegistry.canVoteOnProposal(_voter, msg.sender));
         balances[_voter] -= 10;
         balances[owner] += 1;
         balances[_votee] += 9;
@@ -130,249 +126,119 @@ contract Vote is ERC20,TokenRescue {
     }
 }
 interface ProposalInterface {
-    function getPosition(address _user) public view returns (ProposalLib.Position);
-    function argumentCount() public view returns (uint256);
+    /* uint8:
+        enum Position {
+            SKIP, // default
+            APPROVE,
+            REJECT,
+            AMEND, // == (APPROVE | REJECT)
+            LOL
+            // more to be determined by community
+        }
+    */
+    function getPosition(address _user) external view returns (uint8);
+    function argumentCount() external view returns (uint256);
     function vote(uint256 _argumentId) external;
     event Case(bytes content);
 }
-library ProposalLib {
-    enum Position {
-        SKIP,
-        APPROVE,
-        AMEND,
-        LOL,
-        REJECT
-    }
+contract ProperProposal is ProposalInterface {
     struct Argument {
         address source;
-        Position position;
+        uint8 position;
         uint256 count;
     }
-    struct Storage {
-        Vote voteToken;
-        mapping (address => uint256) votes;
-        Argument[] arguments;
-    }
-    function getPosition(Storage storage self, address _user)
-    public view
-    returns (Position) {
-        return self.arguments[self.votes[_user]].position;
-    }
-
-    function argumentCount(Storage storage self) public view returns (uint256) {
-        return self.arguments.length;
-    }
-    function argumentSource(Storage storage self, uint256 _index)
-    public view
-    returns (address) {
-        return self.arguments[_index].source;
-    }
-
-    function argumentPosition(Storage storage self, uint256 _index)
-    public view
-    returns (Position) {
-        return self.arguments[_index].position;
-    }
-
-    function argumentVoteCount(Storage storage self, uint256 _index)
-    public view
-    returns (uint256) {
-        return self.arguments[_index].count;
-    }
-
-    function source(Storage storage self)
-    public view
-    returns (address) {
-        return self.arguments[0].source;
-    }
-
-    function vote(Storage storage self, uint256 _argumentId)
-    public {
-        address destination = self.arguments[_argumentId].source;
-        self.voteToken.vote9(msg.sender, destination);
-        self.arguments[self.votes[msg.sender]].count--;
-        self.arguments[
-            self.votes[msg.sender] = _argumentId
-        ].count++;
-    }
-
-    event Case(bytes content);
-
-    function argue(Storage storage self, Position _position, bytes _text)
-    public
-    returns (uint256) {
-        address destination = self.arguments[0].source;
-        self.voteToken.vote9(msg.sender, destination);
-        uint256 argumentId = self.arguments.length;
-        self.arguments.push(Argument(msg.sender, _position, 1));
-        Case(_text);
-        self.arguments[self.votes[msg.sender]].count--;
-        self.votes[msg.sender] = argumentId;
-        return argumentId;
-    }
-
-    function init(Storage storage self, address _source, bytes _resolution)
-    public {
-        self.arguments.push(ProposalLib.Argument(_source, Position.SKIP, 0));
-        Case(_resolution);
-    }
-
-}
-contract Proposal is ProposalInterface {
-    using ProposalLib for ProposalLib.Storage;
-    ProposalLib.Storage proposal;
-
-    /* perhaps something like this can reduce propose() cost even further
-     * would need to assert(self.arguments.length == 0); in init()
-    function () public {
-        proposalLib.delegatecall(msg.data);
-    }
-    */
+    Argument[] public arguments;
+    mapping (address => uint256) public votes;
+    Vote public constant voteToken = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
 
     function getPosition(address _user)
-    public view
-    returns (ProposalLib.Position) {
-        return proposal.getPosition(_user);
+    external view
+    returns (uint8) {
+        return arguments[votes[_user]].position;
     }
 
-    function votes(address _user)
-    public view
-    returns (uint256) {
-        return proposal.votes[_user];
+    function argumentCount() external view returns (uint256) {
+        return arguments.length;
     }
-
-    function argumentCount()
-    public view
-    returns (uint256) {
-        return proposal.argumentCount();
-    }
-    
     function argumentSource(uint256 _index)
-    public view
+    external view
     returns (address) {
-        return proposal.argumentSource(_index);
+        return arguments[_index].source;
     }
 
     function argumentPosition(uint256 _index)
-    public view
-    returns (ProposalLib.Position) {
-        return proposal.argumentPosition(_index);
+    external view
+    returns (uint8) {
+        return arguments[_index].position;
     }
 
     function argumentVoteCount(uint256 _index)
-    public view
+    external view
     returns (uint256) {
-        return proposal.argumentVoteCount(_index);
-    }
-
-    function Proposal(Vote _vote, address _source, bytes _resolution)
-    public {
-        proposal.voteToken = _vote;
-        proposal.init(_source, _resolution);
-    }
-
-    function argue(ProposalLib.Position _position, bytes _text)
-    external
-    returns (uint256) {
-        return proposal.argue(_position, _text);
-    }
-
-    function vote(uint256 _argumentId)
-    external {
-        proposal.vote(_argumentId);
-    }
-}
-contract ProperProposal is ProposalInterface {
-    ProposalLib.Storage self;
-
-    function getPosition(address _user)
-    public view
-    returns (ProposalLib.Position) {
-        return self.arguments[self.votes[_user]].position;
-    }
-
-    function argumentCount() public view returns (uint256) {
-        return self.arguments.length;
-    }
-    function argumentSource(uint256 _index)
-    public view
-    returns (address) {
-        return self.arguments[_index].source;
-    }
-
-    function argumentPosition(uint256 _index)
-    public view
-    returns (ProposalLib.Position) {
-        return self.arguments[_index].position;
-    }
-
-    function argumentVoteCount(uint256 _index)
-    public view
-    returns (uint256) {
-        return self.arguments[_index].count;
+        return arguments[_index].count;
     }
 
     function source()
-    public view
+    external view
     returns (address) {
-        return self.arguments[0].source;
+        return arguments[0].source;
+    }
+
+    function voteCount()
+    external view
+    returns (uint256) {
+        return -arguments[0].count;
     }
 
     function vote(uint256 _argumentId)
     external {
-        address destination = self.arguments[_argumentId].source;
-        self.voteToken.vote9(msg.sender, destination);
-        self.arguments[self.votes[msg.sender]].count--;
-        self.arguments[
-            self.votes[msg.sender] = _argumentId
+        address destination = arguments[_argumentId].source;
+        voteToken.vote9(msg.sender, destination);
+        arguments[votes[msg.sender]].count--;
+        arguments[
+            votes[msg.sender] = _argumentId
         ].count++;
     }
 
     event Case(bytes content);
 
-    function argue(ProposalLib.Position _position, bytes _text)
+    function argue(uint8 _position, bytes _text)
     external
     returns (uint256) {
-        address destination = self.arguments[0].source;
-        self.voteToken.vote9(msg.sender, destination);
-        uint256 argumentId = self.arguments.length;
-        self.arguments.push(ProposalLib.Argument(msg.sender, _position, 1));
+        address destination = arguments[0].source;
+        voteToken.vote9(msg.sender, destination);
+        uint256 argumentId = arguments.length;
+        arguments.push(Argument(msg.sender, _position, 1));
         Case(_text);
-        self.arguments[self.votes[msg.sender]].count--;
-        self.votes[msg.sender] = argumentId;
+        arguments[votes[msg.sender]].count--;
+        votes[msg.sender] = argumentId;
         return argumentId;
     }
 
-    function init(Vote _token, address _source, bytes _resolution)
-    public {
-        assert(self.arguments.length == 0);
-        self.voteToken = _token;
-        self.arguments.push(ProposalLib.Argument(_source, ProposalLib.Position.SKIP, 0));
+    function init(address _source, bytes _resolution)
+    external {
+        assert(arguments.length == 0);//TODO use cheaper check msg.sender == accountRegistry
+        arguments.push(Argument(_source, 0/*SKIP*/, 0));
         Case(_resolution);
     }
 }
 contract ProxyProposal {
-    ProposalLib.Storage self;
-    ProperProposal lib;
-    function ProxyProposal(ProperProposal _lib) public {
-        lib = _lib;
-    }
-    function () public {
-        //lib.delegatecall(msg.data);
+    function () external {
+        // return lib.delegatecall(msg.data);
         assembly {
-            calldatacopy(0xff, 0, calldatasize)
-            let _retVal := delegatecall(gas, lib_slot, 0xff, calldatasize, 0, 32)
-            switch _retVal case 0 { revert(0,0) } default { return(0, 32) }
+            calldatacopy(0, 0, calldatasize)
+            let _retVal := delegatecall(sub(gas,740), 0x0000005E1CBE78009143B44D717423cb01a002B7, 0, calldatasize, 0, 32)
+            switch _retVal case 0 { revert(0,returndatasize) } default { return(0, returndatasize) }
         }
     }
 }
 interface CabalInterface {
-    function memberCount() public view returns (uint256);
-    function canonCount() public view returns (uint256);
-    function proposalCount() public view returns (uint256);
+    function memberCount() external view returns (uint256);
+    function canonCount() external view returns (uint256);
+    function proposalCount() external view returns (uint256);
 }
 interface AllProposals {
-    function isProposal(address _proposal) public view returns (bool);
+    function isProposal(address _proposal) external view returns (bool);
 }
 
 contract AccountRegistry is AllProposals,TokenRescue {
@@ -414,11 +280,9 @@ contract AccountRegistry is AllProposals,TokenRescue {
     CabalInterface[] public allCabals;
     ProposalInterface[] public allProposals;
 
-    // TODO rm param
-    function AccountRegistry(Vote _token)
+    function AccountRegistry()
     public
     {
-        token = _token;
         accounts[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership = BOARD;
         accounts[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership = BOARD;
         accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
@@ -436,13 +300,13 @@ contract AccountRegistry is AllProposals,TokenRescue {
     event BannedProposal(ProposalInterface indexed proposal, string reason);
 
     function cabalCount()
-    public view
+    external view
     returns (uint256) {
         return allCabals.length;
     }
 
     function proposalCount()
-    public view
+    external view
     returns (uint256) {
         return allProposals.length;
     }
@@ -500,14 +364,14 @@ contract AccountRegistry is AllProposals,TokenRescue {
     }
 
     function population()
-    public view
+    external view
     returns (uint256)
     {
         return this.balance / 1 finney;
     }
 
     function deregistrationDate()
-    public view
+    external view
     returns (uint256)
     {
         return accounts[msg.sender].lastAccess + 7 days;
@@ -515,14 +379,14 @@ contract AccountRegistry is AllProposals,TokenRescue {
 
     // always true for deregistered accounts
     function canDeregister(address _voter)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_voter].lastAccess + 7 days <= era();
     }
 
-    function canVoteAndIsProposal(address _voter, address _proposal)
-    public view
+    function canVoteOnProposal(address _voter, address _proposal)
+    external view
     returns (bool)
     {
         return accounts[_voter].membership & VOTER == VOTER
@@ -530,42 +394,42 @@ contract AccountRegistry is AllProposals,TokenRescue {
     }
 
     function canVote(address _voter)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_voter].membership & VOTER == VOTER;
     }
 
     function isProposal(address _proposal)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_proposal].membership & PROPOSAL == PROPOSAL;
     }
 
     function isPendingProposal(address _proposal)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
     }
 
     function isFraud(address _account)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_account].membership & FRAUD == FRAUD;
     }
 
     function isPendingCabal(address _account)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_account].membership & PENDING_CABAL == PENDING_CABAL;
     }
 
     function isCabal(address _account)
-    public view
+    external view
     returns (bool)
     {
         return accounts[_account].membership & CABAL == CABAL;
@@ -612,35 +476,24 @@ contract AccountRegistry is AllProposals,TokenRescue {
         Revoked(_board, _reason);
     }
 
-    function propose(Vote voteToken, bytes _resolution)
-    external
-    returns (Proposal)
-    {
-        Proposal proposal = new Proposal(voteToken, msg.sender, _resolution);
-        accounts[proposal].membership |= PROPOSAL;
-        allProposals.push(proposal);
-        NewProposal(proposal);
-        return proposal;
-    }
-
-    function proposeProper(Vote voteToken, bytes _resolution)
+    function proposeProper(bytes _resolution)
     external
     returns (ProposalInterface)
     {
         ProperProposal proposal = new ProperProposal();
-        proposal.init(voteToken, msg.sender, _resolution);
+        proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
         return proposal;
     }
 
-    function proposeProxy(Vote voteToken, ProperProposal _properProposal, bytes _resolution)
+    function proposeProxy(bytes _resolution)
     external
     returns (ProposalInterface)
     {
-        ProperProposal proposal = ProperProposal(new ProxyProposal(_properProposal));
-        proposal.init(voteToken, msg.sender, _resolution);
+        ProperProposal proposal = ProperProposal(new ProxyProposal());
+        proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
         allProposals.push(proposal);
         NewProposal(proposal);
@@ -707,20 +560,21 @@ contract AccountRegistry is AllProposals,TokenRescue {
     // this code lives here instead of in the token so that it can be upgraded with account registry migration
     function faucet()
     external {
-        require(canVote(msg.sender));
-        uint256 lastAccess = accounts[msg.sender].lastAccess;
+        Account storage account = accounts[msg.sender];
+        require(account.membership & VOTER == VOTER);
+        uint256 lastAccess = account.lastAccess;
         uint256 grant = (era() - lastAccess) / 72 minutes;
         if (grant > 40) {
             grant = 40;
-            accounts[msg.sender].lastAccess = era();
+            account.lastAccess = era();
         } else {
-            accounts[msg.sender].lastAccess = lastAccess + grant * 72 minutes;
+            account.lastAccess = lastAccess + grant * 72 minutes;
         }
         token.grant(msg.sender, grant);
     }
 
     function availableFaucet(address _account)
-    public view
+    external view
     returns (uint256) {
         uint256 grant = (era() - accounts[_account].lastAccess) / 72 minutes;
         if (grant > 40) {
