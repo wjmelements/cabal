@@ -220,7 +220,7 @@ contract ProperProposal is ProposalInterface {
 
     function init(address _source, bytes _resolution)
     external {
-        assert(arguments.length == 0);//TODO use cheaper check msg.sender == accountRegistry
+        assert(msg.sender == 0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
         arguments.push(Argument(_source, 0/*SKIP*/, 0));
         Case(_resolution);
     }
@@ -339,7 +339,7 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
         Account storage account = accounts[msg.sender];
         require(account.membership & VOTER == VOTER);
         require(account.lastAccess + 7 days <= era());
-        account.membership &= ~VOTER;
+        account.membership ^= VOTER;
         account.lastAccess = 0;
         // the MANDATORY transfer keeps population() meaningful
         msg.sender.transfer(registrationDeposit);
@@ -455,7 +455,7 @@ contract AccountRegistry is AccountRegistryInterface,TokenRescue {
         if (dncr == msg.sender) {
             return;
         }
-        board.membership ^= (BOARD | FRAUD);
+        board.membership ^= BOARD;
         Revoked(_board, _reason);
     }
 
