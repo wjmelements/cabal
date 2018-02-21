@@ -128,7 +128,7 @@ contract Vote is ERC20, TokenRescue {
     function migrateAccountRegistry(AccountRegistryInterface _newAccountRegistry)
     external onlyOwner {
         accountRegistry = _newAccountRegistry;
-        Registry(_newAcccountRegistry);
+        Registry(_newAccountRegistry);
     }
 }
 interface ProposalInterface {
