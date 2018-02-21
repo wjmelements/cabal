@@ -21,8 +21,8 @@ interface AccountRegistry {
 }
 
 contract FinneyVoteDoppel {
-   Vote constant revToken = 0xe48ba8c36c2a73437ae0a67f4f10a3f23b799327;
-    AccountRegistry constant accountRegistry = 0x6722C370C3762768c0FC40aFFf397b7B9A10A032;
+    Vote constant revToken = Vote(0xe48ba8c36c2a73437ae0a67f4f10a3f23b799327);
+    AccountRegistry constant accountRegistry = AccountRegistry(0x6722C370C3762768c0FC40aFFf397b7B9A10A032);
     address owner;
 
     function FinneyVoteDoppel()
@@ -53,6 +53,9 @@ contract FinneyVoteDoppel {
         accountRegistry.deregister();
         selfdestruct(msg.sender);
     }
+
+    // required to deregister
+    function () public payable {}
 }
 
 // the least efficient bank ever
@@ -88,6 +91,7 @@ contract REVBank is FinneyVoteDoppel {
             unroll = doppels.length;
         }
         while (unroll --> 0) {
+            // FML pop not implemented yet
             doppels.pop().refund();
         }
         msg.sender.transfer(this.balance);
