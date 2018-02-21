@@ -2,9 +2,27 @@ var onAccountRegistry = [];
 accountRegistry=null; 
 window.addEventListener('load', function() {
     Web3Loader.onWeb3(function() {
-        var accountRegistryABI = [{"constant":true,"inputs":[],"name":"population","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"outsideProposalRejectionBurn","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deregistrationDate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"registrationDeposit","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_resolution","type":"bytes"}],"name":"propose","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_board","type":"address"}],"name":"appoint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"confirmCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isCabal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canDeregister","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"outsideProposalVerificationFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isFraud","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"},{"name":"_reason","type":"string"}],"name":"banProposal","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"confirmProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"allProposals","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"cabalCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isPendingProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canVote","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"deregister","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"proposeExternal","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"registerCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"rejectProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"proposalCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"outsideProposalRejectionBounty","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"allCabals","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"voter","type":"address"}],"name":"NewVoter","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"voter","type":"address"}],"name":"Deregistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"board","type":"address"}],"name":"NewBoard","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"proposal","type":"address"}],"name":"NewProposal","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"cabal","type":"address"}],"name":"NewCabal","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"proposal","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"BannedProposal","type":"event"}];
+        var accountRegistryABI = [{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isPendingCabal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"proposalCensorshipFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deregistrationDate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"registrationDeposit","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_board","type":"address"},{"name":"_vouch","type":"string"}],"name":"appoint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"confirmCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"rescueToken","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"burn","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isCabal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canDeregister","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"availableFaucet","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isFraud","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"},{"name":"_reason","type":"string"}],"name":"banProposal","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_resolution","type":"bytes"}],"name":"proposeProxy","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"sudoPropose","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"population","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"confirmProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"},{"name":"_proposal","type":"address"}],"name":"canVoteOnProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isPendingProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canVote","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"deregister","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"proposeExternal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"registerCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"rejectProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_resolution","type":"bytes"}],"name":"proposeProper","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"faucet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_board","type":"address"},{"name":"_reason","type":"string"}],"name":"denounce","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"token","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"voter","type":"address"}],"name":"Voter","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"voter","type":"address"}],"name":"Deregistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"endorsement","type":"string"}],"name":"Nominated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"endorsement","type":"string"}],"name":"Board","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"Denounced","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"Revoked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"proposal","type":"address"}],"name":"Proposal","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"cabal","type":"address"}],"name":"Cabal","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"proposal","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"BannedProposal","type":"event"}];
         Accounts.getAddress(function(address) {
             accountRegistry = web3.eth.contract(accountRegistryABI).at(address);
+            Accounts.proposalFilter = web3.eth.filter({
+                fromBlock:0,
+                to:'latest',
+                address:accountRegistry.address.toLowerCase(),// TODO no lower case
+                topics:[web3.sha3('Proposal(address)')]
+            });
+            Accounts.proposalFilter.watch((error, result) =>{
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                console.log(result);
+                // assumption: we get these in order
+                var proposalAddress = '0x'+result.topics[1].substring(26);
+                Accounts.proposals.push(proposalAddress);
+                Proposals.init(proposalAddress, result.blockNumber);
+                Accounts.resize();
+            });
             while (onAccountRegistry.length) {
                 onAccountRegistry.pop()();
             }
@@ -53,7 +71,7 @@ Accounts = {
             console.error("No known AccountRegistry on this network:" + Net.id.get());
         case "4":
             console.log("Using Rinkeby");
-            return resultFn("0x6DE8e2cCC7c1EC8537164A53C7aa5e74E42331f3");
+            return resultFn("0x0000003B26D088fC73341DEf4FF38d5B8d6a7874");
         }
     },
     isRegistered(address, resultFn) {
@@ -100,6 +118,7 @@ Accounts = {
     },
     proposalCount(resultFn) {
         if (accountRegistry) {
+            /*
             return accountRegistry.proposalCount(function(err, result) {
                 if (err) {
                     console.error(err);
@@ -107,6 +126,8 @@ Accounts = {
                 }
                 resultFn(result.c[0]);
             });
+            */
+            return resultFn(Accounts.proposals.length);
         }
         onAccountRegistry.push(function() {
             Accounts.proposalCount(resultFn);
@@ -127,6 +148,17 @@ Accounts = {
     },
     getProposal(index, resultFn) {
         if (accountRegistry) {
+            if (index < Accounts.proposals.length) {
+                console.log(Accounts.proposals.length);
+                console.log(index);
+                console.log(Accounts.proposals[index]);
+                return resultFn(Accounts.proposals[index]);
+            } else {
+                Accounts.onResize.push(()=> {
+                    Accounts.getProposal(index, resultFn);
+                });
+            }
+            /* XXX
             return accountRegistry.allProposals(index, function(err, result) {
                 if (err) {
                     console.error(err);
@@ -134,6 +166,8 @@ Accounts = {
                 }
                 resultFn(result);
             });
+            */
+            return;
         }
         onAccountRegistry.push(function() {
             Accounts.getProposal(index, resultFn);
@@ -141,7 +175,7 @@ Accounts = {
     },
     propose(proposal, resultFn) {
         console.log(proposal);
-        accountRegistry.propose(proposal, {gasPrice:GasRender.gasPriceInWei()},resultFn);
+        accountRegistry.proposeProxy(proposal, {gasPrice:GasRender.gasPriceInWei()},resultFn);
     },
     fetchCanDeregister(resultFn) {
         Accounts.current(function (account) {
@@ -151,6 +185,35 @@ Accounts = {
                     return;
                 }
                 resultFn(result);
+            });
+        });
+    },
+    claim(resultFn) {
+        if (!accountRegistry) {
+            onAccountRegistry.push(function(){Accounts.claim(resultFn)});
+            return;
+        }
+        accountRegistry.faucet({gasPrice:GasRender.gasPriceInWei()}, function (error, result) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            resultFn(result);
+        });
+    },
+    availableFaucet(resultFn) {
+        if (!accountRegistry) {
+            onAccountRegistry.push(function(){Accounts.availableFaucet(resultFn)});
+            return;
+        }
+        Accounts.current(function(currentAccount) {
+            console.log(currentAccount);
+            accountRegistry.availableFaucet(currentAccount, function(error, available) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                resultFn(available.c[0]);
             });
         });
     },
@@ -189,7 +252,9 @@ Accounts = {
             Accounts.onRegistrationChange.pop()();
         }
     },
+    
 };
+Accounts.proposals = []
 Accounts.onResize = [];
 Accounts.hasWeb3 = new ReactiveVar(true);
 Accounts.hasAccount = new ReactiveVar(true);

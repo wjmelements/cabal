@@ -66,6 +66,7 @@ Template.proposal.onCreated(function() {
     this.gradient = document.createElement('style');
     document.head.appendChild(this.gradient);
     Accounts.getProposal(this.index, function(address) {
+        console.log(address);
         this.address.set(address);
         var storedChoice = localStorage.getItem('choice'+this.address.get());
         var storedChoiceInt = parseInt(storedChoice);

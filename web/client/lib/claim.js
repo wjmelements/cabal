@@ -11,7 +11,7 @@ function onPendingClaim(txhash) {
 }
 Template.claim.onCreated(function() {
     this.available = new ReactiveVar();
-    Token.availableFaucet(function(amount) {
+    Accounts.availableFaucet(function(amount) {
         this.available.set(amount / 10);
         if (amount) {
             Accounts.current(function(address) {
@@ -66,7 +66,7 @@ Template.claim.events({
         if (Template.instance().claiming.get()) {
             return;
         }
-        Token.claim(function(txhash) {
+        Accounts.claim(function(txhash) {
             console.log(txhash);
             localStorage.setItem('claim'+web3.eth.coinbase, txhash);
             onPendingClaim.bind(this)(txhash);

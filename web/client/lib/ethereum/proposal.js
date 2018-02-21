@@ -35,10 +35,28 @@ function estimateArgumentGas(len, hasCases) {
 }
 window.addEventListener('load', function() {
     Web3Loader.onWeb3(function() {
-        var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"},{"name":"text","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentText","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"resolution","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_resolution","type":"bytes"},{"name":"_source","type":"address"},{"name":"_voteToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
+        var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"rescueToken","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_source","type":"address"},{"name":"_resolution","type":"bytes"}],"name":"init","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"content","type":"bytes"}],"name":"Case","type":"event"}];
         // TODO see if web3.eth.contract(proposalABI) localvar is better
-        Proposals.init = function(address) {
+        Proposals.init = function(address, blockNumber) {
+            if (!address || Proposals[address]) {
+                return;
+            }
             Proposals[address] = web3.eth.contract(proposalABI).at(address);
+            Proposals[address].cases = [];
+            var filter = web3.eth.filter({
+                fromBlock:blockNumber || 0,
+                to:'latest',
+                address:address,
+                topics:[web3.sha3('Case(bytes)')]
+            });
+            filter.watch((error, result) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                var text = bytesToStr(result.data);
+                Proposals[address].cases.push(text);
+            });
         };
     });
 });
@@ -46,6 +64,7 @@ window.addEventListener('load', function() {
 Proposals = {
     getArgumentCount(address, resultFn) {
         if (!Proposals[address]) {
+            console.error('I hope this is dead code');
             Proposals.init(address);
         }
         Proposals[address].argumentCount(function(err, result) {
@@ -60,6 +79,7 @@ Proposals = {
     },
     getArgument(address, index, resultFn, refresh) {
         if (!Proposals[address]) {
+            console.error('I hope this is dead code');
             Proposals.init(address);
         }
         var proposal = Proposals[address];
@@ -94,6 +114,12 @@ Proposals = {
             }
             resultFn(argument);
         };
+        if (index < proposal.cases.length) {
+            argument.text = proposal.cases[index];
+        } else {
+            argument.text = "Placeholder";// XXX await fetch
+        }
+        /*
         proposal.argumentText(index, function(err, result) {
             if (err) {
                 console.error(err);
@@ -102,6 +128,7 @@ Proposals = {
             argument.text = bytesToStr(result);
             done();
         });
+        */
         proposal.argumentPosition(index, function(err, result) {
             if (err) {
                 console.error(err);
@@ -176,7 +203,7 @@ Proposals = {
         Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei(), gas:105000}, resultFn);
     },
     argue(address, position, content, resultFn) {
-        var gas = estimateArgumentGas(content.length, Proposals[address].argCount > 1 || 0);
+        var gas = estimateArgumentGas(content.length, Proposals[address].argCount.get() > 1 || 0);
         Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei(), gas:gas}, resultFn);
     },
     getMyVote(address, resultFn) {
