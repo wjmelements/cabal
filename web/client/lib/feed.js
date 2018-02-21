@@ -1,6 +1,13 @@
-var lastSize = 0; // TODO store size
+var lastSize = 1; // TODO store size
 function onResize(count) {
-    this.lastIndex.set(count - 1);
+    if (this.lastIndex.get() == count) {
+        return;
+    }
+    if (count == 0) {
+        this.lastIndex.set(0);
+    } else {
+        this.lastIndex.set(count - 1);
+    }
     // this hack resizes the feed
     this.noRender.set(true);
     window.setTimeout(function() {this.noRender.set(false)}.bind(this), 1);

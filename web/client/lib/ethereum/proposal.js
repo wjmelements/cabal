@@ -29,7 +29,7 @@ function bytesToStr(bytes) {
 }
 // currently accurate, but must be updated with each deployment of the contract
 function estimateArgumentGas(len, hasCases) {
-    var gas = 144495 + len * 64 + + 20526 * Math.ceil(len/32) + 20421 * (len >= 32) + 3 * Math.ceil((len - 28)/32) + hasCases * -15238;
+    var gas = 134495 + len * 64 + + 20526 * Math.ceil(len/32) + 20421 * (len >= 32) + 3 * Math.ceil((len - 28)/32) + hasCases * -15238;
     console.log('Estimating('+len+')> '+ gas);
     return gas;
 }
@@ -41,8 +41,9 @@ window.addEventListener('load', function() {
             if (!address || Proposals[address]) {
                 return;
             }
-            Proposals[address] = web3.eth.contract(proposalABI).at(address);
-            Proposals[address].cases = [];
+            var proposal = web3.eth.contract(proposalABI).at(address);
+            Proposals[address] = proposal;
+            proposal.cases = [];
             var filter = web3.eth.filter({
                 fromBlock:blockNumber || 0,
                 to:'latest',
@@ -54,8 +55,15 @@ window.addEventListener('load', function() {
                     console.error(error);
                     return;
                 }
-                var text = bytesToStr(result.data);
-                Proposals[address].cases.push(text);
+                var bytes = '0x'+result.data.substr(130);
+                var text = bytesToStr(bytes);
+                console.log(result);
+                var index = proposal.cases.length;
+                var ontextindex = 'ontext'+index;
+                if (proposal[ontextindex]) {
+                    proposal[ontextindex](text);
+                }
+                proposal.cases.push(text);
             });
         };
     });
@@ -117,18 +125,13 @@ Proposals = {
         if (index < proposal.cases.length) {
             argument.text = proposal.cases[index];
         } else {
-            argument.text = "Placeholder";// XXX await fetch
+            var idx = 'ontext'+index;
+            proposal[idx] = function(text) {
+                argument.text = text;
+                argument[idx] = undefined;
+                done();
+            };
         }
-        /*
-        proposal.argumentText(index, function(err, result) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            argument.text = bytesToStr(result);
-            done();
-        });
-        */
         proposal.argumentPosition(index, function(err, result) {
             if (err) {
                 console.error(err);
@@ -203,7 +206,7 @@ Proposals = {
         Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei(), gas:105000}, resultFn);
     },
     argue(address, position, content, resultFn) {
-        var gas = estimateArgumentGas(content.length, Proposals[address].argCount.get() > 1 || 0);
+        var gas = estimateArgumentGas(content.length, Proposals[address].argCount > 1 || 0);
         Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei(), gas:gas}, resultFn);
     },
     getMyVote(address, resultFn) {

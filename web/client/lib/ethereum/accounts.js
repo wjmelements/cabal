@@ -149,24 +149,12 @@ Accounts = {
     getProposal(index, resultFn) {
         if (accountRegistry) {
             if (index < Accounts.proposals.length) {
-                console.log(Accounts.proposals.length);
-                console.log(index);
-                console.log(Accounts.proposals[index]);
                 return resultFn(Accounts.proposals[index]);
             } else {
                 Accounts.onResize.push(()=> {
                     Accounts.getProposal(index, resultFn);
                 });
             }
-            /* XXX
-            return accountRegistry.allProposals(index, function(err, result) {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                resultFn(result);
-            });
-            */
             return;
         }
         onAccountRegistry.push(function() {
