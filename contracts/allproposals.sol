@@ -29,7 +29,7 @@ contract TokenRescue {
 interface AccountRegistryInterface {
     function canVoteOnProposal(address _voter, address _proposal) external view returns (bool);
 }
-contract Vote is ERC20,TokenRescue {
+contract Vote is ERC20, TokenRescue {
     uint256 supply = 0;
     AccountRegistryInterface public accountRegistry = AccountRegistryInterface(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
     address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
@@ -123,12 +123,12 @@ contract Vote is ERC20,TokenRescue {
         balances[owner] = 0;
         Transfer(owner, _newOwner, balance);
         owner = _newOwner;
-        Owner(owner);
+        Owner(_newOwner);
     }
     function migrateAccountRegistry(AccountRegistryInterface _newAccountRegistry)
     external onlyOwner {
         accountRegistry = _newAccountRegistry;
-        Registry(accountRegistry);
+        Registry(_newAcccountRegistry);
     }
 }
 interface ProposalInterface {
@@ -243,7 +243,7 @@ interface CabalInterface {
     function canonCount() external view returns (uint256);
     function proposalCount() external view returns (uint256);
 }
-contract AccountRegistry is AccountRegistryInterface,TokenRescue {
+contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     
     uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public proposalCensorshipFee = 50 finney;
