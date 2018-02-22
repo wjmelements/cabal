@@ -81,6 +81,7 @@ img.ltc {
 select {
   appearance:none;
   -webkit-appearance:none;
+  -moz-appearance:none;
   font-size:small;
   border-radius:1px;
   font-weight:bold;
