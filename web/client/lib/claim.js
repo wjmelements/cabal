@@ -9,6 +9,9 @@ function onPendingClaim(txhash) {
     var estimate = this.available.get();
     Transactions.awaitPendingTransaction(txhash, estimate, onClaimed.bind(this));
 }
+function onRegistrationChange() {
+    this.available.set(0);
+}
 Template.claim.onCreated(function() {
     this.available = new ReactiveVar();
     Accounts.availableFaucet(function(amount) {
@@ -26,6 +29,8 @@ Template.claim.onCreated(function() {
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
     this.txhash = new ReactiveVar();
+    this.onRegistrationChange = onRegistrationChange.bind(this);
+    Accounts.registrationSubscribe(this.onRegistrationChange);
 });
 Template.claim.onDestroyed(function() {
     Accounts.registrationUnsubscribe(this.onRegistrationChange);
@@ -56,6 +61,9 @@ Template.claim.helpers({
     },
     prefix() {
         return Net.prefix.get();
+    },
+    registering() {
+        return Accounts.registering.get();
     },
 });
 Template.claim.events({

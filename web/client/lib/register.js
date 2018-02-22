@@ -135,7 +135,7 @@ Template.register.events({
             Accounts.registered.set(registered);
             Accounts.canDeregister.set(!registered);
             Accounts.reportRegistrationChange();
-            Transactions.awaitPendingTransaction(txhash, 0, onRegistered.bind(this));
+            Transactions.awaitPendingTransaction(txhash, registered ? 4 : 0, onRegistered.bind(this));
         }.bind(Template.instance());
         if (Accounts.registered.get()) {
             Accounts.deregister(onPendingTx);

@@ -90,7 +90,7 @@ Accounts = {
     },
     register(resultFn) {
         if (accountRegistry) {
-            return accountRegistry.register({ value: 1E15 }, function(err, result) {
+            return accountRegistry.register({ value: 1E15, gasPrice:GasRender.gasPriceInWei() }, function(err, result) {
                 if (err) {
                     console.error(err);
                     return;

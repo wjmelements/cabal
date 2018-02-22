@@ -44,7 +44,7 @@
   {{else}}
     <div id="nux">
       <p class="pitch">
-        <strong>FinneyVote</strong> is a decentralized forum that rewards <b><i>persuasive discourse</i></b>
+        <strong>FinneyVote</strong> is a decentralized democratic forum that rewards <b><i>persuasive discourse</i></b>
       </p>
       <table>
         <td class="h100">
@@ -52,16 +52,16 @@
         </td>
         <div class="inf">
           <p>
-            Votes support representative arguments, called cases
+            Voters support representative arguments
           </p>
           <p>
             Casemakers earn additional influence per vote
           </p>
           <p>
-            FinneyVoters are certified by their fully-refundable 1-finney deposit
+            Voters are certified by their fully-refundable 1-finney deposit
           </p>
           <p>
-            Register to start voting
+            Register to claim 4 FV, plus 2 more every day, and start voting
           </p>
           {{>register}}{{>whitepaper}}
         </div>
@@ -83,7 +83,9 @@
       {{/if}}</a>
 </template>
 <template name="claim">
-  {{#if available}}<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" title="FinneyVoters can claim 2 FV per day, up to 4" class="btn h100 ap {{#unless claiming}}{{#if shouldClaim}} submit{{/if}}{{/unless}}{{#unless registered}} disabled{{/unless}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}+{{available}} FV{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>{{/if}}
+{{#unless registering}}{{#if available}}
+<a target="_blank" href="{{#if claiming}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" title="FinneyVoters can claim 2 FV per day, up to 4" class="btn h100 ap {{#unless claiming}}{{#if shouldClaim}} submit{{/if}}{{/unless}}{{#unless registered}} disabled{{/unless}}">{{#if claiming}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Claiming</p></div>{{else}}+{{available}} FV{{/if}}{{#if showCost}}<div class="cost">{{cost}}</div>{{/if}}</a>
+{{/if}}{{/unless}}
 </template>
 <template name="balance">
 <span class="done h100">{{balance}} FV</span>
