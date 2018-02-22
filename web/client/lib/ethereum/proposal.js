@@ -169,7 +169,7 @@ Proposals = {
     },
     refresh(address, onComplete) {
         Proposals.getArgumentCount(address, function(argumentCount){
-            var counter = new ReactiveVar(argumentCount - 1);
+            var counter = new ReactiveVar(argumentCount);
             function checkDone(counter) {
                 counter.set(counter.get() - 1);
                 if (counter.get() == 0) {
