@@ -107,8 +107,8 @@
 <template name="propose">
   <div class="dt cb spaced">
     <textarea id="propose" class="h100" placeholder="Propose something controversial
-{{#unless firefox}}Earn 0.5 FV per case{{/unless}}" title="Propose something controversial
-Earn 0.5 FV per case"></textarea>
+{{#unless firefox}}Earn 0.9 FV per case{{/unless}}" title="Propose something controversial
+Earn 0.9 FV per case"></textarea>
     <a class="btn submit h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{/if}}</a>
   </div>
   {{#each proposal in pendingProposals}}
@@ -200,8 +200,8 @@ Earn 0.5 FV per case"></textarea>
       {{#if position}}
         <div id="custom-arg" class="dt">
           <textarea class="{{position}} case h100" placeholder="Write a succinct case
-{{#unless firefox}}Earn 0.5 FV per vote{{/unless}}" title="Write a succinct case
-Earn 0.5 FV per vote"></textarea>
+{{#unless firefox}}Earn 0.9 FV per vote{{/unless}}" title="Write a succinct case
+Earn 0.9 FV per vote"></textarea>
           <a class="{{position}} btn ap h100{{#if cannotArgue}} disabled{{/if}}">{{positionName}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{else}}{{#if showInsufficient}}<div class="price disabled">FV</div>{{/if}}{{/if}}</a>
         </div>
         <div class="switch pos">
