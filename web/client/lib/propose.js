@@ -94,9 +94,6 @@ Template.propose.events({
     "mouseover .submit"(event) {
         var instance = Template.instance();
         var proposal = Template.instance().find('#propose').value;
-        if (instance.cannotPropose.get()) {
-            return;
-        }
         instance.showGas.set(true);
         if (instance.lastValue != proposal) {
             instance.lastValue = proposal;
