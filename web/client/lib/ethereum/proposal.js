@@ -108,7 +108,9 @@ Proposals = {
             }
             var casesKey = 'pos'+argument.position;
             var voteKey = 'votes'+argument.position;
-            if (!proposal[index]) {
+            if (!proposal[casesKey]
+             || !proposal[casesKey].find(function(arg){return index == arg;})
+              ) {
                 if (proposal[casesKey]) {
                     proposal[casesKey].push(index);
                 } else {
