@@ -91,36 +91,41 @@ Proposals = {
             Proposals.init(address);
         }
         var proposal = Proposals[address];
-        if (!refresh && proposal[index]) {
-            resultFn(proposal[index]);
+        if (proposal[index] && (refresh || proposal[index].pending)) {
+            if (proposal[index].pending) {
+                proposal[index].pending.push(resultFn);
+            } else {
+                resultFn(proposal[index]);
+            }
             return;
         }
-        var argument = {index:index};
+        var argument = {index:index,pending:[resultFn]};
+        proposal[index] = argument;
         var done = function() {
             if (!argument.source || !argument.position || typeof(argument.voteCount) == 'undefined' || !argument.text) {
+                // incomplete
                 return;
             }
-            if (refresh || !proposal[index]) {
-                var casesKey = 'pos'+argument.position;
-                var voteKey = 'votes'+argument.position;
-                if (!proposal[index]) {
-                    if (proposal[casesKey]) {
-                        proposal[casesKey].push(index);
-                    } else {
-                        proposal[casesKey] = [index];
-                    }
-                }
-                if (typeof proposal[voteKey] == "undefined") {
-                    proposal[voteKey] = argument.voteCount;
+            var casesKey = 'pos'+argument.position;
+            var voteKey = 'votes'+argument.position;
+            if (!proposal[index]) {
+                if (proposal[casesKey]) {
+                    proposal[casesKey].push(index);
                 } else {
-                    if (proposal[index]) {
-                        proposal[voteKey] -= proposal[index].voteCount;
-                    }
-                    proposal[voteKey] += argument.voteCount;
+                    proposal[casesKey] = [index];
                 }
-                proposal[index] = argument;
             }
-            resultFn(argument);
+            if (typeof proposal[voteKey] == "undefined") {
+                proposal[voteKey] = argument.voteCount;
+            } else {
+                if (proposal[index]) {
+                    proposal[voteKey] -= proposal[index].voteCount;
+                }
+                proposal[voteKey] += argument.voteCount;
+            }
+            while (argument.pending.length) {
+                argument.pending.pop()(argument);
+            }
         };
         if (index < proposal.cases.length) {
             argument.text = proposal.cases[index];
@@ -162,7 +167,7 @@ Proposals = {
             done();
         });
     },
-    prefetchArguments(address, onComplete) {
+    refresh(address, onComplete) {
         Proposals.getArgumentCount(address, function(argumentCount){
             var counter = new ReactiveVar(argumentCount - 1);
             function checkDone(counter) {
@@ -171,7 +176,7 @@ Proposals = {
                     onComplete();
                 }
             }
-            for (var i = 1; i < argumentCount; i++) {
+            for (var i = 0; i < argumentCount; i++) {
                 Proposals.getArgument(address, i, function(){checkDone(counter);}, true);
             }
         });

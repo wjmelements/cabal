@@ -3,7 +3,7 @@ function refresh(ignoreVote) {
     Proposals.getArgumentCount(address, function(argumentCount) {
         this.argumentCount.set(argumentCount - 1);
     }.bind(this));
-    Proposals.prefetchArguments(address, function() {
+    Proposals.refresh(address, function() {
         var proposal = Proposals[address];
         var total = 0;
         for (var i = 1; i < 5; i++) {

@@ -195,7 +195,6 @@ Accounts = {
             return;
         }
         Accounts.current(function(currentAccount) {
-            console.log(currentAccount);
             accountRegistry.availableFaucet(currentAccount, function(error, available) {
                 if (error) {
                     console.error(error);
@@ -228,7 +227,7 @@ Accounts = {
     },
     registrationUnsubscribe(changeFn) {
         if (!Accounts.onRegistrationChange) {
-            return;;
+            return;
         }
         Accounts.onRegistrationChange.filter(function(a){ return a != changeFn;});
     },
@@ -236,8 +235,8 @@ Accounts = {
         if (!Accounts.onRegistrationChange) {
             return;
         }
-        while(Accounts.onRegistrationChange.length) {
-            Accounts.onRegistrationChange.pop()();
+        for (var i = 0; i < Accounts.onRegistrationChange.length; i++) {
+            Accounts.onRegistrationChange[i]();
         }
     },
     

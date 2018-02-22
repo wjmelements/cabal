@@ -14,17 +14,21 @@ function onRegistrationChange() {
 }
 Template.claim.onCreated(function() {
     this.available = new ReactiveVar();
-    Accounts.availableFaucet(function(amount) {
-        this.available.set(amount / 10);
-        if (amount) {
-            Accounts.current(function(address) {
-                var txhash = localStorage.getItem('claim'+address);
-                if (txhash) {
-                    onPendingClaim.bind(this)(txhash);
-                }
-            }.bind(this));
-        }
-    }.bind(this));
+    if (Accounts.registering.get()) {
+        this.available.set(0);
+    } else {
+        Accounts.availableFaucet(function(amount) {
+            this.available.set(amount / 10);
+            if (amount) {
+                Accounts.current(function(address) {
+                    var txhash = localStorage.getItem('claim'+address);
+                    if (txhash) {
+                        onPendingClaim.bind(this)(txhash);
+                    }
+                }.bind(this));
+            }
+        }.bind(this));
+    }
     this.claiming = new ReactiveVar(false);
     this.cost = new ReactiveVar();
     this.showCost = new ReactiveVar(false);
