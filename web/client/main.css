@@ -215,7 +215,7 @@ a.btn {
 }
 .btn {
   display:inline-block;
-  padding:0 1em;
+  padding:0 0.8em;
   height:3em;
   border-width:thin medium medium thin;
   border-style:outset;
@@ -226,7 +226,7 @@ a.btn {
   border-color:#33FF33;
 }
 .done {
-  padding:0 1em;
+  padding:0 0.8em;
   height:3em;
   border-width:medium;
   border-style:solid;
