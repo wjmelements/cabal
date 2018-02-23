@@ -231,11 +231,11 @@ Proposals = {
         });
     },
     vote(address, argumentIndex, resultFn) {
-        Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei(), gas:105000}, resultFn);
+        Proposals[address].vote(argumentIndex, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
     },
     argue(address, position, content, resultFn) {
-        var gas = estimateArgumentGas(content.length, Proposals[address].argCount > 1 || 0);
-        Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei(), gas:gas}, resultFn);
+        //var gas = estimateArgumentGas(content.length, Proposals[address].argCount > 1 || 0);
+        Proposals[address].argue(position, content, {gasPrice:GasRender.gasPriceInWei()}, resultFn);
     },
     getMyVote(address, resultFn) {
         Accounts.current(function(account) {

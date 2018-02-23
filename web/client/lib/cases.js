@@ -275,7 +275,7 @@ Template.cases.events({
         var cases = instance.cases.get();
         var content = instance.find('#custom-arg textarea').value;
         var hasCases = cases && cases.length > 0 || 0;
-        instance.cost.set(GasRender.toString(Proposals.estimateArgGas(content.length, hasCases)));
+        // TODO instance.cost.set(GasRender.toString(Proposals.estimateArgGas(content.length, hasCases)));
         Proposals[instance.address.get()].argue.estimateGas(instance.pos.get(), content, function (error, gas) {
             if (error) {
                 console.error(error);
