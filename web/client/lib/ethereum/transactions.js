@@ -6,7 +6,7 @@ Transactions = {
             change:expectedChange,
         });
         Transactions.pending.set(pendingTxs);
-        Balance.set(Balance.get() + expectedChange);
+        Balance.set(parseFloat((Balance.get() + expectedChange).toFixed()));
         Balance.onChange();
         Transactions.await(txhash, onDone);
     },
