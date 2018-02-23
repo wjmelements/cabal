@@ -176,6 +176,7 @@ ul.pos,ul.cases {
 h2.prop {
   margin-bottom:0;
   vertical-align:middle;
+  display:table-cell;
 }
 #nux {
   padding:0.5em;
@@ -214,7 +215,8 @@ a.btn {
   float:left;
 }
 .btn {
-  display:inline-block;
+  display:table-cell;
+  vertical-align:middle;
   padding:0 0.8em;
   height:2.6em;
   border-width:thin medium medium thin;
