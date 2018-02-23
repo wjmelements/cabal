@@ -112,8 +112,8 @@ Proposals = {
             Proposals.init(address);
         }
         var proposal = Proposals[address];
-        if (proposal[index] && (refresh || proposal[index].pending)) {
-            if (proposal[index].pending) {
+        if (proposal[index] && (!refresh || proposal[index].pending.length)) {
+            if (proposal[index].pending.length) {
                 proposal[index].pending.push(resultFn);
             } else {
                 resultFn(proposal[index]);
