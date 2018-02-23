@@ -121,6 +121,7 @@ Proposals = {
             return;
         }
         var argument = {index:index,pending:[resultFn]};
+        var priorVoteCount = proposal[index] && proposal[index].voteCount || 0;
         proposal[index] = argument;
         var done = function() {
             if (!argument.source || !argument.position || typeof(argument.voteCount) == 'undefined' || !argument.text) {
@@ -142,7 +143,7 @@ Proposals = {
                 proposal[voteKey] = argument.voteCount;
             } else {
                 if (proposal[index]) {
-                    proposal[voteKey] -= proposal[index].voteCount;
+                    proposal[voteKey] -= priorVoteCount;
                 }
                 proposal[voteKey] += argument.voteCount;
             }
