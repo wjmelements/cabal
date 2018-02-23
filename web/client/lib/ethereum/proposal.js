@@ -29,8 +29,29 @@ function bytesToStr(bytes) {
 }
 // currently accurate, but must be updated with each deployment of the contract
 function estimateArgumentGas(len, hasCases) {
-    var gas = 134495 + len * 64 + + 20526 * Math.ceil(len/32) + 20421 * (len >= 32) + 3 * Math.ceil((len - 28)/32) + hasCases * -15238;
+    var gas = 130560 + len * 72 + hasCases * -15238 + Math.ceil(len/32) * 140;
     console.log('Estimating('+len+')> '+ gas);
+    // TODO determine the pattern
+    //  5-> 6
+    // 12->13  +7  2
+    // 20->21  +8
+    // 28->29  +8
+    // 35->36  +7  5
+    // 43->44  +8
+    // 51->52  +8
+    // 59->60  +8
+    // 66->67  +7  9
+    // 74->75  +8
+    // 82->83  +8
+    // 90->91  +8
+    // 97->98  +7 13
+    //105->106 +8
+    //113->114 +8
+    //120->121 +7 16
+    //128->129 +8
+    //135->136 +7 18
+    //143->144 +8   
+    //151->152 +8
     return gas;
 }
 window.addEventListener('load', function() {
