@@ -193,7 +193,7 @@ textarea#propose {
   padding:0.8em;
   border-radius:1px;
   min-width:19em;
-  min-height:3em;
+  min-height:2.6em;
   border-style:inset;
   border-width:2px;
   font-size:small;
@@ -216,7 +216,7 @@ a.btn {
 .btn {
   display:inline-block;
   padding:0 0.8em;
-  height:3em;
+  height:2.6em;
   border-width:thin medium medium thin;
   border-style:outset;
   border-radius:1px;
@@ -227,7 +227,7 @@ a.btn {
 }
 .done {
   padding:0 0.8em;
-  height:3em;
+  height:2.6em;
   border-width:medium;
   border-style:solid;
   border-radius:1px;
