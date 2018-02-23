@@ -67,7 +67,7 @@ window.addEventListener('load', function() {
             proposal.cases = [];
             var filter = web3.eth.filter({
                 fromBlock:blockNumber || 0,
-                to:'latest',
+                to:'pending',
                 address:address,
                 topics:[web3.sha3('Case(bytes)')]
             });

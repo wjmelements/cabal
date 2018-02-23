@@ -7,7 +7,7 @@ window.addEventListener('load', function() {
             accountRegistry = web3.eth.contract(accountRegistryABI).at(address);
             Accounts.proposalFilter = web3.eth.filter({
                 fromBlock:0,
-                to:'latest',
+                to:'pending',
                 address:accountRegistry.address.toLowerCase(),// TODO no lower case
                 topics:[web3.sha3('Proposal(address)')]
             });
@@ -19,6 +19,11 @@ window.addEventListener('load', function() {
                 console.log(result);
                 // assumption: we get these in order
                 var proposalAddress = '0x'+result.topics[1].substring(26);
+                if (Proposals[proposalAddress]) {
+                    console.error('TODO determine how this happens');
+                    // somehow, I get this callback twice for new proposals when supplying to:[currentBlock+3000]
+                    return;
+                }
                 Accounts.proposals.push(proposalAddress);
                 Proposals.init(proposalAddress, result.blockNumber);
                 Accounts.resize();
