@@ -27,6 +27,11 @@ window.addEventListener('load', function() {
                 Accounts.proposals.push(proposalAddress);
                 Proposals.init(proposalAddress, result.blockNumber);
                 Accounts.resize();
+                if (Proposals[result.transactionHash]) {
+                    while (Proposals[result.transactionHash].length) {
+                        Proposals[result.transactionHash].pop()();
+                    }
+                }
             });
             while (onAccountRegistry.length) {
                 onAccountRegistry.pop()();

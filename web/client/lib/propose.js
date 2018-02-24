@@ -4,29 +4,20 @@ function onChange(target) {
     }
 }
 function awaitProposal(txhash) {
-    web3.eth.getTransaction(txhash, function (error, result) {
-        if (error) {
-            console.error(error);
-            return;
-        }
-        if (result.blockNumber) {
-            var pendingProposals = this.pendingProposals.get().slice(0);
-            pendingProposals = pendingProposals.filter((proposal)=>{
-                return proposal.txhash != txhash;
-            });
-            this.pendingProposals.set(pendingProposals);
-            var priorProposals = localStorage.getItem('pendingProposals');
-            if (priorProposals) {
-                var pendingProposals = JSON.parse(priorProposals);
-                if (pendingProposals) {
-                    pendingProposals = pendingProposals.filter(function(a){return a.txhash != txhash;});
-                    localStorage.setItem('pendingProposals', pendingProposals);
-                }
+    Proposals.await(txhash, function() {
+        var pendingProposals = this.pendingProposals.get().slice(0);
+        pendingProposals = pendingProposals.filter((proposal)=>{
+            return proposal.txhash != txhash;
+        });
+        this.pendingProposals.set(pendingProposals);
+        var priorProposals = localStorage.getItem('pendingProposals');
+        if (priorProposals) {
+            var pendingProposals = JSON.parse(priorProposals);
+            if (pendingProposals) {
+                pendingProposals = pendingProposals.filter(function(a){return a.txhash != txhash;});
+                localStorage.setItem('pendingProposals', pendingProposals);
             }
-            Accounts.resize();
-            return;
         }
-        setTimeout(function(){awaitProposal.bind(this)(txhash);}.bind(this),3000);
     }.bind(this));
 }
 Template.propose.onCreated(function() {

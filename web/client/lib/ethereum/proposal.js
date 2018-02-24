@@ -91,6 +91,16 @@ window.addEventListener('load', function() {
 });
 
 Proposals = {
+    init(address, blockNumber) {
+        Web3Loader.onWeb3(function(){Proposals.init(address, blockNumber);});
+    },
+    await(txhash, callback) {
+        if (Proposals[txhash]) {
+            Proposals[txhash].push(callback);
+        } else {
+            Proposals[txhash] = [callback];
+        }
+    },
     getArgumentCount(address, resultFn) {
         if (!Proposals[address]) {
             console.error('I hope this is dead code');
