@@ -10,7 +10,7 @@ function onResize(count) {
     }
     // this hack resizes the feed
     this.noRender.set(true);
-    window.setTimeout(function() {this.noRender.set(false)}.bind(this), 1);
+    window.setTimeout(function() {this.noRender.set(false)}.bind(this), Browser.isFirefox() ? 35 : 1);
 }
 Template.feed.onCreated(function() {
     this.lastIndex = new ReactiveVar(lastSize);
