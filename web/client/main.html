@@ -70,7 +70,7 @@
   {{/if}}
 </template>
 <template name="register">
-    <a target="_blank" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap h100{{#unless registering}} submit{{#unless canDeregister}} disabled{{/unless}}{{/unless}}">
+    <a target="_blank" title="{{#if registered}}You can deregister 1 week after you last claimed FV{{/if}}" href="{{#if registering}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class="btn ap h100{{#unless registering}} submit{{#unless canDeregister}} disabled{{/unless}}{{/unless}}">
       {{#if registering}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">
         {{#if registered}}Registering{{else}}Deregistering{{/if}}
       </p></div>{{else}}
