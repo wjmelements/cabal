@@ -125,7 +125,10 @@ select {
 }
 .pos3 {
   background-color:#FCFF8B;
-  font-family:sans-serif;
+}
+.pwarning {
+  margin:0.5em 1em;
+  font-family:serif;
 }
 .error {
   margin-top:0;

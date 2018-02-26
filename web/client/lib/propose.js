@@ -1,6 +1,9 @@
 function onChange(target) {
     if (target) {
-        this.cannotPropose.set(!target.value);
+        var str = target.value;
+        this.cannotPropose.set(!str);
+        Case.setWarnings(this.warnings, str);
+        Case.setHeight(target, this.find('.btn'));
     }
 }
 function awaitProposal(txhash) {
@@ -21,6 +24,7 @@ function awaitProposal(txhash) {
     }.bind(this));
 }
 Template.propose.onCreated(function() {
+    this.warnings = new ReactiveVar();
     this.gasCost = new ReactiveVar();
     this.showGas = new ReactiveVar(false);
     this.pendingProposals = new ReactiveVar([]);
@@ -60,7 +64,7 @@ Template.propose.onCreated(function() {
     this.lastValue = undefined;
 });
 Template.propose.events({
-    "click .submit"(event) {
+    "click .btn"(event) {
         var proposal = Template.instance().find('#propose').value;
         if (!proposal) {
             return;
@@ -82,7 +86,7 @@ Template.propose.events({
             localStorage.setItem('pendingProposals', JSON.stringify(pendingProposals))
         }.bind(Template.instance()));
     },
-    "mouseover .submit"(event) {
+    "mouseover .btn"(event) {
         var instance = Template.instance();
         var proposal = Template.instance().find('#propose').value;
         instance.showGas.set(true);
@@ -106,7 +110,7 @@ Template.propose.events({
             instance.lastPolicy = GasRender.policy.get();
         }
     },
-    "mouseout .submit"(event) {
+    "mouseout .btn"(event) {
         Template.instance().showGas.set(false);
     },
     "change textarea.case"(event) {
@@ -120,6 +124,9 @@ Template.propose.onRendered(function() {
     onChange.bind(this)(this.find('textarea'));
 });
 Template.propose.helpers({
+    warnings() {
+        return Template.instance().warnings.get();
+    },
     gasCost() {
         return Template.instance().gasCost.get();
     },

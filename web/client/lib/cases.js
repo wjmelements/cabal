@@ -10,6 +10,7 @@ function onPendingVote(txhash, choice) {
     }.bind(this));
 }
 Template.cases.onCreated(function() {
+    this.warnings = new ReactiveVar();
     this.position = this.data.position;
     this.address = this.data.address;
     this.choice = this.data.choice;
@@ -70,6 +71,9 @@ function positionToName(position) {
     }
 }
 Template.cases.helpers({
+    warnings() {
+        return Template.instance().warnings.get();
+    },
     cases() {
         return Template.instance().cases.get();
     },
@@ -141,9 +145,11 @@ Template.cases.helpers({
     },
 });
 function onChange(target) {
+    console.log('onChange');
     this.cannotVote.set(Balance.get() < 1);
     if (target) {
         this.cannotArgue.set(!target.value || Balance.get() < 1);
+        Case.setWarnings(this.warnings, target.value);
     }
 }
 function checkArgument(address, i, argumentCount, customCase) {
