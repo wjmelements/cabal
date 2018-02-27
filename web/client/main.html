@@ -107,20 +107,24 @@
 </select></span>
 </template>
 <template name="propose">
-  <div class="dt cb spaced">
-    <textarea id="propose" class="h100" placeholder="Propose something controversial
-{{#unless firefox}}Earn 0.9 FV per case{{/unless}}" title="Propose something controversial
-Earn 0.9 FV per case"></textarea>
-    <a class="btn {{#unless warnings}}submit {{/unless}}h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{#if cannotPropose}}<div class="price disabled">Empty</div>{{/if}}{{/if}}</a>
-    <div class="h100">
+  <div class="cb">
+    <div class="dt fl spaced">
+      <textarea id="propose" class="h100" placeholder="Propose something controversial
+  {{#unless firefox}}Earn 0.9 FV per case{{/unless}}" title="Propose something controversial
+  Earn 0.9 FV per case"></textarea>
+      <a class="btn {{#unless warnings}}submit {{/unless}}h100 ap{{#if cannotPropose}} disabled{{/if}}">Propose{{#if showGas}}<div class="cost">{{gasCost}}</div>{{#if cannotPropose}}<div class="price disabled">Empty</div>{{/if}}{{/if}}</a>
+    </div>
+    <div class="fl spaced">
       {{#each warning in warnings}}
         <pre class="pwarning">{{warning}}</pre>
       {{/each}}
     </div>
   </div>
-  {{#each proposal in pendingProposals}}
-    {{> pendingproposal data=proposal}}
-  {{/each}}
+  <div class="cb">
+    {{#each proposal in pendingProposals}}
+      {{> pendingproposal data=proposal}}
+    {{/each}}
+  </div>
 </template>
 <template name="pendingproposal">
   <div class="dt bs spaced">
@@ -135,9 +139,11 @@ Earn 0.9 FV per case"></textarea>
   </div>
 </template>
 <template name="feed">
-  {{#unless noRender}}
-    {{> feeditem index=lastIndex}}
-  {{/unless}}
+  <div class="cb">
+    {{#unless noRender}}
+      {{> feeditem index=lastIndex}}
+    {{/unless}}
+  </div>
 </template>
 <template name="loading">
   <div class="dt bs5">
