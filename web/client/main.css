@@ -130,6 +130,12 @@ select {
   margin:0.5em 1em;
   font-family:serif;
 }
+li.pos3,pre.pos3,.btn.pos3 {
+  font-family:sans-serif;
+}
+li.filter.pos3 {
+  font-family:serif;
+}
 .error {
   margin-top:0;
   background-color:#FFDBDB;
