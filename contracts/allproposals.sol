@@ -276,6 +276,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         accounts[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership = BOARD;
         accounts[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership = BOARD;
         accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
+        accounts[0xA4caDe6ecbed8f75F6fD50B8be92feb144400CC4].membership = BOARD;
     }
 
     event Voter(address indexed voter);
@@ -414,7 +415,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
             return;
         }
         address appt = candidate.appointer;
-        if (appt == 0 || accounts[appt].membership & BOARD == 0) {
+        if (accounts[appt].membership & BOARD == 0) {
             candidate.appointer = msg.sender;
             Nominated(_board, _vouch);
             return;
@@ -434,7 +435,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
             return;
         }
         address dncr = board.denouncer;
-        if (dncr == 0 || accounts[dncr].membership & BOARD == 0) {
+        if (accounts[dncr].membership & BOARD == 0) {
             board.denouncer = msg.sender;
             Denounced(_board, _reason);
             return;
