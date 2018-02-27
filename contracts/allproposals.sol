@@ -31,7 +31,7 @@ interface AccountRegistryInterface {
 }
 contract Vote is ERC20, TokenRescue {
     uint256 supply = 0;
-    AccountRegistryInterface public accountRegistry = AccountRegistryInterface(0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
+    AccountRegistryInterface public accountRegistry = AccountRegistryInterface(0x000000002bb43c83eCe652d161ad0fa862129A2C);
     address public owner = 0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1;
 
     uint8 public constant decimals = 1;
@@ -155,7 +155,7 @@ contract ProperProposal is ProposalInterface, TokenRescue {
     }
     Argument[] public arguments;
     mapping (address => uint256) public votes;
-    Vote public constant voteToken = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
+    Vote public constant voteToken = Vote(0x000000002647e16d9BaB9e46604D75591D289277);
 
     function getPosition(address _user)
     external view
@@ -223,19 +223,9 @@ contract ProperProposal is ProposalInterface, TokenRescue {
 
     function init(address _source, bytes _resolution)
     external {
-        assert(msg.sender == 0x0000003B26D088fC73341DEf4FF38d5B8d6a7874);
+        assert(msg.sender == 0x000000002bb43c83eCe652d161ad0fa862129A2C);
         arguments.push(Argument(_source, 0/*SKIP*/, 0));
         Case(_resolution);
-    }
-}
-contract ProxyProposal {
-    function () external {
-        // return lib.delegatecall(msg.data);
-        assembly {
-            calldatacopy(0, 0, calldatasize)
-            let _retVal := delegatecall(sub(gas,740), 0x0000005E1CBE78009143B44D717423cb01a002B7, 0, calldatasize, 0, 32)
-            switch _retVal case 0 { revert(0, returndatasize) } default { return(0, returndatasize) }
-        }
     }
 }
 interface CabalInterface {
@@ -248,10 +238,10 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     uint256 constant public registrationDeposit = 1 finney;
     uint256 constant public proposalCensorshipFee = 50 finney;
 
-    // this is the first deterministic contract address for 0x315017F58EAaFC696bcF286928E08cbf15C00fDc
-    address constant public burn = 0x000000569972310C6de3A8a6cB8241aFfC853D0d;
+    // this is the first deterministic contract address for 0x24AE90765668938351075fB450892800d9A52E39
+    address constant public burn = 0x000000003Ffc15cd9eA076d7ec40B8f516367Ca1;
 
-    Vote public constant token = Vote(0x0000001bf0CDA9c6f6c4644cB97174C427723894);
+    Vote public constant token = Vote(0x000000002647e16d9BaB9e46604D75591D289277);
 
     /* uint8 membership bitmap:
      * 0 - fraud
@@ -471,7 +461,13 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     external
     returns (ProposalInterface)
     {
-        ProperProposal proposal = ProperProposal(new ProxyProposal());
+        ProperProposal proposal;
+        bytes memory clone = hex"600034603b57602f80600f833981f3600036818037808036816b5fbe2cc9b1b684ec445caf176042348e5af415602c573d81803e3d81f35b80fd";
+        assembly {
+            let len := mload(clone)
+            let data := add(clone, 0x20)
+            proposal := create(0, data, len)
+        }
         proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
         Proposal(proposal);
