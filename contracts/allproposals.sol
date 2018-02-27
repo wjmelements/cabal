@@ -479,8 +479,8 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         uint8 membership = accounts[_proposal].membership;
         require(membership & PROPOSAL == 0);
-        Proposal(_proposal);
         accounts[_proposal].membership |= PROPOSAL;
+        Proposal(_proposal);
     }
 
     // To submit an outside proposal contract, you must:
