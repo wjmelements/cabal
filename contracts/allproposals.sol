@@ -229,9 +229,8 @@ contract ProperProposal is ProposalInterface, TokenRescue {
     }
 }
 interface CabalInterface {
-    function memberCount() external view returns (uint256);
+    // TBD
     function canonCount() external view returns (uint256);
-    function proposalCount() external view returns (uint256);
 }
 contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     
@@ -269,22 +268,25 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     }
     mapping (address => Account) accounts;
 
-
     function AccountRegistry()
     public
     {
         accounts[0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1].membership = BOARD;
+        Board(0x4a6f6B9fF1fc974096f9063a45Fd12bD5B928AD1);
         accounts[0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7].membership = BOARD;
+        Board(0x90Fa310397149A7a9058Ae2d56e66e707B12D3A7);
         accounts[0x424a6e871E8cea93791253B47291193637D6966a].membership = BOARD;
+        Board(0x424a6e871E8cea93791253B47291193637D6966a);
         accounts[0xA4caDe6ecbed8f75F6fD50B8be92feb144400CC4].membership = BOARD;
+        Board(0xA4caDe6ecbed8f75F6fD50B8be92feb144400CC4);
     }
 
     event Voter(address indexed voter);
     event Deregistered(address indexed voter);
     event Nominated(address indexed board, string endorsement);
-    event Board(address indexed board, string endorsement);
+    event Board(address indexed board);
     event Denounced(address indexed board, string reason);
-    event Revoked(address indexed board, string reason);
+    event Revoked(address indexed board);
     event Proposal(ProposalInterface indexed proposal);
     event Cabal(CabalInterface indexed cabal);
     event BannedProposal(ProposalInterface indexed proposal, string reason);
@@ -423,8 +425,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         if (appt == msg.sender) {
             return;
         }
+        Nominated(_board, _vouch);
         candidate.membership |= BOARD;
-        Board(_board, _vouch);
+        Board(_board);
     }
 
     function denounce(address _board, string _reason)
@@ -443,8 +446,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         if (dncr == msg.sender) {
             return;
         }
+        Denounced(_board, _reason);
         board.membership ^= BOARD;
-        Revoked(_board, _reason);
+        Revoked(_board);
     }
 
     function proposeProper(bytes _resolution)
