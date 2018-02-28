@@ -39,7 +39,7 @@ Template.propose.onCreated(function() {
                     console.error(error);
                     return;
                 }
-                if (result.blockNumber) {
+                if (result && result.blockNumber) {
                     var priorProposals = localStorage.getItem('pendingProposals');
                     if (priorProposals) {
                         var pendingProposals = JSON.parse(priorProposals);
@@ -74,6 +74,7 @@ Template.propose.events({
                 console.error(error);
                 return;
             }
+            Template.instance().find('#propose').value = '';
             console.log(txhash);
             console.log(proposal);
             var pendingProposals = this.pendingProposals.get().slice(0);
