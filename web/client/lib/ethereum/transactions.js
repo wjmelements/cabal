@@ -16,7 +16,7 @@ Transactions = {
                 console.error(error);
                 return;
             }
-            if (result.blockNumber) {
+            if (result && result.blockNumber) {
                 onDone();
             } else {
                 window.setTimeout(()=>{Transactions.await(txhash, onDone);}, 3000);

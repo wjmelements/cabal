@@ -50,7 +50,7 @@ function init() {
                     console.error(error);
                     return;
                 }
-                if (!result.blockNumber) {
+                if (!result || !result.blockNumber) {
                     this.txhash.set(txhash);
                     if (!Accounts.registering.get()) {
                         Accounts.registering.set(true);
