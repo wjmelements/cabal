@@ -525,7 +525,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         Account storage account = accounts[_proposal];
         require(account.membership & PROPOSAL == PROPOSAL);
         account.membership ^= (FRAUD | PROPOSAL);
-        burn.transfer(msg.value);
+        burn.transfer(proposalCensorshipFee);
         BannedProposal(_proposal, _reason);
     }
 
