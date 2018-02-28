@@ -103,6 +103,7 @@ select {
 .switch {
   display:table;
   margin-right:0;
+  margin-top:-1px;
 }
 .disabled {
   border-color:#FDB8B8;
@@ -162,11 +163,10 @@ div.case.voted {
 }
 li.case {
   list-style: none;
-  margin-left:0.35em;
+  margin-left:0;
 }
 .case pre {
-  border-style: solid;
-  border-width: thin;
+  border-width: 0;
   border-radius: 1px;
   padding: 0.8em;
   margin:0.1em;
@@ -228,7 +228,7 @@ a.btn {
   vertical-align:middle;
   padding:0 0.8em;
   height:2.6em;
-  border-width:thin medium medium thin;
+  border-width:1px 1.5px 1.5px 1px;
   border-style:outset;
   border-radius:1px;
   cursor:pointer;

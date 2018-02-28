@@ -184,14 +184,14 @@ Earn 0.9 FV per case"></textarea>
   <ul class="pos">
     <div class="ltr">
       <li class="pos1">Approve</li>
+      <li class="pos2">Reject</li>
       <li class="pos3">Amend</li>
       <li class="pos4">LOL</li>
-      <li class="pos2">Reject</li>
       <li id="pos0" class="pos0">Skip</li>
     </div>
   </ul>
   <div class="instr">
-    Determine your position on the topic.
+    Determine your position on the topic
   </div>
 </template>
 <template name="cases">
@@ -205,7 +205,7 @@ Earn 0.9 FV per case"></textarea>
   <h2 class="prop inline">{{proposal}}</h2>
   {{#if hasChoice}}
     <li class="case dt bs">
-      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#if cannotVote}} disabled{{/if}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{else}}{{#if showInsufficient}}<div class="price disabled">FV</div>{{/if}}{{/if}}</a>
+      <p class="h100">You chose</p><pre id="arg{{choice.index}}" class="pos{{choice.position}} h100">{{choice.text}}</pre><a target="_blank" href="{{#if voting}}https://{{prefix}}etherscan.io/tx/{{txhash}}{{/if}}" class='pos{{choice.position}} ap vote h100 btn{{#unless voting}}{{#if cannotVote}} disabled{{/if}}{{/unless}}'>{{#if voting}}<div class="dt bs"><div class="h100"><div class="loader"></div></div><p class="h100">Voting</p></div>{{else}}Vote{{/if}}{{#if showCost}}<div class="price">FV</div><div class="cost">{{cost}}</div>{{else}}{{#if showInsufficient}}<div class="price disabled">FV</div>{{/if}}{{/if}}</a>
       <a class="btn reset h100">Reset</a>
     </li>
   {{else}}
@@ -239,7 +239,7 @@ Earn 0.9 FV per vote"></textarea>
     <ul class="cases">
       <div class="ltr">
         {{#each case in cases}}
-          <li class="case dt bs5">
+          <li class="case dt bs">
             <p class="h100">{{case.voteCount}}</p><pre id="arg{{case.index}}" class="pos{{case.position}} h100">{{case.text}}</pre>
           </li>
         {{/each}}
