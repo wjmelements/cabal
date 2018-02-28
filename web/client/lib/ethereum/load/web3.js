@@ -39,7 +39,7 @@ Net.refresh = () => {
         switch (netId) {
             case '1':
                 Net.prefix.set('');
-                Net.unsupportedNetwork.set(true);
+                Net.unsupportedNetwork.set(false);
                 break;
             case '3':
                 Net.prefix.set('ropsten.');

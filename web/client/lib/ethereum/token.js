@@ -5,6 +5,7 @@ Token = {
         switch(Net.id.get()) {
             default:
                 console.log("Unsupported network: "+Net.id.get());
+            case "1":
             case "4":
                 return "0x000000002647e16d9BaB9e46604D75591D289277";
         }

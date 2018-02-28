@@ -88,8 +88,8 @@ Accounts = {
         switch (Net.id.get() || "4") {
         default:
             console.error("No known AccountRegistry on this network:" + Net.id.get());
+        case "1":
         case "4":
-            console.log("Using Rinkeby");
             return resultFn("0x000000002bb43c83eCe652d161ad0fa862129A2C");
         }
     },
