@@ -487,8 +487,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     external {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         uint8 membership = accounts[_proposal].membership;
-        require(membership & PROPOSAL == 0);
-        accounts[_proposal].membership |= PROPOSAL;
+        // prevent board members from unilaterally making themselves proposals
+        require(membership == 0);
+        accounts[_proposal].membership = PROPOSAL;
         Proposal(_proposal);
     }
 
