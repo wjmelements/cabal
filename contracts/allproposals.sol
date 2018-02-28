@@ -149,7 +149,7 @@ interface ProposalInterface {
     // utf8 string
     // swarm hash
     // ipfs hash
-    // and ohers tbd
+    // and others tbd
     event Case(bytes content);
 }
 contract ProperProposal is ProposalInterface, TokenRescue {
