@@ -258,7 +258,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
      * 7 - board
      */
     uint8 constant UNCONTACTED = 0;
-    uint8 constant FRAUD = 1;
+    uint8 constant PROPOSER = 1;
     uint8 constant VOTER = 2;
     uint8 constant PENDING_PROPOSAL = 4;
     uint8 constant PROPOSAL = 8;
@@ -268,8 +268,10 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     struct Account {
         uint256 lastAccess;
         uint8 membership;
-        address appointer;
-        address denouncer;
+        address appointer;//nominated this account for BOARD
+        address denouncer;//denounced this BOARD account
+        address voucher;//nominated this account for PROPOSER
+        address devoucher;//denounced this account for PROPOSER
     }
     mapping (address => Account) accounts;
 
@@ -295,6 +297,10 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     event Proposal(ProposalInterface indexed proposal);
     event Cabal(CabalInterface indexed cabal);
     event BannedProposal(ProposalInterface indexed proposal, string reason);
+    event Vouch(address indexed proposer, string vouch);
+    event Proposer(address indexed proposer);
+    event Devouch(address indexed proposer, string vouch);
+    event Shutdown(address indexed proposer);
 
     // To register a Cabal, you must
     // - implement CabalInterface
@@ -392,13 +398,6 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         return accounts[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
     }
 
-    function isFraud(address _account)
-    external view
-    returns (bool)
-    {
-        return accounts[_account].membership & FRAUD == FRAUD;
-    }
-
     function isPendingCabal(address _account)
     external view
     returns (bool)
@@ -456,6 +455,48 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         Revoked(_board);
     }
 
+    function vouchProposer(address _proposer, string _vouch)
+    external {
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage candidate = accounts[_proposer];
+        if (candidate.membership & PROPOSER == PROPOSER) {
+            return;
+        }
+        address appt = candidate.voucher;
+        if (accounts[appt].membership & BOARD == 0) {
+            candidate.voucher = msg.sender;
+            Vouch(_proposer, _vouch);
+            return;
+        }
+        if (appt == msg.sender) {
+            return;
+        }
+        Vouch(_proposer, _vouch);
+        candidate.membership |= PROPOSER;
+        Proposer(_proposer);
+    }
+
+    function devouchProposer(address _proposer, string _devouch)
+    external {
+        require(accounts[msg.sender].membership & BOARD == BOARD);
+        Account storage candidate = accounts[_proposer];
+        if (candidate.membership & PROPOSER == 0) {
+            return;
+        }
+        address appt = candidate.devoucher;
+        if (accounts[appt].membership & BOARD == 0) {
+            candidate.devoucher = msg.sender;
+            Devouch(_proposer, _devouch);
+            return;
+        }
+        if (appt == msg.sender) {
+            return;
+        }
+        Devouch(_proposer, _devouch);
+        candidate.membership &= ~PROPOSER;
+        Shutdown(_proposer);
+    }
+
     function proposeProper(bytes _resolution)
     external
     returns (ProposalInterface)
@@ -485,9 +526,8 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function sudoPropose(ProposalInterface _proposal)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & PROPOSER == PROPOSER);
         uint8 membership = accounts[_proposal].membership;
-        // prevent board members from unilaterally making themselves proposals
         require(membership == 0);
         accounts[_proposal].membership = PROPOSAL;
         Proposal(_proposal);
@@ -525,7 +565,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         Account storage account = accounts[_proposal];
         require(account.membership & PROPOSAL == PROPOSAL);
-        account.membership ^= (FRAUD | PROPOSAL);
+        account.membership &= ~PROPOSAL;
         burn.transfer(proposalCensorshipFee);
         BannedProposal(_proposal, _reason);
     }
@@ -537,7 +577,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         require(accounts[msg.sender].membership & BOARD == BOARD);
         Account storage account = accounts[_proposal];
         require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
-        account.membership ^= (FRAUD | PENDING_PROPOSAL);
+        account.membership &= PENDING_PROPOSAL;
     }
 
     // this code lives here instead of in the token so that it can be upgraded with account registry migration
