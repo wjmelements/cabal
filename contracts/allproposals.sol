@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.20;// blaze it
 
 interface ERC20 {
     function totalSupply() external constant returns (uint supply);
@@ -145,6 +145,11 @@ interface ProposalInterface {
     function getPosition(address _user) external view returns (uint8);
     function argumentCount() external view returns (uint256);
     function vote(uint256 _argumentId) external;
+    // bytes could be:
+    // utf8 string
+    // swarm hash
+    // ipfs hash
+    // and ohers tbd
     event Case(bytes content);
 }
 contract ProperProposal is ProposalInterface, TokenRescue {
