@@ -7,7 +7,7 @@ function rewatch() {
     }
     Accounts.proposalFilter = web3.eth.filter({
         fromBlock:Net.firstProposalBlock.get(),
-        toBlock:'latest',
+        to:'pending',
         address:accountRegistry.address.toLowerCase(),// TODO no lower case
         topics:[web3.sha3('Proposal(address)')]
     });

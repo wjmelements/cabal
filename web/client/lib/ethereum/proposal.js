@@ -153,6 +153,35 @@ Proposals = {
                 // incomplete
                 return;
             }
+            while (argument.pending.length) {
+                argument.pending.pop()(argument);
+            }
+        };
+        if (index < proposal.cases.length) {
+            argument.text = proposal.cases[index];
+        } else {
+            var idx = 'ontext'+index;
+            proposal[idx] = function(text) {
+                argument.text = text;
+                argument[idx] = undefined;
+                done();
+            };
+        }
+        proposal.arguments(index, function(err, result) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            argument.source = result[0];
+            argument.position = result[1];
+            var vote256 = result[2];
+            var voteCount = vote256.c[0];
+            if (vote256.c[5]) {
+                // FIXME support uint256
+                voteCount = 7913129639936 - vote256.c[5];
+            }
+            argument.voteCount = voteCount;
+
             var casesKey = 'pos'+argument.position;
             var voteKey = 'votes'+argument.position;
             if (!proposal[casesKey]
@@ -172,47 +201,6 @@ Proposals = {
                 }
                 proposal[voteKey] += argument.voteCount;
             }
-            while (argument.pending.length) {
-                argument.pending.pop()(argument);
-            }
-        };
-        if (index < proposal.cases.length) {
-            argument.text = proposal.cases[index];
-        } else {
-            var idx = 'ontext'+index;
-            proposal[idx] = function(text) {
-                argument.text = text;
-                argument[idx] = undefined;
-                done();
-            };
-        }
-        proposal.argumentPosition(index, function(err, result) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            argument.position = result;
-            done();
-        });
-        proposal.argumentVoteCount(index, function(err, result) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            var voteCount = result.c[0];
-            if (result.c[5]) {
-                // FIXME support uint256
-                voteCount = 7913129639936 - result.c[5];
-            }
-            argument.voteCount = voteCount;
-            done();
-        });
-        proposal.argumentSource(index, function(err, result) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            argument.source = result;
             done();
         });
     },
