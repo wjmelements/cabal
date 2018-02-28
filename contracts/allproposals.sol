@@ -465,9 +465,8 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
         ProperProposal proposal;
         bytes memory clone = hex"600034603b57602f80600f833981f3600036818037808036816f5fbe2cc9b1b684ec445caf176042348e5af415602c573d81803e3d81f35b80fd";
         assembly {
-            let len := mload(clone)
             let data := add(clone, 0x20)
-            proposal := create(0, data, len)
+            proposal := create(0, data, 58)
         }
         proposal.init(msg.sender, _resolution);
         accounts[proposal].membership |= PROPOSAL;
