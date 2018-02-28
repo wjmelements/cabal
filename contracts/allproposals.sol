@@ -11,10 +11,6 @@ interface ERC20 {
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
 contract TokenRescue {
-    // gas paid, and now i am immortal
-    // i shall not end until heat death
-    // i shall gain no ether, hold no tokens, pity no fool
-
     // use this method to rescue your tokens if you sent them by mistake but be quick or someone else will get them
     function rescueToken(ERC20 _token)
     external
@@ -248,7 +244,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     Vote public constant token = Vote(0x000000002647e16d9BaB9e46604D75591D289277);
 
     /* uint8 membership bitmap:
-     * 0 - fraud
+     * 0 - proposer
      * 1 - registered to vote
      * 2 - pending proposal
      * 3 - proposal
