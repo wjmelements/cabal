@@ -98,6 +98,9 @@ Template.propose.events({
         if (instance.lastValue != proposal) {
             instance.lastValue = proposal;
             Web3Loader.onWeb3(function() {
+                if (!accountRegistry) {
+                    return;
+                }
                 accountRegistry.proposeProxy.estimateGas(this.lastValue, function(error, estimatedGas) {
                     if (error) {
                         console.error(error);
