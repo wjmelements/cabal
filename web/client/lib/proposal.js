@@ -6,19 +6,19 @@ function refresh(ignoreVote) {
     Proposals.refresh(address, function() {
         var proposal = Proposals[address];
         var total = 0;
-        for (var i = 1; i < 5; i++) {
+        [1,3,4,2].forEach((i)=> {
             var contribution = proposal['votes'+i];
-            total += contribution  ? contribution : 0;
-        }
+            total += contribution || 0;
+        });
         var positionPcts = []
         var runningTotal = total;
         total /= 100;
         this.voteCount.set(proposal['votes0']);
-        for (var i = 4; i > 0; i--) {
+        [2,4,3,1].forEach((i)=> {
             var contribution = proposal['votes'+i];
-            runningTotal -= contribution ? contribution : 0;
+            runningTotal -= contribution || 0;
             positionPcts.push(parseInt(100 - runningTotal / total));
-        }
+        });
         this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
         console.log(this.gradient);
         var cases = Proposals.argumentsOpposing(this.address.get(), 0);

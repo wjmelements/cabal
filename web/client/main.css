@@ -118,22 +118,22 @@ select {
   background-color:#33FF33;
 }
 .pos4 {
-  background-color:#FFDBDB;
+  background-color:#FCFF8B;
 }
 .pos2 {
-  background-color:#BEFFF8;
+  background-color:#FFDBDB;
 }
 .pos3 {
-  background-color:#FCFF8B;
+  background-color:#BEFFF8;
 }
 .pwarning {
   margin:0.5em 1em;
   font-family:serif;
 }
-li.pos3,pre.pos3,.btn.pos3 {
+li.pos4,pre.pos4,.btn.pos4 {
   font-family:sans-serif;
 }
-li.filter.pos3 {
+li.filter.pos4 {
   font-family:serif;
 }
 .error {
@@ -246,13 +246,13 @@ a.btn {
 .pos1 .loader {
   border-top: 0.35em solid white;
 }
-.pos2 .loader {
+.pos3 .loader {
   border-left: 0.35em solid white;
 }
-.pos3 .loader {
+.pos4 .loader {
   border-right:0.35em solid white;
 }
-.pos4 .loader {
+.pos2 .loader {
   border-bottom: 0.35em solid white;
 }
 .loader {

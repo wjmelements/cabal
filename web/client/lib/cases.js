@@ -63,11 +63,11 @@ function positionToName(position) {
         case 1:
             return 'Approve';
         case 2:
-            return 'Amend';
-        case 3:
-            return 'LOL';
-        case 4:
             return 'Reject';
+        case 3:
+            return 'Amend';
+        case 4:
+            return 'LOL';
     }
 }
 Template.cases.helpers({
@@ -150,31 +150,6 @@ function onChange(target) {
         this.cannotArgue.set(!target.value || Balance.get() < 1);
         Case.setWarnings(this.warnings, target.value);
     }
-}
-function checkArgument(address, i, argumentCount, customCase) {
-    Proposals.getArgument(address, i, function(argument) {
-        if (argument.text == customCase.text) {
-            this.voting.set(false);
-            this.voted.set(argument);
-            this.choice.set(argument);
-            this.onVote();
-        } else if (i < argumentCount) {
-            checkArgument.bind(this)(address, i + 1, argumentCount, customCase);
-        } else {
-            awaitArgument.bind(this)(address, argumentCount, customCase);
-        }
-    }.bind(this));
-}
-function awaitArgument(address, lastArgumentCount, argument) {
-    Proposals.getArgumentCount(address, function(argumentCount) {
-        if (argumentCount > lastArgumentCount) {
-            checkArgument.bind(this)(address, lastArgumentCount, argumentCount, argument);
-            return;
-        }
-        window.setTimeout(function() {
-            awaitArgument.bind(this)(address, lastArgumentCount, argument);
-        }.bind(this), 4000);
-    }.bind(this));
 }
 function updateCases() {
     var cases;
@@ -323,11 +298,7 @@ Template.cases.events({
                     };
                     localStorage.setItem('pvote'+address, JSON.stringify({a:txhash,b:argument}));
                     this.choice.set(argument);
-                    this.txhash.set(txhash);
-                    this.voting.set(true);
-                    this.showCost.set(false);
-                    Balance.set(Balance.get() - 1);
-                    awaitArgument.bind(this)(address, argumentCount, argument);
+                    onPendingVote.bind(this)(txhash, argument);
                 }.bind(this)
             );
         }.bind(Template.instance()));
