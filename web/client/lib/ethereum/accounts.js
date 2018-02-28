@@ -179,6 +179,10 @@ Accounts = {
     },
     fetchCanDeregister(resultFn) {
         Accounts.current(function (account) {
+            if (!accountRegistry) {
+                onAccountRegistry.push(()=>{Accounts.fetchCanDeregister(resultFn);});
+                return;
+            }
             accountRegistry.canDeregister(account, function(error, result) {
                 if (error) {
                     console.error(error);
