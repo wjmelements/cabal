@@ -82,6 +82,7 @@ function rewatch() {
         var ontextindex = 'ontext'+index;
         if (proposal[ontextindex]) {
             proposal[ontextindex](text);
+            proposal[ontextindex]=undefined;
         }
         proposal.cases.push(text);
     });
