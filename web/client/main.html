@@ -183,11 +183,11 @@ Earn 0.9 FV per case"></textarea>
 <template name="positions">
   <ul class="pos">
     <div class="ltr">
+      <li id="pos0" title="Skip" class="pos0">-</li>
       <li class="pos1">Approve</li>
       <li class="pos2">Reject</li>
       <li class="pos3">Amend</li>
       <li class="pos4">LOL</li>
-      <li id="pos0" class="pos0">Skip</li>
     </div>
   </ul>
   <div class="instr">
@@ -198,7 +198,6 @@ Earn 0.9 FV per case"></textarea>
 {{#if skip}}
   <div class="pos">
     <a class="btn reset">+</a>
-    <h2 class="prop inline">{{proposal}}</h2>
   </div>
 {{else}}
   <div class="ib">
