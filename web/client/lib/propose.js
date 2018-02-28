@@ -74,7 +74,7 @@ Template.propose.events({
                 console.error(error);
                 return;
             }
-            Template.instance().find('#propose').value = '';
+            this.find('#propose').value = '';
             console.log(txhash);
             console.log(proposal);
             var pendingProposals = this.pendingProposals.get().slice(0);
