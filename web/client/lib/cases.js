@@ -145,7 +145,6 @@ Template.cases.helpers({
     },
 });
 function onChange(target) {
-    console.log('onChange');
     this.cannotVote.set(Balance.get() < 1);
     if (target) {
         this.cannotArgue.set(!target.value || Balance.get() < 1);

@@ -6,7 +6,7 @@ window.addEventListener('load', function() {
         Accounts.getAddress(function(address) {
             accountRegistry = web3.eth.contract(accountRegistryABI).at(address);
             Accounts.proposalFilter = web3.eth.filter({
-                fromBlock:0,
+                fromBlock:0,//TODO set this to correct block number
                 to:'pending',
                 address:accountRegistry.address.toLowerCase(),// TODO no lower case
                 topics:[web3.sha3('Proposal(address)')]

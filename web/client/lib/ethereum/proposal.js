@@ -76,9 +76,9 @@ window.addEventListener('load', function() {
                     console.error(error);
                     return;
                 }
+                console.log(result);
                 var bytes = '0x'+result.data.substr(130);
                 var text = bytesToStr(bytes);
-                console.log(result);
                 var index = proposal.cases.length;
                 var ontextindex = 'ontext'+index;
                 if (proposal[ontextindex]) {

@@ -64,7 +64,7 @@ Template.propose.onCreated(function() {
     this.lastValue = undefined;
 });
 Template.propose.events({
-    "click .btn"(event) {
+    "click #propbtn"(event) {
         var proposal = Template.instance().find('#propose').value;
         if (!proposal) {
             return;
