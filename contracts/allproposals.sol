@@ -314,9 +314,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function confirmCabal(CabalInterface _cabal)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage account = accounts[_cabal];
-        require(account.membership & PENDING_CABAL == PENDING_CABAL);
+        require(account.membership & PENDING_CABAL != 0);
         account.membership ^= (CABAL | PENDING_CABAL);
         Cabal(_cabal);
     }
@@ -338,7 +338,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     external
     {
         Account storage account = accounts[msg.sender];
-        require(account.membership & VOTER == VOTER);
+        require(account.membership & VOTER != 0);
         require(account.lastAccess + 7 days <= now);
         account.membership ^= VOTER;
         account.lastAccess = 0;
@@ -373,51 +373,51 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     external view
     returns (bool)
     {
-        return accounts[_voter].membership & VOTER == VOTER
-            && accounts[_proposal].membership & PROPOSAL == PROPOSAL;
+        return accounts[_voter].membership & VOTER != 0
+            && accounts[_proposal].membership & PROPOSAL != 0;
     }
 
     function canVote(address _voter)
     external view
     returns (bool)
     {
-        return accounts[_voter].membership & VOTER == VOTER;
+        return accounts[_voter].membership & VOTER != 0;
     }
 
     function isProposal(address _proposal)
     external view
     returns (bool)
     {
-        return accounts[_proposal].membership & PROPOSAL == PROPOSAL;
+        return accounts[_proposal].membership & PROPOSAL != 0;
     }
 
     function isPendingProposal(address _proposal)
     external view
     returns (bool)
     {
-        return accounts[_proposal].membership & PENDING_PROPOSAL == PENDING_PROPOSAL;
+        return accounts[_proposal].membership & PENDING_PROPOSAL != 0;
     }
 
     function isPendingCabal(address _account)
     external view
     returns (bool)
     {
-        return accounts[_account].membership & PENDING_CABAL == PENDING_CABAL;
+        return accounts[_account].membership & PENDING_CABAL != 0;
     }
 
     function isCabal(address _account)
     external view
     returns (bool)
     {
-        return accounts[_account].membership & CABAL == CABAL;
+        return accounts[_account].membership & CABAL != 0;
     }
 
     // under no condition should you let anyone control two BOARD accounts
     function appoint(address _board, string _vouch)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage candidate = accounts[_board];
-        if (candidate.membership & BOARD == BOARD) {
+        if (candidate.membership & BOARD != 0) {
             return;
         }
         address appt = candidate.appointer;
@@ -436,7 +436,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function denounce(address _board, string _reason)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage board = accounts[_board];
         if (board.membership & BOARD == 0) {
             return;
@@ -457,9 +457,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function vouchProposer(address _proposer, string _vouch)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage candidate = accounts[_proposer];
-        if (candidate.membership & PROPOSER == PROPOSER) {
+        if (candidate.membership & PROPOSER != 0) {
             return;
         }
         address appt = candidate.voucher;
@@ -478,7 +478,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function devouchProposer(address _proposer, string _devouch)
     external {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage candidate = accounts[_proposer];
         if (candidate.membership & PROPOSER == 0) {
             return;
@@ -526,7 +526,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
 
     function sudoPropose(ProposalInterface _proposal)
     external {
-        require(accounts[msg.sender].membership & PROPOSER == PROPOSER);
+        require(accounts[msg.sender].membership & PROPOSER != 0);
         uint8 membership = accounts[_proposal].membership;
         require(membership == 0);
         accounts[_proposal].membership = PROPOSAL;
@@ -548,9 +548,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     function confirmProposal(ProposalInterface _proposal)
     external
     {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage account = accounts[_proposal];
-        require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        require(account.membership & PENDING_PROPOSAL != 0);
         account.membership ^= (PROPOSAL | PENDING_PROPOSAL);
         Proposal(_proposal);
     }
@@ -562,9 +562,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     external payable
     {
         require(msg.value == proposalCensorshipFee);
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage account = accounts[_proposal];
-        require(account.membership & PROPOSAL == PROPOSAL);
+        require(account.membership & PROPOSAL != 0);
         account.membership &= ~PROPOSAL;
         burn.transfer(proposalCensorshipFee);
         BannedProposal(_proposal, _reason);
@@ -574,9 +574,9 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     function rejectProposal(ProposalInterface _proposal)
     external
     {
-        require(accounts[msg.sender].membership & BOARD == BOARD);
+        require(accounts[msg.sender].membership & BOARD != 0);
         Account storage account = accounts[_proposal];
-        require(account.membership & PENDING_PROPOSAL == PENDING_PROPOSAL);
+        require(account.membership & PENDING_PROPOSAL != 0);
         account.membership &= PENDING_PROPOSAL;
     }
 
@@ -584,7 +584,7 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     function faucet()
     external {
         Account storage account = accounts[msg.sender];
-        require(account.membership & VOTER == VOTER);
+        require(account.membership & VOTER != 0);
         uint256 lastAccess = account.lastAccess;
         uint256 grant = (now - lastAccess) / 72 minutes;
         if (grant > 40) {
