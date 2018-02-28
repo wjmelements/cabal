@@ -89,6 +89,10 @@ Template.propose.events({
     "mouseover .btn"(event) {
         var instance = Template.instance();
         var proposal = Template.instance().find('#propose').value;
+        if (typeof proposal == "string") {
+            // https://github.com/ethereum/web3.js/pull/1398
+            proposal = web3.fromUtf8(proposal);
+        }
         instance.showGas.set(true);
         if (instance.lastValue != proposal) {
             instance.lastValue = proposal;

@@ -172,7 +172,9 @@ Accounts = {
         });
     },
     propose(proposal, resultFn) {
-        console.log(proposal);
+        if (typeof proposal == "string") {
+            proposal = web3.fromUtf8(proposal);
+        }
         accountRegistry.proposeProxy(proposal, {gasPrice:GasRender.gasPriceInWei()},resultFn);
     },
     fetchCanDeregister(resultFn) {
