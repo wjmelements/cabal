@@ -16,6 +16,9 @@ Transactions = {
                 console.error(error);
                 return;
             }
+            if (!result) {
+                console.log('missing transaction '+txhash);
+            }
             if (result && result.blockNumber) {
                 onDone();
             } else {
