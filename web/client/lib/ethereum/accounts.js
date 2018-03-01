@@ -1,5 +1,33 @@
 var onAccountRegistry = [];
 accountRegistry=null; 
+function onProposal(result) {
+    console.log(result);
+    var proposalAddress = '0x'+result.topics[1].substring(26);
+    if (Proposals[proposalAddress]) {
+        return;
+    }
+    // assumption: we get these in order
+    Accounts.proposals.push(proposalAddress);
+    Proposals.init(proposalAddress, result.blockNumber);
+    Accounts.resize();
+    if (Proposals[result.transactionHash]) {
+        while (Proposals[result.transactionHash].length) {
+            Proposals[result.transactionHash].pop()();
+        }
+    }
+}
+function watchFallback() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange= function() {
+        if (xmlHttp.responseText) {
+            response = JSON.parse(xmlHttp.responseText);
+            response.result.forEach(onProposal);
+        }
+    };
+    xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
+    xmlHttp.setRequestHeader("Content-type", "application/json");
+    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"0x000000002bb43c83ece652d161ad0fa862129a2c","fromBlock":"0x4ee93f","toBlock":"latest","topics":["0xd721fc4b71111225bba131141f013ef3e3956654b0eade3c9e9f611f0d93b551"]}]}');
+}
 function rewatch() {
     // XXX hacky way to get current events while filter.watch fails
     if (Accounts.proposalFilter) {
@@ -14,23 +42,11 @@ function rewatch() {
     Accounts.proposalFilter.watch((error, result) =>{
         if (error) {
             console.error(error);
+            watchFallback();
             return;
         }
         //results.forEach((result)=>{
-        console.log(result);
-        var proposalAddress = '0x'+result.topics[1].substring(26);
-        if (Proposals[proposalAddress]) {
-            return;
-        }
-        // assumption: we get these in order
-        Accounts.proposals.push(proposalAddress);
-        Proposals.init(proposalAddress, result.blockNumber);
-        Accounts.resize();
-        if (Proposals[result.transactionHash]) {
-            while (Proposals[result.transactionHash].length) {
-                Proposals[result.transactionHash].pop()();
-            }
-        }
+        onProposal(result);
         //});
     });
     setTimeout(rewatch, 15000);

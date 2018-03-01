@@ -57,6 +57,19 @@ function estimateArgumentGas(len, hasCases) {
 var rewatchTimeouts = {};
 var proposalFilters = {};
 var blockNumbers = {};
+
+function watchFallback(address, onCase) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange= function() {
+        if (xmlHttp.responseText) {
+            response = JSON.parse(xmlHttp.responseText);
+            response.result.forEach(onCase);
+        }
+    };
+    xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
+    xmlHttp.setRequestHeader("Content-type", "application/json");
+    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"'+address+'","fromBlock":"0x4ee93f","toBlock":"latest","topics":["0xb026a0d6eb8b5919e909850a1d0ab0f3468e08b48ef884a544e886fb93d6ab04"]}]}');
+}
 function rewatch() {
     // XXX hack to get new events :(
     if (proposalFilters[this]) {
@@ -70,11 +83,7 @@ function rewatch() {
     });
     var proposal = Proposals[this];
     proposal.cases = [];
-    proposalFilters[this].watch((error, result) => {
-        if (error) {
-            console.error(error);
-            return;
-        }
+    var onCase = function(result) {
         console.log(result);
         var bytes = '0x'+result.data.substr(130);
         var text = bytesToStr(bytes);
@@ -85,6 +94,14 @@ function rewatch() {
             proposal[ontextindex]=undefined;
         }
         proposal.cases.push(text);
+    }
+    proposalFilters[this].watch((error, result) => {
+        if (error) {
+            console.error(error);
+            watchFallback(this, onCase);
+            return;
+        }
+        onCase(result);
     });
     clearTimeout(rewatchTimeouts[this]);
     rewatchTimeouts[this] = setTimeout(rewatch.bind(this), 12000);
