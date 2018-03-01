@@ -172,7 +172,7 @@ Template.register.events({
                 accountRegistry.deregister.estimateGas(resultFn);
             }
         } else {
-            inst.cost.set(GasRender.toString(63205));
+            inst.cost.set(GasRender.toString(93202));
             accountRegistry.register.estimateGas({value: 1E15}, resultFn);
         }
     },
