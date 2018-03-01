@@ -113,8 +113,10 @@ function onRegistered() {
     if (Accounts.registered.get()) {
         Accounts.canDeregister.set(false);
     }
-    localStorage.setItem('reg'+web3.eth.coinbase, '');
     fetchTimer.bind(this)();
+    Accounts.current(function(account) {
+        localStorage.setItem('reg'+account, '');
+    });
 }
 Template.register.events({
     "click .submit"(event) {
@@ -130,7 +132,9 @@ Template.register.events({
             console.log(txhash);
             Accounts.registering.set(true);
             this.txhash.set(txhash);
-            localStorage.setItem('reg'+web3.eth.coinbase, txhash);
+            Accounts.current(function(account) {
+                localStorage.setItem('reg'+account, txhash);
+            });
             var registered = !Accounts.registered.get();
             Accounts.registered.set(registered);
             Accounts.canDeregister.set(!registered);

@@ -3,7 +3,7 @@ accountRegistry=null;
 function rewatch() {
     // XXX hacky way to get current events while filter.watch fails
     if (Accounts.proposalFilter) {
-        Accounts.proposalFilter.stopWatching();
+        Accounts.proposalFilter.stopWatching(function(){});
     }
     Accounts.proposalFilter = web3.eth.filter({
         fromBlock:Net.firstProposalBlock.get(),
@@ -52,20 +52,34 @@ var onCurrentAccount = [];
 function checkAccount(refreshId) {
     var hasWeb3 = (typeof web3 !== 'undefined') && (typeof web3.currentProvider.host === 'undefined');
     Accounts.hasWeb3.set(hasWeb3);
-    var hasAccount = hasWeb3 && web3 && web3.eth && web3.eth.accounts && (web3.eth.accounts.length > 0); 
-    Accounts.hasAccount.set(hasAccount);
-    console.log("hasWeb3:"+hasWeb3+",hasAccount:"+hasAccount);
-    if (hasAccount) {
-        while (onCurrentAccount.length) {
-            onCurrentAccount.pop()();
-        }
-        clearInterval(refreshId);
-    } else if (!refreshId) {
+    var hasAccount = false;//&& web3.eth.accounts && (web3.eth.accounts.length > 0); 
+    if (hasWeb3 && web3 && web3.eth) {
+        web3.eth.getAccounts(function(error, accounts) {
+            hasAccount = !error && !!accounts[0];
+            Accounts.hasAccount.set(hasAccount);
+            console.log("hasWeb3:"+hasWeb3+",hasAccount:"+hasAccount);
+            if (hasAccount) {
+                while (onCurrentAccount.length) {
+                    onCurrentAccount.pop()();
+                }
+                clearInterval(refreshId);
+            } else if (!refreshId) {
+                Accounts.registered.set(false);
+                var refreshIndirect = []; 
+                refreshIndirect.push(setInterval(function () {
+                    checkAccount(refreshIndirect[0]);
+                }, 500));
+            }
+        });
+    } else {
+        Accounts.hasAccount.set(false);
         Accounts.registered.set(false);
         var refreshIndirect = []; 
-        refreshIndirect.push(setInterval(function () {
-            checkAccount(refreshIndirect[0]);
-        }, 500));
+        if (!refreshId) {
+            refreshIndirect.push(setInterval(function () {
+                checkAccount(refreshIndirect[0]);
+            }, 500));
+        }
     }
 }
 
@@ -73,15 +87,16 @@ Accounts = {
     check: checkAccount,
     current(resultFn) {
         Web3Loader.onWeb3(function() {
-            if (!web3.eth.accounts[0]) {
-                onCurrentAccount.push(function() {
-                    Accounts.current(resultFn);
-                });
+            web3.eth.getAccounts(function(error, accounts) {
+                if (!accounts[0]) {
+                    onCurrentAccount.push(function() {
+                        Accounts.current(resultFn);
+                    });
 
-                return;
-            }
-            // FIXME compare to web3.eth.coinbase
-            resultFn(web3.eth.accounts[0]);
+                    return;
+                }
+                resultFn(accounts[0]);
+            });
         });
     },
     getAddress(resultFn) {

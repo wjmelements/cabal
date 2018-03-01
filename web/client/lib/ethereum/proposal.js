@@ -60,7 +60,7 @@ var blockNumbers = {};
 function rewatch() {
     // XXX hack to get new events :(
     if (proposalFilters[this]) {
-        proposalFilters[this].stopWatching();
+        proposalFilters[this].stopWatching(function(){});
     }
     proposalFilters[this] = web3.eth.filter({
         fromBlock:blockNumbers[this] || 0,

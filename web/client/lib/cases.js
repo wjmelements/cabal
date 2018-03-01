@@ -280,27 +280,29 @@ Template.cases.events({
         var address = Template.instance().address.get();
         var position = Template.instance().pos.get();
         Proposals.getArgumentCount(address, function(argumentCount) {
-            Proposals.argue(
-                address,
-                position,
-                customCase,
-                function(error, txhash) {
-                    if (error) {
-                        console.error(error);
-                        return;
-                    }
-                    console.log(txhash);
-                    var argument = {
-                        source:web3.eth.coinbase,
-                        position:position,
-                        index:argumentCount,
-                        text:customCase
-                    };
-                    localStorage.setItem('pvote'+address, JSON.stringify({a:txhash,b:argument}));
-                    this.choice.set(argument);
-                    onPendingVote.bind(this)(txhash, argument);
-                }.bind(this)
-            );
+            Accounts.current(function (account) {
+                Proposals.argue(
+                    address,
+                    position,
+                    customCase,
+                    function(error, txhash) {
+                        if (error) {
+                            console.error(error);
+                            return;
+                        }
+                        console.log(txhash);
+                        var argument = {
+                            source:account,
+                            position:position,
+                            index:argumentCount,
+                            text:customCase
+                        };
+                        localStorage.setItem('pvote'+address, JSON.stringify({a:txhash,b:argument}));
+                        this.choice.set(argument);
+                        onPendingVote.bind(this)(txhash, argument);
+                    }.bind(this)
+                );
+            }.bind(this));
         }.bind(Template.instance()));
     },
     "click .reset"(event) {

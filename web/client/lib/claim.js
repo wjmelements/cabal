@@ -1,5 +1,7 @@
 function onClaimed() {
-    localStorage.setItem('claim'+web3.eth.coinbase, '');
+    Accounts.current(function(account) {
+        localStorage.setItem('claim'+account, '');
+    });
     this.claiming.set(false);
     this.available.set(0);
 }
@@ -80,7 +82,9 @@ Template.claim.events({
         }
         Accounts.claim(function(txhash) {
             console.log(txhash);
-            localStorage.setItem('claim'+web3.eth.coinbase, txhash);
+            Accounts.current(function(account) {
+                localStorage.setItem('claim'+account, txhash);
+            });
             onPendingClaim.bind(this)(txhash);
         }.bind(Template.instance()));
     },
