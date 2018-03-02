@@ -141,6 +141,7 @@ Proposals = {
         Proposals[address].argumentCount(function(err, result) {
             if (err) {
                 console.error(err);
+                setTimeout(function(){Proposal.getArgumentCount(address, resultFn);}, 1000);
                 return;
             }
             var argCount = result.c[0];
