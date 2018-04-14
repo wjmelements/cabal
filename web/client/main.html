@@ -13,7 +13,7 @@
   {{#if hasWeb3}}
     {{#if unsupportedNetwork}}
       <div id="withweb3">
-        <p class="error ib">FinneyVote does not support this network. Please switch to Rinkeby (4).</p>
+        <p class="error ib">FinneyVote does not support this network. Please use Mainnet (1) or Rinkeby (4).</p>
       </div>
     {{else}}
       {{#unless hasAccount}}
@@ -173,7 +173,7 @@ Earn 0.9 FV per case"></textarea>
 </template>
 <template name="voted">
   <div class="ib">
-    <h2 class="prop inline">{{proposal}}</h2>
+    <h2 class="prop inline"><a href={{href}}>{{proposal}}</a></h2>
     <div class="case dt bs5 voted">
       <p class="h100">{{vote.voteCount}}</p><pre id="arg{{vote.index}}" class="pos{{vote.position}} h100">{{vote.text}}</pre>
         <a class="btn reset h100">Change</a>
