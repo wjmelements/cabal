@@ -20,7 +20,6 @@ function refresh(ignoreVote) {
             positionPcts.push(parseInt(100 - runningTotal / total));
         });
         this.gradient.innerHTML = 'div#'+address.substring(1)+' {background: linear-gradient(to bottom, #FFDBDB '+ (positionPcts[0])+"%, #FCFF8B "+ (positionPcts[0]) + "%, #FCFF8B "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[1])+"%, #BEFFF8 "+(positionPcts[2])+"%, #33FF33 "+(positionPcts[2])+'%, #33FF33 '+(positionPcts[3])+'%);}';
-        console.log(this.gradient);
         var cases = Proposals.argumentsOpposing(this.address.get(), 0);
         this.cases.set(cases);
         if (ignoreVote) {

@@ -1,3 +1,4 @@
+const Web3 = require('web3')
 var loaded = false;
 var web3Delayed = [];
 function onWeb3() {

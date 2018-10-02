@@ -54,11 +54,24 @@ function estimateArgumentGas(len, hasCases) {
     //151->152 +8
     return gas;
 }
-var rewatchTimeouts = {};
-var proposalFilters = {};
+
+// indexed by address
 var blockNumbers = {};
 
-function watchFallback(address, onCase) {
+function onCase(result) {
+    var proposal = Proposals[result.address]
+    var bytes = '0x'+result.data.substr(130);
+    var text = bytesToStr(bytes);
+    var index = proposal.cases.length;
+    var ontextindex = 'ontext'+index;
+    if (proposal[ontextindex]) {
+        proposal[ontextindex](text);
+        proposal[ontextindex]=undefined;
+    }
+    proposal.cases.push(text);
+}
+
+function fetchEvents(address) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange= function() {
         if (xmlHttp.responseText) {
@@ -68,44 +81,11 @@ function watchFallback(address, onCase) {
     };
     xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
     xmlHttp.setRequestHeader("Content-type", "application/json");
-    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"'+address+'","fromBlock":"0x4ee93f","toBlock":"latest","topics":["0xb026a0d6eb8b5919e909850a1d0ab0f3468e08b48ef884a544e886fb93d6ab04"]}]}');
+    var startBlockNumber = blockNumbers[address] || '0x4ee93f'
+    startBlockNumber = web3.toHex(blockNumbers[address])
+    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"'+address+'","fromBlock":"' + startBlockNumber + '","toBlock":"latest","topics":["0xb026a0d6eb8b5919e909850a1d0ab0f3468e08b48ef884a544e886fb93d6ab04"]}]}');
 }
-function rewatch() {
-    // XXX hack to get new events :(
-    if (proposalFilters[this]) {
-        proposalFilters[this].stopWatching(function(){});
-    }
-    proposalFilters[this] = web3.eth.filter({
-        fromBlock:blockNumbers[this] || 0,
-        to:'pending',
-        address:this,
-        topics:[web3.sha3('Case(bytes)')]
-    });
-    var proposal = Proposals[this];
-    proposal.cases = [];
-    var onCase = function(result) {
-        console.log(result);
-        var bytes = '0x'+result.data.substr(130);
-        var text = bytesToStr(bytes);
-        var index = proposal.cases.length;
-        var ontextindex = 'ontext'+index;
-        if (proposal[ontextindex]) {
-            proposal[ontextindex](text);
-            proposal[ontextindex]=undefined;
-        }
-        proposal.cases.push(text);
-    }
-    proposalFilters[this].watch((error, result) => {
-        if (error) {
-            console.error(error);
-            watchFallback(this, onCase);
-            return;
-        }
-        onCase(result);
-    });
-    clearTimeout(rewatchTimeouts[this]);
-    rewatchTimeouts[this] = setTimeout(rewatch.bind(this), 12000);
-}
+
 window.addEventListener('load', function() {
     Web3Loader.onWeb3(function() {
         var proposalABI = [{"constant":false,"inputs":[{"name":"_argumentId","type":"uint256"}],"name":"vote","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"arguments","outputs":[{"name":"source","type":"address"},{"name":"position","type":"uint8"},{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_user","type":"address"}],"name":"getPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentPosition","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentVoteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"rescueToken","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"argumentCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_position","type":"uint8"},{"name":"_text","type":"bytes"}],"name":"argue","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"source","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_source","type":"address"},{"name":"_resolution","type":"bytes"}],"name":"init","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"argumentSource","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"votes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"content","type":"bytes"}],"name":"Case","type":"event"}];
@@ -117,7 +97,8 @@ window.addEventListener('load', function() {
             blockNumbers[address] = blockNumber;
             var proposal = web3.eth.contract(proposalABI).at(address);
             Proposals[address] = proposal;
-            rewatch.bind(address)();
+            proposal.cases = [];
+            fetchEvents(address)
         };
     });
 });
@@ -134,13 +115,10 @@ Proposals = {
         }
     },
     getArgumentCount(address, resultFn) {
-        if (!Proposals[address]) {
-            console.error('I hope this is dead code');
-            Proposals.init(address);
-        }
         Proposals[address].argumentCount(function(err, result) {
             if (err) {
                 console.error(err);
+                // retry
                 setTimeout(function(){Proposal.getArgumentCount(address, resultFn);}, 1000);
                 return;
             }
