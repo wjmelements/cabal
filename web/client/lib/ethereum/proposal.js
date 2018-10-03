@@ -55,10 +55,21 @@ function estimateArgumentGas(len, hasCases) {
     return gas;
 }
 
-// indexed by address
+// address -> blockNumber(: number) 
 var blockNumbers = {};
 
+// blockNumber is a string like '0x4ee93f'
+function updateBlockNumber(address, blockNumber) {
+    var prior = blockNumbers[address] || 5171519
+    var proposed = web3.toDecimal(blockNumber) + 1
+    if (proposed <= prior) {
+        return
+    }
+    blockNumbers[address] = proposed
+}
+
 function onCase(result) {
+    updateBlockNumber(result.address, result.blockNumber)
     var proposal = Proposals[result.address]
     var bytes = '0x'+result.data.substr(130);
     var text = bytesToStr(bytes);
@@ -73,17 +84,25 @@ function onCase(result) {
 
 function fetchEvents(address) {
     var xmlHttp = new XMLHttpRequest();
+    var latestBlock = Block.current() || 'latest'
     xmlHttp.onreadystatechange= function() {
         if (xmlHttp.responseText) {
             response = JSON.parse(xmlHttp.responseText);
             response.result.forEach(onCase);
         }
     };
+    xmlHttp.onerror = console.error
     xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
     xmlHttp.setRequestHeader("Content-type", "application/json");
-    var startBlockNumber = blockNumbers[address] || '0x4ee93f'
-    startBlockNumber = web3.toHex(blockNumbers[address])
-    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"'+address+'","fromBlock":"' + startBlockNumber + '","toBlock":"latest","topics":["0xb026a0d6eb8b5919e909850a1d0ab0f3468e08b48ef884a544e886fb93d6ab04"]}]}');
+    var startBlockNumber = blockNumbers[address] || 5171519
+    startBlockNumber = web3.toHex(startBlockNumber)
+    if (latestBlock) {
+        blockNumbers[address] = latestBlock + 1
+        latestBlock = web3.toHex(latestBlock)
+    } else {
+        latestBlock = 'latest'
+    }
+    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"'+address+'","fromBlock":"' + startBlockNumber + '","toBlock":"' + latestBlock + '","topics":["0xb026a0d6eb8b5919e909850a1d0ab0f3468e08b48ef884a544e886fb93d6ab04"]}]}');
 }
 
 window.addEventListener('load', function() {
@@ -99,6 +118,7 @@ window.addEventListener('load', function() {
             Proposals[address] = proposal;
             proposal.cases = [];
             fetchEvents(address)
+            Block.on(fetchEvents.bind(null, address))
         };
     });
 });
