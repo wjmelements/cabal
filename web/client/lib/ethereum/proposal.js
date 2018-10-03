@@ -92,7 +92,7 @@ function fetchEvents(address) {
         }
     };
     xmlHttp.onerror = console.error
-    xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
+    xmlHttp.open('POST', 'https://' + Net.infuraPrefix.get() + 'infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
     xmlHttp.setRequestHeader("Content-type", "application/json");
     var startBlockNumber = blockNumbers[address] || 5171519
     startBlockNumber = web3.toHex(startBlockNumber)

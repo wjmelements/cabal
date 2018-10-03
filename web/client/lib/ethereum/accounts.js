@@ -17,31 +17,36 @@ function onProposal(result) {
 }
 var lastCheckedBlock = "0x6253d6"
 function fetchProposals(endBlock, startBlock) {
-    console.log('fetching proposals')
-    if (!startBlock) {
-        startBlock = lastCheckedBlock
-    }
-    if (typeof endBlock == 'number') {
-        endBlock = web3.toHex(endBlock)
-    }
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange= function() {
-        if (xmlHttp.readyState == 4) { // DONE
-            try {
-                response = JSON.parse(xmlHttp.responseText);
-                response.result.forEach(onProposal);
-                if (web3.toDecimal(lastCheckedBlock) > web3.toDecimal(endBlock)) {
-                    lastCheckedBlock = endBlock
-                }
-            } catch (e) {
-                console.error(e)
-                console.error(xmlHttp.responseText)
-            }
+    Accounts.getAddress(function (address) {
+        if (!startBlock) {
+            startBlock = lastCheckedBlock
         }
-    };
-    xmlHttp.open('POST', 'https://mainnet.infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
-    xmlHttp.setRequestHeader("Content-type", "application/json");
-    xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"0x000000002bb43c83ece652d161ad0fa862129a2c","fromBlock":"' + startBlock + '","toBlock":"' + endBlock + '","topics":["0xd721fc4b71111225bba131141f013ef3e3956654b0eade3c9e9f611f0d93b551"]}]}');
+        if (typeof endBlock == 'number') {
+            endBlock = web3.toHex(endBlock)
+        }
+        console.log('fetching proposals ' + startBlock + '->' + endBlock)
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange= function() {
+            if (xmlHttp.readyState == 4) { // DONE
+                try {
+                    response = JSON.parse(xmlHttp.responseText);
+                    response.result.forEach(onProposal);
+                    if (web3.toDecimal(lastCheckedBlock) < web3.toDecimal(endBlock)) {
+                        lastCheckedBlock = endBlock
+                    }
+                } catch (e) {
+                    console.error(e)
+                    console.error(xmlHttp.responseText)
+                }
+            }
+        };
+        xmlHttp.open('POST', 'https://' + Net.infuraPrefix.get() + 'infura.io/x6jRpmEj17uLQR1TuV1E', true/*async*/);
+        xmlHttp.setRequestHeader("Content-type", "application/json");
+        xmlHttp.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{"address":"' + address +
+            '","fromBlock":"' + startBlock +
+            '","toBlock":"' + endBlock +
+            '","topics":["0xd721fc4b71111225bba131141f013ef3e3956654b0eade3c9e9f611f0d93b551"]}]}');
+    })
 }
 
 window.addEventListener('load', function() {
@@ -49,11 +54,15 @@ window.addEventListener('load', function() {
         var accountRegistryABI = [{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isPendingCabal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"proposalCensorshipFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deregistrationDate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"registrationDeposit","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_board","type":"address"},{"name":"_vouch","type":"string"}],"name":"appoint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"confirmCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_token","type":"address"}],"name":"rescueToken","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"burn","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isCabal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canDeregister","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"availableFaucet","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"isFraud","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"},{"name":"_reason","type":"string"}],"name":"banProposal","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_resolution","type":"bytes"}],"name":"proposeProxy","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"sudoPropose","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"population","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"confirmProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"},{"name":"_proposal","type":"address"}],"name":"canVoteOnProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_proposal","type":"address"}],"name":"isPendingProposal","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"canVote","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"deregister","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"proposeExternal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_cabal","type":"address"}],"name":"registerCabal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_proposal","type":"address"}],"name":"rejectProposal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_resolution","type":"bytes"}],"name":"proposeProper","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"faucet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_board","type":"address"},{"name":"_reason","type":"string"}],"name":"denounce","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"token","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"voter","type":"address"}],"name":"Voter","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"voter","type":"address"}],"name":"Deregistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"endorsement","type":"string"}],"name":"Nominated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"endorsement","type":"string"}],"name":"Board","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"Denounced","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"board","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"Revoked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"proposal","type":"address"}],"name":"Proposal","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"cabal","type":"address"}],"name":"Cabal","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"proposal","type":"address"},{"indexed":false,"name":"reason","type":"string"}],"name":"BannedProposal","type":"event"}];
         Accounts.getAddress(function(address) {
             accountRegistry = web3.eth.contract(accountRegistryABI).at(address);
+            if (Net.id.get() == '1') {
+                fetchProposals('0x620563', '0x620563')
+                fetchProposals('0x5086bc', '0x4ee93f')
+                fetchProposals('0x55116f', '0x55116f')
+                fetchProposals('0x560e7b', '0x560e7b')
+            } else {
+                lastCheckedBlock = web3.toHex(Net.firstProposalBlock.get())
+            }
             Block.on(fetchProposals)
-            fetchProposals('0x620563', '0x620563')
-            fetchProposals('0x5086bc', '0x4ee93f')
-            fetchProposals('0x55116f', '0x55116f')
-            fetchProposals('0x560e7b', '0x560e7b')
             while (onAccountRegistry.length) {
                 onAccountRegistry.pop()();
             }

@@ -25,7 +25,9 @@ if (typeof web3 === 'undefined') {
     console.log('Using injected web3');
 }
 Net = {};
+// etherscan prefix
 Net.prefix = new ReactiveVar('rinkeby.');
+Net.infuraPrefix = new ReactiveVar('rinkeby.')
 Net.id = new ReactiveVar('4');
 Net.unsupportedNetwork = new ReactiveVar(false);
 Net.firstProposalBlock = new ReactiveVar(517519);
@@ -44,15 +46,18 @@ Net.refresh = () => {
         switch (netId) {
             case '1':
                 Net.prefix.set('');
+                Net.infuraPrefix.set('mainnet.')
                 Net.unsupportedNetwork.set(false);
                 Net.firstProposalBlock.set(5171519);
                 break;
             case '3':
                 Net.prefix.set('ropsten.');
+                Net.infuraPrefix.set('ropsten.')
                 Net.unsupportedNetwork.set(true);
                 break;
             case '4':
                 Net.prefix.set('rinkeby.');
+                Net.infuraPrefix.set('rinkeby.')
                 Net.unsupportedNetwork.set(false);
                 Net.firstProposalBlock.set(0);
                 break;
