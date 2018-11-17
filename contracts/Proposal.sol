@@ -99,7 +99,8 @@ contract ProperProposal is ProposalInterface, TokenRescue {
 
     function init(address _source, bytes _resolution)
     external {
-        assert(msg.sender == 0x000000002bb43c83eCe652d161ad0fa862129A2C);
+        // AccountRegistry v2 0x00000000de3638170e9f98ad382901c504f6cad5
+        assert(msg.sender == 0x00000000de3638170e9f98ad382901c504f6cad5);
         arguments.push(Argument(_source, 0/*SKIP*/, 0));
         emit Case(_resolution);
     }

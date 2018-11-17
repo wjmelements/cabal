@@ -284,7 +284,8 @@ contract AccountRegistry is AccountRegistryInterface, TokenRescue {
     returns (ProposalInterface)
     {
         ProperProposal app;
-        bytes memory clone = hex"600034603b57602f80600f833981f3600036818037808036816f5fbe2cc9b1b684ec445caf176042348e5af415602c573d81803e3d81f35b80fd";
+        // ProperProposal v2: 0x00000000ef04214697e0de5567019a7908e16ba4
+        bytes memory clone = hex"363d3d373d3d3d363d6fef04214697e0de5567019a7908e16ba45af43d82803e903d91602b57fd5bf3";
         assembly {
             let data := add(clone, 0x20)
             app := create(0, data, 58)
